@@ -1,0 +1,3 @@
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/CMakeFiles/master_algorithm.dir
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/CMakeFiles/edit_cache.dir
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/CMakeFiles/rebuild_cache.dir

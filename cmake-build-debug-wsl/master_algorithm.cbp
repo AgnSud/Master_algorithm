@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="master_algorithm"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\home\;CMake Files\..\..\..\..\..\..\home\agnieszka\;CMake Files\..\..\..\..\..\..\home\agnieszka\CAPD\;CMake Files\..\..\..\..\..\..\home\agnieszka\CAPD\build\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="master_algorithm">
+				<Option output="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/master_algorithm" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/agnieszka/CAPD/capdDynSys/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdAlg/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdAux/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdExt/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdDynSys/lib"/>
+					<Add directory="/home/agnieszka/CAPD/capdAlg/lib"/>
+					<Add directory="/home/agnieszka/CAPD/capdAux/lib"/>
+					<Add directory="/home/agnieszka/CAPD/capdExt/lib"/>
+					<Add directory="/usr/include/c++/13"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/13"/>
+					<Add directory="/usr/include/c++/13/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/13/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 master_algorithm"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="master_algorithm/fast">
+				<Option output="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/master_algorithm" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/agnieszka/CAPD/capdDynSys/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdAlg/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdAux/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdExt/include"/>
+					<Add directory="/home/agnieszka/CAPD/capdDynSys/lib"/>
+					<Add directory="/home/agnieszka/CAPD/capdAlg/lib"/>
+					<Add directory="/home/agnieszka/CAPD/capdAux/lib"/>
+					<Add directory="/home/agnieszka/CAPD/capdExt/lib"/>
+					<Add directory="/usr/include/c++/13"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/13"/>
+					<Add directory="/usr/include/c++/13/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/13/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 master_algorithm/fast"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j16 -f &quot;/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/cmake-build-debug-wsl/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/main.cpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.hpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.hpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/../../../../../../home/agnieszka/CAPD/build/capd-config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\home\agnieszka\CAPD\build\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
