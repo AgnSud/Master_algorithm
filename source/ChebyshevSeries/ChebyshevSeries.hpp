@@ -38,12 +38,15 @@ public:
     T operator()(T x) const;
 
     ChebyshevSeries<T, DIM> operator+(const ChebyshevSeries<T, DIM>& other) const;
+    ChebyshevSeries<T, DIM> operator-(const ChebyshevSeries<T, DIM>& other) const;
     ChebyshevSeries<T, DIM> operator*(const ChebyshevSeries<T, DIM>& other) const;
     ChebyshevSeries<T, DIM> power(int n) const;
 
 
+
     // Splot
     static ChebyshevSeries<T, DIM> convolve(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b);
+    static T dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b);
 
     friend std::ostream& operator<<(std::ostream& os, const ChebyshevSeries<T, DIM>& a){
         os << "{";
@@ -62,8 +65,17 @@ public:
         return result;
     }
 
+
     friend ChebyshevSeries<T, DIM> operator*(const ChebyshevSeries<T, DIM>& a, T scalar){
         return scalar * a;
+    }
+
+    friend ChebyshevSeries<T, DIM> operator-(T scalar, const ChebyshevSeries<T, DIM>& a) {
+        ChebyshevSeries<T, DIM> result(a.getN());
+        for (int i = 0; i < a.getN(); ++i) {
+            result[i] = scalar - a[i];
+        }
+        return result;
     }
 
 /*

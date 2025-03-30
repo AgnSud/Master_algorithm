@@ -31,8 +31,8 @@ T ChebyshevSeries<T, DIM>::operator()(T x) const {
 
 template <typename T, int DIM>
 ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator+(const ChebyshevSeries<T, DIM>& other) const {
-    ChebyshevSeries<T, DIM> result(std::max(this->N, other.N));
-    for (int i = 0; i <= result.N; ++i) {
+            ChebyshevSeries<T, DIM> result(std::max(this->N, other.N));
+    for (int i = 0; i < result.N; ++i) {
         if (i <= this->N) result[i] += (*this)[i];
         if (i <= other.N) result[i] += other[i];
     }
@@ -40,23 +40,45 @@ ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator+(const ChebyshevSeries
 }
 
 template <typename T, int DIM>
+ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator-(const ChebyshevSeries<T, DIM>& other) const {
+    ChebyshevSeries<T, DIM> result(std::max(this->N, other.N));
+    for (int i = 0; i < result.N; ++i) {
+        if (i <= this->N) result[i] -= (*this)[i];
+        if (i <= other.N) result[i] -= other[i];
+    }
+    return result;
+}
+
+template <typename T, int DIM>
 ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::convolve(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
-    CVector a_coefs = a.getCoefficients();
-    CVector b_coefs = b.getCoefficients();
-    int size = a_coefs.dimension() + b_coefs.dimension() - 1;
+//    CVector a_coefs = a.getCoefficients();
+//    CVector b_coefs = b.getCoefficients();
+    int size = a.getN() + b.getN() - 1;
     ChebyshevSeries<T, DIM> result(size);
-    int n = std::max(a_coefs.dimension() - 1, b_coefs.dimension() - 1);
+    int n = std::max(a.getN() - 1, b.getN() - 1);
     int negate = -1 * n;
     for (int k = 0; k < size; ++k) {
         result[k] = 0;
         for (int k1 = negate; k1 <= n; k1++) {
 //            std::cout << "k1=" << k1 << "\n";
             int k2 = k - k1;
-            if (abs(k1) < a_coefs.dimension() && abs(k2) < b_coefs.dimension()) {
-                result[k] += a_coefs[abs(k1)] * b_coefs[abs(k2)];
+            if (abs(k1) < a.getN() && abs(k2) < b.getN()) {
+                result[k] += a[abs(k1)] * b[abs(k2)];
             }
         }
     }
+    return result;
+}
+
+template <typename T, int DIM>
+T ChebyshevSeries<T, DIM>::dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
+    T result = 0;
+    int N = std::min(a.getN(), b.getN());
+
+    for (int k = 0; k < N; ++k) {
+        result += a[k] * b[k];
+    }
+
     return result;
 }
 
