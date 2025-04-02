@@ -24,7 +24,8 @@ public:
 
     ChebyshevSeries() : N(1), CVector(1) {}
 
-    explicit ChebyshevSeries(int N) : N(N), CVector(N) {}
+    ChebyshevSeries(int N) : N(N), CVector(N) {}
+    ChebyshevSeries(std::initializer_list<T> list);
 
     // Zwraca wartosc wielomianu T_k(x)
     static T evaluateFirstKind(int k, T x);
@@ -46,7 +47,9 @@ public:
 
     // Splot
     static ChebyshevSeries<T, DIM> convolve(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b);
-    static T dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b);
+
+    //funkcja dot - ALE nie uzywam,  bo przeciez iloczyn skalarny jest na WEKTORACH z R^n nie na ChebyshevSeries
+    //static T dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b);
 
     friend std::ostream& operator<<(std::ostream& os, const ChebyshevSeries<T, DIM>& a){
         os << "{";

@@ -3,6 +3,16 @@
 #include "ChebyshevSeries.hpp"
 
 template <typename T, int DIM>
+ChebyshevSeries<T, DIM>::ChebyshevSeries(std::initializer_list<T> list)
+        : N(static_cast<int>(list.size())), CVector(list.size()) {
+
+    int i = 0;
+    for (auto val : list) {
+        (*this)[i++] = val;
+    }
+}
+
+template <typename T, int DIM>
 T ChebyshevSeries<T, DIM>::evaluateFirstKind(int k, T x) {
     if (k == 0) return 1;
     if (k == 1) return x;
@@ -70,17 +80,17 @@ ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::convolve(const ChebyshevSeries<
     return result;
 }
 
-template <typename T, int DIM>
-T ChebyshevSeries<T, DIM>::dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
-    T result = 0;
-    int N = std::min(a.getN(), b.getN());
-
-    for (int k = 0; k < N; ++k) {
-        result += a[k] * b[k];
-    }
-
-    return result;
-}
+//template <typename T, int DIM>
+//T ChebyshevSeries<T, DIM>::dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
+//    T result = 0;
+//    int N = std::min(a.getN(), b.getN());
+//
+//    for (int k = 0; k < N; ++k) {
+//        result += a[k] * b[k];
+//    }
+//
+//    return result;
+//}
 
 template <typename T, int DIM>
 ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator*(const ChebyshevSeries<T, DIM>& other) const {
@@ -91,12 +101,16 @@ ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator*(const ChebyshevSeries
 
 template <typename T, int DIM>
 ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::power(int n) const {
-//    std::cout << "N: " << this->N << '\n';
+    ChebyshevSeries<T, DIM> tmp(this->N);
+    tmp[0] = 1;
+    for (int i = 0; i < n; ++i) {
+        tmp = tmp * (*this);
+//        result[i] = std::pow((*this)[i], n);
+    }
+
     ChebyshevSeries<T, DIM> result(this->N);
-//    std::cout << result;
-    for (int i = 0; i < this->N; ++i) {
-//        std::cout << "Iteracja " << i << ": ";
-        result[i] = std::pow((*this)[i], n);
+    for (int i = 0; i < this->N; i++){
+        result[i] = tmp[i];
     }
     return result;
 }

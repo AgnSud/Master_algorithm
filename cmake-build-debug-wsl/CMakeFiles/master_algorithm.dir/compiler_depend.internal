@@ -213,6 +213,9 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdExt/include/capd/alglib/nsevd.h
  /home/agnieszka/CAPD/capdExt/include/capd/alglib/reflections.h
  /home/agnieszka/CAPD/capdExt/include/capd/alglib/rotations.h
+ /home/agnieszka/CAPD/capdExt/include/capd/fadbad/differentiate.h
+ /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadbad.h
+ /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadiff.h
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.hpp
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp
