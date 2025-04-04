@@ -22,7 +22,7 @@ add_executable(master_algorithm main.cpp
         source/ChebyshevSeries/norm.hpp
         source/ChebyshevSeries/norm.tpp
         source/ChebyshevSeries/ChebyshevOperatorFinite.hpp
-        source/ChebyshevSeries/ChebyshevOperatorFinite.tpp source/ChebyshevSeries/ChebyshevOperatorFinite.old.tpp)
+        source/ChebyshevSeries/ChebyshevOperatorFinite.old.old.old.tpp source/ChebyshevSeries/ChebyshevOperatorFinite.tpp source/ChebyshevSeries/ChebyshevOperatorFiniteCopFor2Variables.tpp)
 
 target_link_libraries(master_algorithm
         /home/agnieszka/CAPD/build/libcapd.a

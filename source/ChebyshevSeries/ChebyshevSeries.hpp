@@ -56,7 +56,7 @@ public:
         for (int i = 0; i < a.N-1; ++i) {
             os << a[i] << ", ";
         }
-        os << a[a.N-1] << "}\n";
+        os << a[a.N-1] << "}";
         return os;
     }
 

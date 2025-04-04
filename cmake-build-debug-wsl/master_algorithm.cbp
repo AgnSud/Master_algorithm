@@ -104,10 +104,13 @@
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.hpp">
 			<Option target="master_algorithm"/>
 		</Unit>
-		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.old.tpp">
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.old.old.old.tpp">
 			<Option target="master_algorithm"/>
 		</Unit>
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFiniteCopFor2Variables.tpp">
 			<Option target="master_algorithm"/>
 		</Unit>
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp">

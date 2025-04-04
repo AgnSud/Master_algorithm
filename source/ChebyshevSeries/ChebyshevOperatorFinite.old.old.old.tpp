@@ -1,6 +1,30 @@
 #pragma once
 
-//#include "ChebyshevOperatorFinite.hpp"
+#include "ChebyshevOperatorFinite.hpp"
+#include "capd/fadbad/fadiff.h"
+
+
+template<typename T>
+class ComputeFWrapper {
+public:
+    // Konstruktor przyjmujący referencję do obiektu ChebyshevOperatorFinite
+    ComputeFWrapper(ChebyshevOperatorFinite<T>& op) : operator_(op) {}
+
+    // Operator wywołania, który wywołuje computeF
+    capd::vectalg::Vector<T, 0> operator()(const capd::vectalg::Vector<fadbad::F<T>, 0>& x) {
+        // Zamieniamy x (vector fadbad::F<T>) na vector T
+        capd::vectalg::Vector<T, 0> result(x.dimension());
+        for (size_t i = 0; i < x.dimension(); ++i) {
+            result[i] = x[i].val();  // Pobieramy wartość z obiektu F
+        }
+        return operator_.computeF(result);  // Wywołujemy computeF
+    }
+
+private:
+    ChebyshevOperatorFinite<T>& operator_;  // Przechowujemy referencję do obiektu operatora
+};
+
+
 
 template<typename T>
 ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
@@ -19,7 +43,7 @@ void ChebyshevOperatorFinite<T>::setASeries(const capd::vectalg::Vector<Chebyshe
 
 template<typename T>
 void ChebyshevOperatorFinite<T>::setCSeries() {
-    this->c_series = computeC(multiIndices);
+    this->c_series = computeC();
 }
 
 template<typename T>
@@ -30,7 +54,7 @@ void ChebyshevOperatorFinite<T>::setOmega(const T& omega_su) {
 
 template <typename T>
 capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION>
-ChebyshevOperatorFinite<T>::computeC(const std::vector<std::vector<int>>& multiIndices) {
+ChebyshevOperatorFinite<T>::computeC() {
     capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> c_result(this->n);
 
     // kazdy element c_result (czyli wektor) to będzie ChebyshevSeries i ich będzie tyle, jaki wymiar ma a (małe n),
@@ -84,7 +108,6 @@ capd::vectalg::Vector<T, DIMENSION> ChebyshevOperatorFinite<T>::findFiniteSoluti
         T omega_start,
         const capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0>& a_series_start,
         int max_iterations, T tolerance) {
-
     // Ustaw a i c
     setOmega(omega_start);
     setASeries(a_series_start);
@@ -95,48 +118,60 @@ capd::vectalg::Vector<T, DIMENSION> ChebyshevOperatorFinite<T>::findFiniteSoluti
 
     // Utwórz wynik jako Vector<T, DIMENSION>
     capd::vectalg::Vector<T, DIMENSION> F(this->n * this->N + 1);
+    capd::vectalg::Matrix<T, DIMENSION, DIMENSION> jacobian(this->n * this->N + 1, this->n * this->N + 1);
 
+    //x_k_1 = x_k - F_x_k/DF_x_k
+    //co oznacza x_{k+1} = x_k - F(x_k) / DF(x_k)
     while (iteration < max_iterations && norm > tolerance) {
-        auto [f0, f1] = this->computeF();
+        capd::vectalg::Vector<T, 0> x(this->n * this->N + 1);
+        x[0] = omega;  // omega w formie F
+
+        int index = 1;
+        for (int k = 0; k < this->N; ++k) {
+            for (int i = 0; i < this->n; ++i) {
+                x[index] = a_series[i][k];  // a_series w formie F
+                index++;
+            }
+        }
+
         std::cout << "Wyliczenia operatora Czebyszewa F:" << '\n';
         std::cout << "a_series: " << this->a_series << '\n';
         std::cout << "c_series: " << this->c_series << '\n';
         std::cout << "omega: " << this->omega << '\n';
-        std::cout << "f0: " << f0 << '\n';
-        std::cout << "f1: " << f1 << '\n';
+        std::cout << "x = (omega, a) =" << x << '\n';
 
-        // Zamiana na jeden wektor F
-        F[0] = f0;
-        int index = 1;
-        for (int k = 0; k < this->N; ++k) {
-            for (int i = 0; i < this->n; ++i) {
-                F[index] = f1[i][k];  // f1 jest wektorem szeregów Czebyszewa
-                index++;
-            }
-        }
+        ComputeFWrapper<T> computeFWrapper(*this);
 
-        //Zamiana na jeden punkt x = (\omega, a)
-        capd::vectalg::Vector<T, DIMENSION> x(this->n * this->N + 1);
-        x[0] = omega;
+        capd::vectalg::Vector<T, 0> F_x_k = this->computeF(x);
+        std::cout << "F(x_k) = " << F_x_k << '\n';
 
-        index = 1;
-        for (int k = 0; k < this->N; ++k) {
-            for (int i = 0; i < this->n; ++i) {
-                x[index] = a_series[i][k];  // Wypełniamy wartościami z a_series
-                index++;
-            }
-        }
-        std::cout << "x=(omega, a): " << x << "\n";
-        std::cout << "F(x): " << F << "\n";
+//        computeDerivative(computeFWrapper, x, jacobian);
+//        std::cout << "Jacobian: " << jacobian << "\n";
 
-        setOmega(f0);
-        setASeries(f1);
-        setCSeries();
+//        T omega_next = F_x_k[0].val();
+//        capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> a_series_next(this->n);
+//        for (int i = 0; i < this->n; i++){
+//            a_series_next[i] = ChebyshevSeries<T, DIMENSION>(this->N);
+//        }
 
+//        index = 1;
+//        for (int k = 0; k < this->N; ++k) {
+//            for (int i = 0; i < this->n; ++i) {
+//                std::cout << "x_next["<< index << "]=" << x_next[index].val() << '\n';
+//                a_series_next[i][k] = F_x_k[index].val();  // Rozpakowywanie a_series
+//                std::cout << "a_series_next["<< i << ", " << k  << "]=" << a_series_next[i][k] << '\n';
+//                index++;
+//            }
+//        }
+//        setOmega(omega_next);
+//        setASeries(a_series_next);
+//        setCSeries();
+//
 //        std::cout << "Po zaktualizowaniu:" << '\n';
 //        std::cout << "a_series: " << this->a_series << '\n';
 //        std::cout << "c_series: " << this->c_series << '\n';
 //        std::cout << "omega: " << this->omega << '\n';
+
         iteration++;
     }
 
@@ -145,27 +180,43 @@ capd::vectalg::Vector<T, DIMENSION> ChebyshevOperatorFinite<T>::findFiniteSoluti
 
 
 template<typename T>
-std::pair<T, capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0>>
-ChebyshevOperatorFinite<T>::computeF() {
-
+capd::vectalg::Vector<T, 0> ChebyshevOperatorFinite<T>::computeF(const capd::vectalg::Vector<T, 0>& x) {
 
     // Oblicz f_0
-    T f0 = this->computeF0();
-
+    T f0 = computeF0();
     // Oblicz f_1
-    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> f1 = this->computeF1();
+    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> f1 = computeF1();
 
-    return std::make_pair(f0, f1);
+    capd::vectalg::Vector<T,0> result(x.dimension());
+    result[0] = f0;  // Przypisanie f0
+    int index = 1;
+    for (int k = 0; k < this->N; ++k) {
+        for (int i = 0; i < this->n; ++i) {
+            result[index] = f1[i][k];  // f1 w postaci F
+            index++;
+        }
+    }
+
+    return result;
 }
 
+template<typename T>
+template<class V>
+V ChebyshevOperatorFinite<T>::operator() (const V& x) {
+    V result(x.dimension());
 
+    result[0] = computeF0(x); //zmienic
+
+
+    return result;
+}
 
 template<typename T>
 T ChebyshevOperatorFinite<T>::computeF0() {
 
     //skoro i tak potrzebuje petli, aby wyciagnac a_k, to nie bede robic osobnej funkcji dot, tylko tutaj wykonam iloczyn skalarny
     T result = 0;
-    for (int i = 0; i < this->n; i++){
+    for (int i = 1; i < this->n; i++){
         // <v, u>
 //        std::cout << "i=" << i << '\n';
 //        std::cout << "v[i] * u[i] = " << v[i] * u[i] << '\n';
@@ -184,10 +235,12 @@ T ChebyshevOperatorFinite<T>::computeF0() {
     return result;
 }
 
+
 template<typename T>
 capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> ChebyshevOperatorFinite<T>::computeF1() {
 
     capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> a_series_next(this->n);
+
 
     // 1. Obliczenie f_1[0]
     for (int i = 0; i < this->n; i++){
@@ -213,3 +266,5 @@ capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> ChebyshevOperatorFinite<
     }
     return a_series_next;
 }
+
+
