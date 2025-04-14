@@ -13,7 +13,9 @@ template <typename T>
 class ChebyshevOperatorFinite {
 public:
     ChebyshevOperatorFinite() : N(1), n(1), omega(1), y0(1), g(1, 1), v(1), u(1), multiIndices(1), a_series(1), c_series(1) {}
-
+    typedef  capd::vectalg::Matrix<T, DIMENSION, DIMENSION> MatrixType;
+    typedef capd::vectalg::Vector<T, DIMENSION> VectorType;
+//    TODO
 
     /**
      * parametry konstruktora.
@@ -84,6 +86,17 @@ private:
     template <class V>
     std::tuple<typename V::ScalarType, capd::vectalg::Vector<typename V::VectorType, 0>> convertXVectorToOmegaAndASeries(const V& x);
 
+    template<class V>
+    inline typename V::ScalarType getCoeff(const V &x, int i, int k, bool is_omega=false) const;
+
+    template<class V>
+    inline typename V::VectorType getCoeffVectorI_thSquareParan(const V &x, int i) const;
+
+    template<class V>
+    V convolve(const V& a, const V& b);
+
+    template<class V>
+    V multiply(const V& a, const V& b);
 };
 
 //#include "ChebyshevOperatorFinite.old.old.old.tpp"

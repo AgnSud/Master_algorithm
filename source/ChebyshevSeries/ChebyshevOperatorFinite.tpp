@@ -24,26 +24,55 @@ void ChebyshevOperatorFinite<T>::setOmega(const T& omega_su) {
     this->omega = omega_su;
 }
 
-
 template <typename T>
-template <class V>
-capd::vectalg::Vector<typename V::VectorType, 0>
-ChebyshevOperatorFinite<T>::computeC(const V& x) {
-    auto [omega_input, a_series_input] = convertXVectorToOmegaAndASeries(x);
+template<class V>
+V ChebyshevOperatorFinite<T>::convolve(const V& a, const V& b) {
 
-    //konwersja a_series_input na ChebyshevSeries dla funkcji power()
-    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> converted_a_series_input(this->n);
-    for (int i = 0; i < this->n; i++){
-        converted_a_series_input[i] = ChebyshevSeries<T, DIMENSION>(this->N);
-        for (int k = 0; k < this->N; k++){
-            if constexpr (std::is_same<decltype(a_series_input[i][k]), double&>::value){
-                converted_a_series_input[i][k] = a_series_input[i][k];
-            }
-            else{
-                converted_a_series_input[i][k] = a_series_input[i][k].x();
+    int size = a.dimension() + b.dimension() - 1;
+    V result(size);
+//    int n = std::max(a.getN() - 1, b.getN() - 1);
+    int negate = -1 * std::max(a.dimension() -1, b.dimension() - 1);
+    int upper=std::max(a.dimension() -1, b.dimension() - 1);
+    for (int k = 0; k < size; ++k) {
+        result[k] = 0;
+        for (int k1 = negate; k1 <= upper; k1++) {
+            int k2 = k - k1;
+            if (abs(k1) < a.dimension() && abs(k2) < b.dimension()) {
+//                if (a[abs(k1)] !=0 ||b[abs(k2)] !=0)
+//                    std::cout<<"tu ";
+                result[k] += a[abs(k1)] * b[abs(k2)];
             }
         }
     }
+    return result;
+}
+
+template <typename T>
+template <class V>
+V ChebyshevOperatorFinite<T>::multiply(const V& a, const V& b) {
+    V result(a.dimension() + b.dimension() - 1);
+    result = convolve(a, b);
+    return result;
+}
+
+template <typename T>
+template <class V>
+capd::vectalg::Vector<typename V::VectorType, 0> ChebyshevOperatorFinite<T>::computeC(const V& x) {
+//    auto [omega_input, a_series_input] = convertXVectorToOmegaAndASeries(x);
+//
+////    konwersja a_series_input na ChebyshevSeries dla funkcji power()
+//    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> converted_a_series_input(this->n);
+//    for (int i = 0; i < this->n; i++){
+//        converted_a_series_input[i] = ChebyshevSeries<T, DIMENSION>(this->N);
+//        for (int k = 0; k < this->N; k++){
+//            if constexpr (std::is_same<decltype(a_series_input[i][k]), double&>::value){
+//                converted_a_series_input[i][k] = a_series_input[i][k];
+//            }
+//            else{
+//                converted_a_series_input[i][k] = a_series_input[i][k].x();
+//            }
+//        }
+//    }
     capd::vectalg::Vector<typename V::VectorType, 0> c_series_result(this->n);
     for (int i = 0; i < this->n; ++i)
         c_series_result[i] = typename V::VectorType(this->N + 1);
@@ -53,13 +82,28 @@ ChebyshevOperatorFinite<T>::computeC(const V& x) {
     // alpha - numer wielowskaznika
     // alpha_idx - elementy wielowskaznika
     for (int alpha = 0; alpha < numAlphas; ++alpha) {
-        ChebyshevSeries<T, DIMENSION> conv(this->N + 1);  // stały 1
+        V conv(this->N + 1);  // stały 1
         conv[0] = 1.0;
 
         for (int alpha_idx = 0; alpha_idx < this->n; ++alpha_idx) {
             int exponent = multiIndices[alpha][alpha_idx];
-            ChebyshevSeries<T, DIMENSION> aj_pow = converted_a_series_input[alpha_idx].power(exponent);
-            conv = ChebyshevSeries<T>::convolve(conv, aj_pow);
+            //compute power:
+            V a_square_paran_alpha_idx = getCoeffVectorI_thSquareParan(x, alpha_idx);
+            V aj_pow(this->N);
+
+            aj_pow[0] = 1;
+            for (int i = 0; i < exponent; ++i) {
+                aj_pow = multiply(aj_pow, a_square_paran_alpha_idx);
+            }
+//
+//            if constexpr (std::is_same<decltype(c_series_result[0][0]), double&>::value) {
+//                std::cout << "a_square_paran_alpha_idx: " << a_square_paran_alpha_idx << '\n';
+//                std::cout << "exponent: " << exponent << '\n';
+//                std::cout << "aj_pow: " << aj_pow << '\n';
+//            }
+
+//            ChebyshevSeries<T, DIMENSION> aj_pow = converted_a_series_input[alpha_idx].power(exponent);
+            conv = convolve(conv, aj_pow);
         }
 
         // Teraz dodaj g_alpha * term do c
@@ -72,6 +116,7 @@ ChebyshevOperatorFinite<T>::computeC(const V& x) {
     }
     if constexpr (std::is_same<decltype(c_series_result[0][0]), double&>::value)
         std::cout << "c_series_result: " << c_series_result << '\n';
+
 
     return c_series_result;
 }
@@ -118,6 +163,26 @@ ChebyshevOperatorFinite<T>::convertXVectorToOmegaAndASeries(const V& x) {
 //    }
 
     return {omega_result, a_series_result};
+}
+
+
+template<typename T>
+template<class V>
+inline typename V::ScalarType
+ChebyshevOperatorFinite<T>::getCoeff(const V& x, int i, int k, bool is_omega) const {
+    if (is_omega)
+        return x[0];
+    return x[1 + k * this->N + i];
+}
+
+template<typename T>
+template<class V>
+inline typename V::VectorType ChebyshevOperatorFinite<T>::getCoeffVectorI_thSquareParan(const V& x, int i) const {
+    V result(this->N);
+    for (int k = 0; k < this->N; ++k) {
+        result[k] = x[1 + k * this->N + i];
+    }
+    return result;
 }
 
 
@@ -175,22 +240,20 @@ V ChebyshevOperatorFinite<T>::operator() (const V& x) {
     return result;
 }
 
-
 template<typename T>
 template<class V>
 typename V::ScalarType ChebyshevOperatorFinite<T>::computeF0(const V& x){
-    auto [omega_input, a_series_input] = convertXVectorToOmegaAndASeries(x);
     typename V::ScalarType result = 0;
     for (int i = 0; i < this->n; i++){
         // <v, u>
         result += v[i] * u[i];
 
         // <v, a_0>
-        result -= v[i] * a_series_input[i][0];
+        result -= v[i] * this->getCoeff(x, i, 0);
 
         // sum_{k=1}^{N-1} 2<v, a_k>
         for (int k = 1; k < this->N; ++k) {
-            result -= v[i] * 2 * a_series_input[i][k];
+            result -= 2 * v[i] * this->getCoeff(x, i, k);
         }
     }
     return result;
@@ -202,19 +265,21 @@ template<class V>
 capd::vectalg::Vector<typename V::VectorType, 0> ChebyshevOperatorFinite<T>::computeF1(const V& x) {
 
     capd::vectalg::Vector<typename V::VectorType, 0> result(this->n);
-    auto [omega_input, a_series_input] = convertXVectorToOmegaAndASeries(x);
+//    auto [omega_input, a_series_input] = convertXVectorToOmegaAndASeries(x);
     auto c_series_input = computeC(x);
+
+
 
     // 1. Obliczenie f_1[0]
     for (int i = 0; i < this->n; i++){
         result[i] = typename V::VectorType(this->N);
-        result[i][0] = this->y0[i] - this->a_series[i][0];
+        result[i][0] = this->y0[i] - this->getCoeff(x, i, 0);
         for (int l = 1; l < this->N; l++){
             if (l % 2 == 0){
-                result[i][0] = result[i][0] - 2.0 * a_series_input[i][l];
+                result[i][0] = result[i][0] - 2.0 * this->getCoeff(x, i, l);
             }
             else{
-                result[i][0] = result[i][0] + 2.0 * a_series_input[i][l];
+                result[i][0] = result[i][0] + 2.0 * this->getCoeff(x, i, l);
             }
         }
     }
@@ -222,7 +287,7 @@ capd::vectalg::Vector<typename V::VectorType, 0> ChebyshevOperatorFinite<T>::com
 //     2. Obliczanie f_1 dla k > 0
     for (int i = 0; i < this->n; i++){
         for (int k = 1; k < this->N; ++k) {
-            result[i][k] = omega_input * k * a_series_input[i][k] - 0.5 * (c_series_input[i][k-1] - c_series_input[i][k+1]);
+            result[i][k] = this->getCoeff(x, 0, 0, true) * k * this->getCoeff(x, i, k) - 0.5 * (c_series_input[i][k-1] - c_series_input[i][k+1]);
         }
     }
     return result;

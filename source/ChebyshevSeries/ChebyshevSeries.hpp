@@ -15,22 +15,22 @@
  * */
 
 template <typename T, int DIM = DIMENSION>
-class ChebyshevSeries : private capd::vectalg::Vector<T, DIM>{
+class ChebyshevSeries : public capd::vectalg::Vector<T, DIM>{
 public:
     //docelowo Vector<ChebyshevSeries, DIM>
-    using CVector = capd::vectalg::Vector<T, DIM>;
+    using VectorType = capd::vectalg::Vector<T, DIM>;
     using capd::vectalg::Vector<T, DIM>::operator=;  // Używamy operatora przypisania z klasy bazowej
     using capd::vectalg::Vector<T, DIM>::operator[];
 
-    ChebyshevSeries() : N(1), CVector(1) {}
+    ChebyshevSeries() : N(1), VectorType(1) {}
 
-    ChebyshevSeries(int N) : N(N), CVector(N) {}
+    ChebyshevSeries(int N) : N(N), VectorType(N) {}
     ChebyshevSeries(std::initializer_list<T> list);
 
     // Zwraca wartosc wielomianu T_k(x)
     static T evaluateFirstKind(int k, T x);
 
-    CVector getCoefficients() const;
+    VectorType getCoefficients() const;
     int getN() const;
     void prettyPrint() const;
 
@@ -42,7 +42,6 @@ public:
     ChebyshevSeries<T, DIM> operator-(const ChebyshevSeries<T, DIM>& other) const;
     ChebyshevSeries<T, DIM> operator*(const ChebyshevSeries<T, DIM>& other) const;
     ChebyshevSeries<T, DIM> power(int n) const;
-
 
 
     // Splot

@@ -129,7 +129,7 @@ void testNorms() {
 void testChebyshevOperatorFinite() {
     std::cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
 
-    constexpr int N = 4;
+    constexpr int N = 2;
     constexpr int n = 2;
 
     //Ponizej startowe parametry
@@ -137,8 +137,8 @@ void testChebyshevOperatorFinite() {
     capd::vectalg::Vector<T, 0> y0{2.0, 0.0};
     capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> a_series_start(n);
 
-    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{2,0,0,0};
-    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{1,0,0,0};
+    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{2,0};
+    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{1,0};
 
     std::cout << "Ustawienia startowe (omega_0, a_series_0, y0):" << '\n';
     std::cout << "omega_0: " << omega_start << '\n';

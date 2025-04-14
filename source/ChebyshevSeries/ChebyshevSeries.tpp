@@ -4,7 +4,7 @@
 
 template <typename T, int DIM>
 ChebyshevSeries<T, DIM>::ChebyshevSeries(std::initializer_list<T> list)
-        : N(static_cast<int>(list.size())), CVector(list.size()) {
+        : N(static_cast<int>(list.size())), VectorType(list.size()) {
 
     int i = 0;
     for (auto val : list) {
@@ -20,7 +20,7 @@ T ChebyshevSeries<T, DIM>::evaluateFirstKind(int k, T x) {
 }
 
 template<typename T, int DIM>
-typename ChebyshevSeries<T, DIM>::CVector
+typename ChebyshevSeries<T, DIM>::VectorType
 ChebyshevSeries<T, DIM>::getCoefficients() const {
     return *this;
 }
@@ -41,7 +41,7 @@ T ChebyshevSeries<T, DIM>::operator()(T x) const {
 
 template <typename T, int DIM>
 ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator+(const ChebyshevSeries<T, DIM>& other) const {
-            ChebyshevSeries<T, DIM> result(std::max(this->N, other.N));
+    ChebyshevSeries<T, DIM> result(std::max(this->N, other.N));
     for (int i = 0; i < result.N; ++i) {
         if (i <= this->N) result[i] += (*this)[i];
         if (i <= other.N) result[i] += other[i];
@@ -79,18 +79,6 @@ ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::convolve(const ChebyshevSeries<
     }
     return result;
 }
-
-//template <typename T, int DIM>
-//T ChebyshevSeries<T, DIM>::dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
-//    T result = 0;
-//    int N = std::min(a.getN(), b.getN());
-//
-//    for (int k = 0; k < N; ++k) {
-//        result += a[k] * b[k];
-//    }
-//
-//    return result;
-//}
 
 template <typename T, int DIM>
 ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator*(const ChebyshevSeries<T, DIM>& other) const {
