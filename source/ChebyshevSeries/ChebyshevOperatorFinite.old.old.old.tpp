@@ -43,7 +43,7 @@ void ChebyshevOperatorFinite<T>::setASeries(const capd::vectalg::Vector<Chebyshe
 
 template<typename T>
 void ChebyshevOperatorFinite<T>::setCSeries() {
-    this->c_series = computeC();
+    this->c_series = compute_c();
 }
 
 template<typename T>
@@ -183,9 +183,9 @@ template<typename T>
 capd::vectalg::Vector<T, 0> ChebyshevOperatorFinite<T>::computeF(const capd::vectalg::Vector<T, 0>& x) {
 
     // Oblicz f_0
-    T f0 = computeF0();
+    T f0 = compute_f_0();
     // Oblicz f_1
-    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> f1 = computeF1();
+    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> f1 = compute_f_1();
 
     capd::vectalg::Vector<T,0> result(x.dimension());
     result[0] = f0;  // Przypisanie f0
@@ -205,7 +205,7 @@ template<class V>
 V ChebyshevOperatorFinite<T>::operator() (const V& x) {
     V result(x.dimension());
 
-    result[0] = computeF0(x); //zmienic
+    result[0] = compute_f_0(x); //zmienic
 
 
     return result;

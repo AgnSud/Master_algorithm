@@ -40,12 +40,16 @@ public:
 
     ChebyshevSeries<T, DIM> operator+(const ChebyshevSeries<T, DIM>& other) const;
     ChebyshevSeries<T, DIM> operator-(const ChebyshevSeries<T, DIM>& other) const;
-    ChebyshevSeries<T, DIM> operator*(const ChebyshevSeries<T, DIM>& other) const;
-    ChebyshevSeries<T, DIM> power(int n) const;
+    template<class V>
+    V operator*(const V& other) const;
+
+//    template<class V>
+//    V power(int n) const;
 
 
     // Splot
-    static ChebyshevSeries<T, DIM> convolve(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b);
+    template<class V>
+    static V convolve(const V& a, const V& b);
 
     //funkcja dot - ALE nie uzywam,  bo przeciez iloczyn skalarny jest na WEKTORACH z R^n nie na ChebyshevSeries
     //static T dot(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b);
@@ -88,5 +92,6 @@ public:
 private:
     int N;  // Stopień wielomianu + 1 (liczba wspolczynnikow)
 };
+
 
 #include "ChebyshevSeries.tpp"

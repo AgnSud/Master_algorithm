@@ -32,24 +32,60 @@ std::vector<std::vector<int>> generateMultiIndices(int order, int maxDegree) {
 
 capd::vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(std::vector<std::vector<int>> multiIndices, int n){
     int A = multiIndices.size();
-    double mu = 0.5;
-    capd::vectalg::Matrix<T, 0, 0> g(A, n);
+    double rho = 28;
+    double beta = 8/3.;
+    double sigma = 10;
+    capd::vectalg::Matrix<T, DIMENSION, DIMENSION> g(A, n);
 
     //definiuje poprzez wielowskazniki
-    //To ponizej do Van der Poll
+    //Lorenz
     for (int j = 0; j < A; ++j) {
         const auto& alpha = multiIndices[j];
-        if (alpha[0] == 0 && alpha[1] == 1) {
-            g[j][0] = 1.0;
-            g[j][1] = mu;
+        if (alpha[0] == 0 && alpha[1] == 0 && alpha[2] == 1) {
+            g[j][0] = 0;
+            g[j][1] = 0;
+            g[j][2] = -beta;
         }
-        else if (alpha[0] == 1 && alpha[1] == 0) {
-            g[j][1] = 1.0;
+        else if (alpha[0] == 0 && alpha[2] == 0 && alpha[1] == 1) {
+            g[j][0] = sigma;
+            g[j][1] = -1;
+            g[j][2] = 0;
         }
-        else if (alpha[0] == 2 && alpha[1] == 1) {
-            g[j][1] = -mu;
+        else if (alpha[1] == 0 && alpha[2] == 0 && alpha[0] == 1) {
+            g[j][0] = -sigma;
+            g[j][1] = rho;
+            g[j][2] = 0;
+        }
+        else if (alpha[0] == 1 && alpha[2] == 1 && alpha[1] == 0) {
+            g[j][0] = 0;
+            g[j][1] = -1;
+            g[j][2] = 0;
+        }
+        else if (alpha[0] == 1 && alpha[1] == 1 && alpha[2] == 0) {
+            g[j][0] = 0;
+            g[j][1] = 0;
+            g[j][2] = 1;
+        }
+        else{
+            g[j][0] = g[j][1] = g[j][2] = 0;
         }
     }
+
+
+    //To ponizej do Van der Poll
+//    for (int j = 0; j < A; ++j) {
+//        const auto& alpha = multiIndices[j];
+//        if (alpha[0] == 0 && alpha[1] == 1) {
+//            g[j][0] = 1.0;
+//            g[j][1] = mu;
+//        }
+//        else if (alpha[0] == 1 && alpha[1] == 0) {
+//            g[j][1] = 1.0;
+//        }
+//        else if (alpha[0] == 2 && alpha[1] == 1) {
+//            g[j][1] = -mu;
+//        }
+//    }
 
     // g(y) = (y1 + y2, y2)
 //    for (int i = 0; i < A; ++i) {
@@ -89,7 +125,7 @@ void testChebyshevSeries() {
     std::cout << "poly1 * poly2: " << poly1 * poly2;
     std::cout << "4.0 * poly2: " << 4.0 * poly2;
     std::cout << "poly2 * 2.0: " << poly2 * 2.0;
-    std::cout << "poly1 ^ 2: " << poly1.power(2);
+//    std::cout << "poly1 ^ 2: " << poly1.power(2);
 
     double x = 0.5;
     std::cout << "\nEvaluations at x = " << x << ":\n";
@@ -130,30 +166,33 @@ void testChebyshevOperatorFinite() {
     std::cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
 
     constexpr int N = 2;
-    constexpr int n = 2;
+    constexpr int n = 3;
+    constexpr int N_g = 2;
 
     //Ponizej startowe parametry
     constexpr T omega_start = 1; //omega jest czescia rownania
-    capd::vectalg::Vector<T, 0> y0{2.0, 0.0};
-    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0> a_series_start(n);
+    capd::vectalg::Vector<T, 0> u0{5.0, 5.0, 5.0};
+    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
 
-    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{2,0};
-    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{1,0};
+    //kazdy jest rozmiaru N
+    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{5,0};
+    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{5,0};
+    a_series_start[2] = ChebyshevSeries<T, DIMENSION>{5,0};
 
-    std::cout << "Ustawienia startowe (omega_0, a_series_0, y0):" << '\n';
+    std::cout << "Ustawienia startowe (omega_0, a_series_0, u0):" << '\n';
     std::cout << "omega_0: " << omega_start << '\n';
     std::cout << "a_series_start: " << a_series_start << '\n';
-    std::cout << "y0: " << y0 << '\n';
+    std::cout << "u0: " << u0 << '\n';
     //-------------------------------------------------------------------
 
     //Definicja v i u - takiego rozmiaru jak n
-    ChebyshevSeries<T, DIMENSION> v{1.0, 1.0};
-    ChebyshevSeries<T, DIMENSION> u{3.0, 3.0};
+    ChebyshevSeries<T, DIMENSION> v{1.0, 0, 0};
+    ChebyshevSeries<T, DIMENSION> w{6.0, 0, 0};
     //-------------------------------------------------------------------
 
     //Wielowskazniki
-    auto multiIndices = generateMultiIndices(n, 3);
-    capd::vectalg::Matrix<T, 0, 0> g = defineFunctionG(multiIndices, n);
+    auto multiIndices = generateMultiIndices(n, N_g);
+    capd::vectalg::Matrix<T, DIMENSION, DIMENSION> g = defineFunctionG(multiIndices, n);
     std::cout << "Funkcja g: " << g << '\n';
 
     std::cout << "Wielowskaźniki:\n";
@@ -167,7 +206,7 @@ void testChebyshevOperatorFinite() {
     std::cout << "\n-----------------------------------------------------------------\n\n";
 
 
-    ChebyshevOperatorFinite<T> op(N, n, y0, g, v, u, multiIndices);
+    ChebyshevOperatorFinite<T> op(N, n, u0, g, v, w, multiIndices);
     int max_iterations = 1;
     auto F = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
 }

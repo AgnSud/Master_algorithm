@@ -4,18 +4,20 @@
 #include "capd/fadbad/fadbad.h"
 #include <type_traits>
 
+
+
 template<typename T>
 ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
         const int N, const int n,
-        const capd::vectalg::Vector<T, 0>& y0_init,
-        const capd::vectalg::Matrix<T, 0, 0>& g_init,
+        const VectorType& u0_init,
+        const MatrixType& g_init,
         const ChebyshevSeries<T, 0>& v,
-        const ChebyshevSeries<T, 0>& u,
+        const ChebyshevSeries<T, 0>& w,
         const std::vector<std::vector<int>>& multiIndices
-) : N(N), n(n), omega(0), y0(y0_init), g(g_init), a_series(n), c_series(n), v(v), u(u), multiIndices(multiIndices) {}
+) : N(N), n(n), omega(0), u0(u0_init), g(g_init), a_series(n), c_series(n), v(v), w(w), multiIndices(multiIndices) {}
 
 template<typename T>
-void ChebyshevOperatorFinite<T>::setASeries(const capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0>& a_input) {
+void ChebyshevOperatorFinite<T>::setASeries(const VectorOfChebyshevsType& a_input) {
     this->a_series = a_input;
 }
 
@@ -25,55 +27,17 @@ void ChebyshevOperatorFinite<T>::setOmega(const T& omega_su) {
 }
 
 template <typename T>
-template<class V>
-V ChebyshevOperatorFinite<T>::convolve(const V& a, const V& b) {
-
-    int size = a.dimension() + b.dimension() - 1;
-    V result(size);
-//    int n = std::max(a.getN() - 1, b.getN() - 1);
-    int negate = -1 * std::max(a.dimension() -1, b.dimension() - 1);
-    int upper=std::max(a.dimension() -1, b.dimension() - 1);
-    for (int k = 0; k < size; ++k) {
-        result[k] = 0;
-        for (int k1 = negate; k1 <= upper; k1++) {
-            int k2 = k - k1;
-            if (abs(k1) < a.dimension() && abs(k2) < b.dimension()) {
-//                if (a[abs(k1)] !=0 ||b[abs(k2)] !=0)
-//                    std::cout<<"tu ";
-                result[k] += a[abs(k1)] * b[abs(k2)];
-            }
-        }
-    }
-    return result;
-}
-
-template <typename T>
 template <class V>
 V ChebyshevOperatorFinite<T>::multiply(const V& a, const V& b) {
     V result(a.dimension() + b.dimension() - 1);
-    result = convolve(a, b);
+    result = ChebyshevSeries<T>::convolve(a, b);
     return result;
 }
 
 template <typename T>
 template <class V>
-capd::vectalg::Vector<typename V::VectorType, 0> ChebyshevOperatorFinite<T>::computeC(const V& x) {
-//    auto [omega_input, a_series_input] = convertXVectorToOmegaAndASeries(x);
-//
-////    konwersja a_series_input na ChebyshevSeries dla funkcji power()
-//    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> converted_a_series_input(this->n);
-//    for (int i = 0; i < this->n; i++){
-//        converted_a_series_input[i] = ChebyshevSeries<T, DIMENSION>(this->N);
-//        for (int k = 0; k < this->N; k++){
-//            if constexpr (std::is_same<decltype(a_series_input[i][k]), double&>::value){
-//                converted_a_series_input[i][k] = a_series_input[i][k];
-//            }
-//            else{
-//                converted_a_series_input[i][k] = a_series_input[i][k].x();
-//            }
-//        }
-//    }
-    capd::vectalg::Vector<typename V::VectorType, 0> c_series_result(this->n);
+typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVectorsVType ChebyshevOperatorFinite<T>::compute_c(const V& x) {
+    typename Types<V>::VectorOfVectorsVType c_series_result(this->n);
     for (int i = 0; i < this->n; ++i)
         c_series_result[i] = typename V::VectorType(this->N + 1);
 
@@ -93,17 +57,14 @@ capd::vectalg::Vector<typename V::VectorType, 0> ChebyshevOperatorFinite<T>::com
 
             aj_pow[0] = 1;
             for (int i = 0; i < exponent; ++i) {
+//                aj_pow = aj_pow * a_square_paran_alpha_idx;
                 aj_pow = multiply(aj_pow, a_square_paran_alpha_idx);
             }
-//
-//            if constexpr (std::is_same<decltype(c_series_result[0][0]), double&>::value) {
-//                std::cout << "a_square_paran_alpha_idx: " << a_square_paran_alpha_idx << '\n';
-//                std::cout << "exponent: " << exponent << '\n';
+            conv = ChebyshevSeries<T>::convolve(conv, aj_pow);
+//            if constexpr (std::is_same<decltype(conv[0]), double&>::value){
 //                std::cout << "aj_pow: " << aj_pow << '\n';
+//                std::cout << "conv: " << conv << '\n';
 //            }
-
-//            ChebyshevSeries<T, DIMENSION> aj_pow = converted_a_series_input[alpha_idx].power(exponent);
-            conv = convolve(conv, aj_pow);
         }
 
         // Teraz dodaj g_alpha * term do c
@@ -122,8 +83,8 @@ capd::vectalg::Vector<typename V::VectorType, 0> ChebyshevOperatorFinite<T>::com
 }
 
 template<typename T>
-capd::vectalg::Vector<T, 0> ChebyshevOperatorFinite<T>::convertToXVector() {
-    capd::vectalg::Vector<T, 0> x(this->n * this->N + 1);
+typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::convertToXVector() {
+    VectorType x(this->n * this->N + 1);
 
     x[0] = omega;
 
@@ -138,58 +99,32 @@ capd::vectalg::Vector<T, 0> ChebyshevOperatorFinite<T>::convertToXVector() {
     return x;
 }
 
-template<typename T>
-template <class V>
-std::tuple<typename V::ScalarType, capd::vectalg::Vector<typename V::VectorType, 0>>
-ChebyshevOperatorFinite<T>::convertXVectorToOmegaAndASeries(const V& x) {
-    // Wyciągamy omega z pierwszego elementu wektora x
-    typename V::ScalarType omega_result = x[0];
-
-    // Tworzymy a_series z pozostałych elementów wektora x
-    capd::vectalg::Vector<typename V::VectorType, 0> a_series_result(this->n);
-    for (int i = 0; i < this->n; i++)
-        a_series_result[i] = typename V::VectorType(this->N);
-
-    int index = 1;
-    for (int k = 0; k < this->N; ++k) {
-        for (int i = 0; i < this->n; i++) {
-            a_series_result[i][k] = x[index];
-            index++;
-        }
-    }
-//    if constexpr (std::is_same<decltype(a_series_result[0][0]), double&>::value) {
-//        std::cout << "x: " << x << '\n';
-//        std::cout << "a_series_result: " << a_series_result << '\n';
-//    }
-
-    return {omega_result, a_series_result};
-}
-
-
+//zwraca [a_k]_i
 template<typename T>
 template<class V>
-inline typename V::ScalarType
-ChebyshevOperatorFinite<T>::getCoeff(const V& x, int i, int k, bool is_omega) const {
+inline typename V::ScalarType ChebyshevOperatorFinite<T>::getCoeff(const V& x, int i, int k, bool is_omega) const {
     if (is_omega)
         return x[0];
-    return x[1 + k * this->N + i];
+    return x[1 + k * this->n + i];
 }
 
+
+//zwraca [a]_i
 template<typename T>
 template<class V>
 inline typename V::VectorType ChebyshevOperatorFinite<T>::getCoeffVectorI_thSquareParan(const V& x, int i) const {
     V result(this->N);
     for (int k = 0; k < this->N; ++k) {
-        result[k] = x[1 + k * this->N + i];
+        result[k] = x[1 + k * this->n + i];
     }
     return result;
 }
 
 
 template<typename T>
-capd::vectalg::Vector<T, DIMENSION> ChebyshevOperatorFinite<T>::findFiniteSolution(
+typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::findFiniteSolution(
         T omega_start,
-        const capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, 0>& a_series_start,
+        const VectorOfChebyshevsType& a_series_start,
         int max_iterations, T tolerance) {
     // Ustaw a i omega
     setOmega(omega_start);
@@ -198,13 +133,13 @@ capd::vectalg::Vector<T, DIMENSION> ChebyshevOperatorFinite<T>::findFiniteSoluti
     T norm = 1.0;
 
     // Utwórz wynik jako Vector<T, DIMENSION>
-    capd::vectalg::Vector<T, DIMENSION> F(this->n * this->N + 1);
-    capd::vectalg::Matrix<T, DIMENSION, DIMENSION> jacobian(this->n * this->N + 1, this->n * this->N + 1);
+    VectorType F(this->n * this->N + 1);
+    MatrixType jacobian(this->n * this->N + 1, this->n * this->N + 1);
 
     //x_k_1 = x_k - F_x_k/DF_x_k
     //co oznacza x_{k+1} = x_k - F(x_k) / DF(x_k)
     while (iteration < max_iterations && norm > tolerance) {
-        capd::vectalg::Vector<T, 0> x = convertToXVector();
+        VectorType x = convertToXVector();
         std::cout << "x = (omega, a) =" << x << '\n';
 
         auto F_x_k = (*this)(x);
@@ -222,8 +157,8 @@ template<class V>
 V ChebyshevOperatorFinite<T>::operator() (const V& x) {
     V result(x.dimension());
 
-    result[0] = computeF0(x);
-    auto f1_result = computeF1(x);
+    result[0] = compute_f_0(x);
+    auto f1_result = compute_f_1(x);
     int index = 1;
     for (int k = 0; k < this->N; ++k) {
         for (int i = 0; i < this->n; ++i) {
@@ -242,11 +177,11 @@ V ChebyshevOperatorFinite<T>::operator() (const V& x) {
 
 template<typename T>
 template<class V>
-typename V::ScalarType ChebyshevOperatorFinite<T>::computeF0(const V& x){
+typename V::ScalarType ChebyshevOperatorFinite<T>::compute_f_0(const V& x){
     typename V::ScalarType result = 0;
     for (int i = 0; i < this->n; i++){
-        // <v, u>
-        result += v[i] * u[i];
+        // <v, w>
+        result += v[i] * w[i];
 
         // <v, a_0>
         result -= v[i] * this->getCoeff(x, i, 0);
@@ -262,18 +197,16 @@ typename V::ScalarType ChebyshevOperatorFinite<T>::computeF0(const V& x){
 
 template<typename T>
 template<class V>
-capd::vectalg::Vector<typename V::VectorType, 0> ChebyshevOperatorFinite<T>::computeF1(const V& x) {
+typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVectorsVType ChebyshevOperatorFinite<T>::compute_f_1(const V& x) {
 
-    capd::vectalg::Vector<typename V::VectorType, 0> result(this->n);
-//    auto [omega_input, a_series_input] = convertXVectorToOmegaAndASeries(x);
-    auto c_series_input = computeC(x);
-
+    typename Types<V>::VectorOfVectorsVType result(this->n);
+    auto c_series_input = compute_c(x);
 
 
     // 1. Obliczenie f_1[0]
     for (int i = 0; i < this->n; i++){
         result[i] = typename V::VectorType(this->N);
-        result[i][0] = this->y0[i] - this->getCoeff(x, i, 0);
+        result[i][0] = this->u0[i] - this->getCoeff(x, i, 0);
         for (int l = 1; l < this->N; l++){
             if (l % 2 == 0){
                 result[i][0] = result[i][0] - 2.0 * this->getCoeff(x, i, l);

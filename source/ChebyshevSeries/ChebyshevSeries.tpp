@@ -59,20 +59,43 @@ ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator-(const ChebyshevSeries
     return result;
 }
 
+//template <typename T, int DIM>
+//ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::convolve(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
+////    CVector a_coefs = a.getCoefficients();
+////    CVector b_coefs = b.getCoefficients();
+//    int size = a.getN() + b.getN() - 1;
+//    ChebyshevSeries<T, DIM> result(size);
+//    int n = std::max(a.getN() - 1, b.getN() - 1);
+//    int negate = -1 * n;
+//    for (int k = 0; k < size; ++k) {
+//        result[k] = 0;
+//        for (int k1 = negate; k1 <= n; k1++) {
+////            std::cout << "k1=" << k1 << "\n";
+//            int k2 = k - k1;
+//            if (abs(k1) < a.getN() && abs(k2) < b.getN()) {
+//                result[k] += a[abs(k1)] * b[abs(k2)];
+//            }
+//        }
+//    }
+//    return result;
+//}
+
 template <typename T, int DIM>
-ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::convolve(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
-//    CVector a_coefs = a.getCoefficients();
-//    CVector b_coefs = b.getCoefficients();
-    int size = a.getN() + b.getN() - 1;
-    ChebyshevSeries<T, DIM> result(size);
-    int n = std::max(a.getN() - 1, b.getN() - 1);
-    int negate = -1 * n;
+template<class V>
+V ChebyshevSeries<T, DIM>::convolve(const V& a, const V& b) {
+
+    int size = a.dimension() + b.dimension() - 1;
+    V result(size);
+//    int n = std::max(a.getN() - 1, b.getN() - 1);
+    int negate = -1 * std::max(a.dimension() -1, b.dimension() - 1);
+    int upper=std::max(a.dimension() -1, b.dimension() - 1);
     for (int k = 0; k < size; ++k) {
         result[k] = 0;
-        for (int k1 = negate; k1 <= n; k1++) {
-//            std::cout << "k1=" << k1 << "\n";
+        for (int k1 = negate; k1 <= upper; k1++) {
             int k2 = k - k1;
-            if (abs(k1) < a.getN() && abs(k2) < b.getN()) {
+            if (abs(k1) < a.dimension() && abs(k2) < b.dimension()) {
+//                if (a[abs(k1)] !=0 ||b[abs(k2)] !=0)
+//                    std::cout<<"tu ";
                 result[k] += a[abs(k1)] * b[abs(k2)];
             }
         }
@@ -81,27 +104,25 @@ ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::convolve(const ChebyshevSeries<
 }
 
 template <typename T, int DIM>
-ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator*(const ChebyshevSeries<T, DIM>& other) const {
-    ChebyshevSeries<T, DIM> result(this->N + other.N - 1);
+template<class V>
+V ChebyshevSeries<T, DIM>::operator*(const V& other) const {
+    V result(this->N + other.N - 1);
     result = convolve(*this, other);
     return result;
 }
 
-template <typename T, int DIM>
-ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::power(int n) const {
-    ChebyshevSeries<T, DIM> tmp(this->N);
-    tmp[0] = 1;
-    for (int i = 0; i < n; ++i) {
-        tmp = tmp * (*this);
-//        result[i] = std::pow((*this)[i], n);
-    }
-
-    ChebyshevSeries<T, DIM> result(this->N);
-    for (int i = 0; i < this->N; i++){
-        result[i] = tmp[i];
-    }
-    return result;
-}
+//template <typename T, int DIM>
+//template<class V>
+//V ChebyshevSeries<T, DIM>::power(int n) const {
+//    V tmp(this->N);
+//    tmp[0] = 1;
+//    for (int i = 0; i < n; ++i) {
+//        tmp = tmp * (*this);
+////        result[i] = std::pow((*this)[i], n);
+//    }
+//
+//    return tmp;
+//}
 
 
 template <typename T, int DIM>

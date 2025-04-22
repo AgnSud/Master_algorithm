@@ -9,7 +9,7 @@
  * w funkcji convertXVectorToOmegaAndASeries(), bo wtedy nie bedzie sie wyliczała pochodna?
  * dlatego w tej funkcji i innych zmienie a_series, na a_series_first_variable i a_series_second_variable
  * aby nie robic z tego Vector<ChebyshevSeries>, jak to było w poprzedniej wersji.
- * Zmienie tez computeC aby przyjmował (const V& x) i w funkcji juz odpakował. Funkcja computeC będzie również zwracała
+ * Zmienie tez computeC aby przyjmował (const V& x) i w funkcji juz odpakował. Funkcja compute_c będzie również zwracała
  * parę (c_series_first_variable, c_series_second_variable)
  */
 
@@ -30,7 +30,7 @@ void ChebyshevOperatorFinite<T>::setASeries(const capd::vectalg::Vector<Chebyshe
 
 //template<typename T>
 //void ChebyshevOperatorFinite<T>::setCSeries() {
-//    this->c_series = computeC();
+//    this->c_series = compute_c();
 //}
 
 template<typename T>
@@ -42,7 +42,7 @@ void ChebyshevOperatorFinite<T>::setOmega(const T& omega_su) {
 template <typename T>
 template <class V>
 std::tuple<typename V::VectorType, typename V::VectorType>
-ChebyshevOperatorFinite<T>::computeC(const V& x) {
+ChebyshevOperatorFinite<T>::compute_c(const V& x) {
     auto [omega_input, a_series_input_first_variable, a_series_input_second_variable] = convertXVectorToOmegaAndASeries(x);
 
     //konwersja a_series na ChebyshevSeries:
@@ -164,10 +164,10 @@ capd::vectalg::Vector<T, DIMENSION> ChebyshevOperatorFinite<T>::findFiniteSoluti
 template<typename T>
 capd::vectalg::Vector<T, 0> ChebyshevOperatorFinite<T>::computeF(const capd::vectalg::Vector<T, 0>& x) {
     // Oblicz f_0
-    auto f0 = computeF0(x);
+    auto f0 = compute_f_0(x);
     capd::vectalg::Vector<T, 0> result;
     // Oblicz f_1
-//    auto [f1_first_variable, f1_second_variable] = computeF1();
+//    auto [f1_first_variable, f1_second_variable] = compute_f_1();
 //
 //    capd::vectalg::Vector<T,0> result = convertToXVector();
 
@@ -188,8 +188,8 @@ template<class V>
 V ChebyshevOperatorFinite<T>::operator() (const V& x) {
     V result(x.dimension());
 
-    result[0] = computeF0(x);
-    auto [f1_first_variable, f1_second_variable] = computeF1(x);
+    result[0] = compute_f_0(x);
+    auto [f1_first_variable, f1_second_variable] = compute_f_1(x);
 //    std::cout << "f1_first_variable: " << f1_first_variable << '\n';
 //    std::cout << "f1_second_variable: " << f1_second_variable << '\n';
 
@@ -200,7 +200,7 @@ V ChebyshevOperatorFinite<T>::operator() (const V& x) {
 
 template<typename T>
 template<class V>
-typename V::ScalarType ChebyshevOperatorFinite<T>::computeF0(const V& x){
+typename V::ScalarType ChebyshevOperatorFinite<T>::compute_f_0(const V& x){
 
     auto [omega_input, a_series_input_first_variable, a_series_input_second_variable] = convertXVectorToOmegaAndASeries(x);
 //    <v, u>
@@ -220,12 +220,12 @@ typename V::ScalarType ChebyshevOperatorFinite<T>::computeF0(const V& x){
 
 template<typename T>
 template<class V>
-std::tuple<typename V::VectorType, typename V::VectorType> ChebyshevOperatorFinite<T>::computeF1(const V& x) {
+std::tuple<typename V::VectorType, typename V::VectorType> ChebyshevOperatorFinite<T>::compute_f_1(const V& x) {
 
     typename V::VectorType result_first_variable(this->N);
     typename V::VectorType result_second_variable(this->N);
     auto [omega_input, a_series_input_first_variable, a_series_input_second_variable] = convertXVectorToOmegaAndASeries(x);
-    auto [c_series_result_first_variable, c_series_result_second_variable] = computeC(x);
+    auto [c_series_result_first_variable, c_series_result_second_variable] = compute_c(x);
 
 
     // 1. Obliczenie f_1[0]
