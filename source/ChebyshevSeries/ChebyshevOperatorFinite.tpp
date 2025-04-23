@@ -3,8 +3,10 @@
 #include "ChebyshevOperatorFinite.hpp"
 #include "capd/fadbad/fadbad.h"
 #include <type_traits>
+#include <iomanip>
 
-
+using namespace capd;
+using namespace std;
 
 template<typename T>
 ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
@@ -13,7 +15,7 @@ ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
         const MatrixType& g_init,
         const ChebyshevSeries<T, 0>& v,
         const ChebyshevSeries<T, 0>& w,
-        const std::vector<std::vector<int>>& multiIndices
+        const vector<vector<int>>& multiIndices
 ) : N(N), n(n), omega(0), u0(u0_init), g(g_init), a_series(n), c_series(n), v(v), w(w), multiIndices(multiIndices) {}
 
 template<typename T>
@@ -36,8 +38,8 @@ V ChebyshevOperatorFinite<T>::multiply(const V& a, const V& b) {
 
 template <typename T>
 template <class V>
-typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVectorsVType ChebyshevOperatorFinite<T>::compute_c(const V& x) {
-    typename Types<V>::VectorOfVectorsVType c_series_result(this->n);
+typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVType ChebyshevOperatorFinite<T>::compute_c(const V& x) {
+    typename Types<V>::VectorOfVType c_series_result(this->n);
     for (int i = 0; i < this->n; ++i)
         c_series_result[i] = typename V::VectorType(this->N + 1);
 
@@ -61,9 +63,9 @@ typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVectorsVType Che
                 aj_pow = multiply(aj_pow, a_square_paran_alpha_idx);
             }
             conv = ChebyshevSeries<T>::convolve(conv, aj_pow);
-//            if constexpr (std::is_same<decltype(conv[0]), double&>::value){
-//                std::cout << "aj_pow: " << aj_pow << '\n';
-//                std::cout << "conv: " << conv << '\n';
+//            if constexpr (is_same<decltype(conv[0]), double&>::value){
+//                cout << "aj_pow: " << aj_pow << '\n';
+//                cout << "conv: " << conv << '\n';
 //            }
         }
 
@@ -75,8 +77,8 @@ typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVectorsVType Che
             }
         }
     }
-    if constexpr (std::is_same<decltype(c_series_result[0][0]), double&>::value)
-        std::cout << "c_series_result: " << c_series_result << '\n';
+    if constexpr (is_same<decltype(c_series_result[0][0]), double&>::value)
+        cout << "c_series_result: " << c_series_result << '\n';
 
 
     return c_series_result;
@@ -85,7 +87,6 @@ typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVectorsVType Che
 template<typename T>
 typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::convertToXVector() {
     VectorType x(this->n * this->N + 1);
-
     x[0] = omega;
 
     int index = 1;
@@ -95,7 +96,6 @@ typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::conv
             index++;
         }
     }
-
     return x;
 }
 
@@ -112,7 +112,7 @@ inline typename V::ScalarType ChebyshevOperatorFinite<T>::getCoeff(const V& x, i
 //zwraca [a]_i
 template<typename T>
 template<class V>
-inline typename V::VectorType ChebyshevOperatorFinite<T>::getCoeffVectorI_thSquareParan(const V& x, int i) const {
+inline V ChebyshevOperatorFinite<T>::getCoeffVectorI_thSquareParan(const V& x, int i) const {
     V result(this->N);
     for (int k = 0; k < this->N; ++k) {
         result[k] = x[1 + k * this->n + i];
@@ -130,26 +130,35 @@ typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::find
     setOmega(omega_start);
     setASeries(a_series_start);
     int iteration = 0;
-    T norm = 1.0;
+//    T norm_tolerance = 1.0;
 
     // Utwórz wynik jako Vector<T, DIMENSION>
-    VectorType F(this->n * this->N + 1);
+    VectorType F_x_k(this->n * this->N + 1);
     MatrixType jacobian(this->n * this->N + 1, this->n * this->N + 1);
 
     //x_k_1 = x_k - F_x_k/DF_x_k
     //co oznacza x_{k+1} = x_k - F(x_k) / DF(x_k)
-    while (iteration < max_iterations && norm > tolerance) {
-        VectorType x = convertToXVector();
-        std::cout << "x = (omega, a) =" << x << '\n';
+    auto x = convertToXVector();
+    norm<double> myNorm(1.5);
+    T norm_tolerance = myNorm.computeNorm(x);
 
-        auto F_x_k = (*this)(x);
-        std::cout << "F(x_k) = " << F_x_k << '\n';
+    while (iteration < max_iterations && norm_tolerance > tolerance) {
+        cout << "x = (omega, a) =" << x << '\n';
+
+        F_x_k = (*this)(x);
+        cout << "F(x_k) = " << F_x_k << '\n';
         computeDerivative(*this, x, jacobian);
-        std::cout << "Jacobian: " << jacobian << "\n";
+        cout << "Jacobian: " << jacobian << "\n";
+        x = x - matrixAlgorithms::gauss(jacobian, F_x_k);
+        cout << "x_next: " << x << "\n";
+        norm_tolerance = myNorm.computeNorm(F_x_k);
+        cout << "norm_tolerance: " << setprecision(16) << norm_tolerance << '\n';
+        cout << "----------------------------------------------------------------" << '\n';
 
         iteration++;
     }
-    return F;
+    cout << "FINAL number of iterations: " << iteration << '\n';
+    return F_x_k;
 }
 
 template<typename T>
@@ -167,9 +176,9 @@ V ChebyshevOperatorFinite<T>::operator() (const V& x) {
         }
     }
 
-    if constexpr (std::is_same<decltype(f1_result[0][0]), double&>::value) {
-        std::cout << "f1_result: " << f1_result << '\n';
-        std::cout << "result: " << result << '\n';
+    if constexpr (is_same<decltype(f1_result[0][0]), double&>::value) {
+        cout << "f1_result: " << f1_result << '\n';
+        cout << "result: " << result << '\n';
     }
 
     return result;
@@ -197,15 +206,15 @@ typename V::ScalarType ChebyshevOperatorFinite<T>::compute_f_0(const V& x){
 
 template<typename T>
 template<class V>
-typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVectorsVType ChebyshevOperatorFinite<T>::compute_f_1(const V& x) {
+typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVType ChebyshevOperatorFinite<T>::compute_f_1(const V& x) {
 
-    typename Types<V>::VectorOfVectorsVType result(this->n);
+    typename Types<V>::VectorOfVType result(this->n);
     auto c_series_input = compute_c(x);
 
 
     // 1. Obliczenie f_1[0]
     for (int i = 0; i < this->n; i++){
-        result[i] = typename V::VectorType(this->N);
+        result[i] = V(this->N);
         result[i][0] = this->u0[i] - this->getCoeff(x, i, 0);
         for (int l = 1; l < this->N; l++){
             if (l % 2 == 0){

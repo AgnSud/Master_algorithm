@@ -2,8 +2,11 @@
 
 #include "ChebyshevSeries.hpp"
 
+using namespace capd;
+using namespace std;
+
 template <typename T, int DIM>
-ChebyshevSeries<T, DIM>::ChebyshevSeries(std::initializer_list<T> list)
+ChebyshevSeries<T, DIM>::ChebyshevSeries(initializer_list<T> list)
         : N(static_cast<int>(list.size())), VectorType(list.size()) {
 
     int i = 0;
@@ -70,7 +73,7 @@ ChebyshevSeries<T, DIM> ChebyshevSeries<T, DIM>::operator-(const ChebyshevSeries
 //    for (int k = 0; k < size; ++k) {
 //        result[k] = 0;
 //        for (int k1 = negate; k1 <= n; k1++) {
-////            std::cout << "k1=" << k1 << "\n";
+////            cout << "k1=" << k1 << "\n";
 //            int k2 = k - k1;
 //            if (abs(k1) < a.getN() && abs(k2) < b.getN()) {
 //                result[k] += a[abs(k1)] * b[abs(k2)];
@@ -95,7 +98,7 @@ V ChebyshevSeries<T, DIM>::convolve(const V& a, const V& b) {
             int k2 = k - k1;
             if (abs(k1) < a.dimension() && abs(k2) < b.dimension()) {
 //                if (a[abs(k1)] !=0 ||b[abs(k2)] !=0)
-//                    std::cout<<"tu ";
+//                    cout<<"tu ";
                 result[k] += a[abs(k1)] * b[abs(k2)];
             }
         }
@@ -127,10 +130,10 @@ V ChebyshevSeries<T, DIM>::operator*(const V& other) const {
 
 template <typename T, int DIM>
 void ChebyshevSeries<T, DIM>::prettyPrint() const {
-    std::cout << "Chebyshev Series Expansion:\n";
-    std::cout << "{";
+    cout << "Chebyshev Series Expansion:\n";
+    cout << "{";
     for (int i = 0; i < this->N-1; ++i) {
-        std::cout << "a_" << i << ": " << (*this)[i] << ", ";
+        cout << "a_" << i << ": " << (*this)[i] << ", ";
     }
-    std::cout << "a_" << this->N - 1 << ": " << (*this)[this->N-1] << "}";
+    cout << "a_" << this->N - 1 << ": " << (*this)[this->N-1] << "}";
 }

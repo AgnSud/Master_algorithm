@@ -6,11 +6,12 @@
 
 using namespace capd;
 using T = double;
+using namespace std;
 
 
 // ---------- Pomocnicze ----------
 void generateMultiIndicesRecursive(int order, int maxDegree, int pos, int remainingSum,
-                                   std::vector<int>& current, std::vector<std::vector<int>>& result) {
+                                   vector<int>& current, vector<vector<int>>& result) {
     if (pos == order) {
         if (remainingSum == 0)
             result.push_back(current);
@@ -22,20 +23,20 @@ void generateMultiIndicesRecursive(int order, int maxDegree, int pos, int remain
     }
 }
 
-std::vector<std::vector<int>> generateMultiIndices(int order, int maxDegree) {
-    std::vector<std::vector<int>> result;
-    std::vector<int> current(order, 0);
+vector<vector<int>> generateMultiIndices(int order, int maxDegree) {
+    vector<vector<int>> result;
+    vector<int> current(order, 0);
     for (int d = 0; d <= maxDegree; ++d)
         generateMultiIndicesRecursive(order, d, 0, d, current, result);
     return result;
 }
 
-capd::vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(std::vector<std::vector<int>> multiIndices, int n){
+vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(vector<vector<int>> multiIndices, int n){
     int A = multiIndices.size();
     double rho = 28;
     double beta = 8/3.;
     double sigma = 10;
-    capd::vectalg::Matrix<T, DIMENSION, DIMENSION> g(A, n);
+    vectalg::Matrix<T, DIMENSION, DIMENSION> g(A, n);
 
     //definiuje poprzez wielowskazniki
     //Lorenz
@@ -73,6 +74,7 @@ capd::vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(std::vector<std::
 
 
     //To ponizej do Van der Poll
+//    double mu = 0.5;
 //    for (int j = 0; j < A; ++j) {
 //        const auto& alpha = multiIndices[j];
 //        if (alpha[0] == 0 && alpha[1] == 1) {
@@ -105,7 +107,7 @@ capd::vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(std::vector<std::
 
 // ---------- TEST 1: ChebyshevSeries ----------
 void testChebyshevSeries() {
-    std::cout << "\n========== TEST: ChebyshevSeries ==========\n";
+    cout << "\n========== TEST: ChebyshevSeries ==========\n";
 
     ChebyshevSeries<double> poly1(3);  // a_0 + a_1 T_1 + a_2 T_2
     poly1[0] = 1.0;
@@ -118,26 +120,26 @@ void testChebyshevSeries() {
     poly2[2] = 2.0;
     poly2[3] = 2.0;
 
-    std::cout << "poly1: "; poly1.prettyPrint(); std::cout << "\n";
-    std::cout << "poly2: "; poly2.prettyPrint(); std::cout << "\n";
+    cout << "poly1: "; poly1.prettyPrint(); cout << "\n";
+    cout << "poly2: "; poly2.prettyPrint(); cout << "\n";
 
-    std::cout << "poly1 + poly2: " << poly1 + poly2;
-    std::cout << "poly1 * poly2: " << poly1 * poly2;
-    std::cout << "4.0 * poly2: " << 4.0 * poly2;
-    std::cout << "poly2 * 2.0: " << poly2 * 2.0;
-//    std::cout << "poly1 ^ 2: " << poly1.power(2);
+    cout << "poly1 + poly2: " << poly1 + poly2;
+    cout << "poly1 * poly2: " << poly1 * poly2;
+    cout << "4.0 * poly2: " << 4.0 * poly2;
+    cout << "poly2 * 2.0: " << poly2 * 2.0;
+//    cout << "poly1 ^ 2: " << poly1.power(2);
 
     double x = 0.5;
-    std::cout << "\nEvaluations at x = " << x << ":\n";
-    std::cout << "poly1(x) = " << poly1(x) << "\n";
-    std::cout << "poly2(x) = " << poly2(x) << "\n";
-    std::cout << "sum(x)   = " << (poly1 + poly2)(x) << "\n";
-    std::cout << "prod(x)  = " << (poly1 * poly2)(x) << "\n";
+    cout << "\nEvaluations at x = " << x << ":\n";
+    cout << "poly1(x) = " << poly1(x) << "\n";
+    cout << "poly2(x) = " << poly2(x) << "\n";
+    cout << "sum(x)   = " << (poly1 + poly2)(x) << "\n";
+    cout << "prod(x)  = " << (poly1 * poly2)(x) << "\n";
 }
 
 // ---------- TEST 2: Norm ----------
 void testNorms() {
-    std::cout << "\n========== TEST: Norm ==========\n";
+    cout << "\n========== TEST: Norm ==========\n";
 
     ChebyshevSeries<double> poly1(3);
     poly1[0] = 1.0; poly1[1] = 1.0; poly1[2] = 1.0;
@@ -151,8 +153,8 @@ void testNorms() {
 
     norm<double> myNorm(2.0);
 
-    std::cout << "Norm of poly1: " << myNorm.computeNorm(poly1) << "\n";
-    std::cout << "Norm of vector: " << myNorm.computeNorm(vec, 2) << "\n";
+    cout << "Norm of poly1: " << myNorm.computeNorm(poly1) << "\n";
+    cout << "Norm of vector: " << myNorm.computeNorm(vec, 2) << "\n";
 }
 
 // ---------- TEST 3: ChebyshevOperatorFinite (Van der Pol) ----------
@@ -163,7 +165,7 @@ void testNorms() {
 // czyli a_0, a_1, a_2, ..., a_N oraz c_0, c_1, c_2, ..., c_N
 // bedziemy wyznaczac F_{N-1}
 void testChebyshevOperatorFinite() {
-    std::cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
+    cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
 
     constexpr int N = 2;
     constexpr int n = 3;
@@ -171,43 +173,48 @@ void testChebyshevOperatorFinite() {
 
     //Ponizej startowe parametry
     constexpr T omega_start = 1; //omega jest czescia rownania
-    capd::vectalg::Vector<T, 0> u0{5.0, 5.0, 5.0};
-    capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
+    vectalg::Vector<T, 0> u0{0.1, 0.1, 0.1};
+    vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
 
     //kazdy jest rozmiaru N
-    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{5,0};
-    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{5,0};
-    a_series_start[2] = ChebyshevSeries<T, DIMENSION>{5,0};
-
-    std::cout << "Ustawienia startowe (omega_0, a_series_0, u0):" << '\n';
-    std::cout << "omega_0: " << omega_start << '\n';
-    std::cout << "a_series_start: " << a_series_start << '\n';
-    std::cout << "u0: " << u0 << '\n';
-    //-------------------------------------------------------------------
-
+    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{0.1, 1.0};
+    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{0.1, 0};
+    a_series_start[2] = ChebyshevSeries<T, DIMENSION>{0.1, 0};
     //Definicja v i u - takiego rozmiaru jak n
     ChebyshevSeries<T, DIMENSION> v{1.0, 0, 0};
-    ChebyshevSeries<T, DIMENSION> w{6.0, 0, 0};
+    ChebyshevSeries<T, DIMENSION> w{0.2, 0, 0};
     //-------------------------------------------------------------------
+
+    cout << "Ustawienia startowe:" << '\n';
+    cout << "omega_0: " << omega_start << '\n';
+    cout << "a_series_start: " << a_series_start << '\n';
+    cout << "u_0: " << u0 << '\n';
+    cout << "v: " << v << '\n';
+    cout << "w: " << w << '\n';
+    cout << "n:" << n << '\n';
+    cout << "N: " << N << '\n';
+    cout << "N_0: " << N_g << '\n';
+    //-------------------------------------------------------------------
+
 
     //Wielowskazniki
     auto multiIndices = generateMultiIndices(n, N_g);
-    capd::vectalg::Matrix<T, DIMENSION, DIMENSION> g = defineFunctionG(multiIndices, n);
-    std::cout << "Funkcja g: " << g << '\n';
+    vectalg::Matrix<T, DIMENSION, DIMENSION> g = defineFunctionG(multiIndices, n);
+    cout << "Funkcja g: " << g << '\n';
 
-    std::cout << "Wielowskaźniki:\n";
+    cout << "Wielowskaźniki:\n";
     for (const auto& mi : multiIndices) {
-        std::cout << "(";
+        cout << "(";
         for (int i = 0; i < mi.size(); ++i) {
-            std::cout << mi[i] << (i < mi.size() - 1 ? "," : "");
+            cout << mi[i] << (i < mi.size() - 1 ? "," : "");
         }
-        std::cout << ") ";
+        cout << ") ";
     }
-    std::cout << "\n-----------------------------------------------------------------\n\n";
+    cout << "\n-----------------------------------------------------------------\n\n";
 
 
     ChebyshevOperatorFinite<T> op(N, n, u0, g, v, w, multiIndices);
-    int max_iterations = 1;
+    int max_iterations = 10;
     auto F = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
 }
 

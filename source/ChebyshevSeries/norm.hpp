@@ -10,13 +10,18 @@ public:
     explicit norm(T nu) : nu(nu) {}
 
     // Norma w przestrzeni l1_nu dla n=1
-    T computeNorm(const ChebyshevSeries<T, DIM>& a) const;
+//    T computeNorm(const ChebyshevSeries<T, DIM>& a) const;
+    template<class V>
+    T computeNorm(const V& a) const;
+
 
     // Norma w przestrzeni l1_nu dla n>1
-    T computeNorm(const capd::vectalg::Vector<ChebyshevSeries<T, DIM>, DIM>& vec, int n) const;
+    template<class V>
+    T computeNorm(const capd::vectalg::Vector<V, DIM>& vec, int n) const;
 
     //Norma operatorowa
-    T computeOperatorNorm(const ChebyshevSeries<T, DIM>& a) const;
+    template<class V>
+    T computeOperatorNorm(const V& a) const;
 
 
 private:

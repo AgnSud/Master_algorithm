@@ -4,23 +4,27 @@
 #include <capd/fadbad/differentiate.h>
 #include <cmath>
 #include "ChebyshevSeries.hpp"
+#include "norm.hpp"
+
 
 #ifndef TRUNCATION
 #define TRUNCATION 10
 #endif
 
+using namespace capd;
+using namespace std;
+
 template <typename T>
 class ChebyshevOperatorFinite {
 public:
     ChebyshevOperatorFinite() : N(1), n(1), omega(1), u0(1), g(1, 1), v(1), w(1), multiIndices(1), a_series(1), c_series(1) {}
-    typedef  capd::vectalg::Matrix<T, DIMENSION, DIMENSION> MatrixType;
-    typedef capd::vectalg::Vector<T, DIMENSION> VectorType;
-    typedef capd::vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> VectorOfChebyshevsType;
+    typedef  vectalg::Matrix<T, DIMENSION, DIMENSION> MatrixType;
+    typedef vectalg::Vector<T, DIMENSION> VectorType;
+    typedef vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> VectorOfChebyshevsType;
     template <class V>
     struct Types {
-        typedef capd::vectalg::Vector<typename V::VectorType, DIMENSION> VectorOfVectorsVType;
+        typedef vectalg::Vector<V, DIMENSION> VectorOfVType;
     };
-//    TODO
 
     /**
      * parametry konstruktora.
@@ -42,8 +46,8 @@ public:
             const VectorType& u0_init,
             const MatrixType& g_init,
             const ChebyshevSeries<T, 0>& v,
-            const ChebyshevSeries<T, 0>& u,
-            const std::vector<std::vector<int>>& multiIndices
+            const ChebyshevSeries<T, 0>& w,
+            const vector<vector<int>>& multiIndices
     );
 
     void setASeries(const VectorOfChebyshevsType& a_input);
@@ -75,20 +79,20 @@ private:
     MatrixType g;
     ChebyshevSeries<T, 0> v;
     ChebyshevSeries<T, 0> w;
-    std::vector<std::vector<int>> multiIndices;
+    vector<vector<int>> multiIndices;
 
     T omega;
     VectorOfChebyshevsType a_series;
     VectorOfChebyshevsType c_series;
 
     template <class V>
-    typename Types<V>::VectorOfVectorsVType compute_c(const V& x);
+    typename Types<V>::VectorOfVType compute_c(const V& x);
 
     template<class V>
     typename V::ScalarType compute_f_0(const V& x);
 
     template<class V>
-    typename Types<V>::VectorOfVectorsVType compute_f_1(const V& x);
+    typename Types<V>::VectorOfVType compute_f_1(const V& x);
 
     VectorType convertToXVector();
 
@@ -96,12 +100,10 @@ private:
     inline typename V::ScalarType getCoeff(const V &x, int i, int k, bool is_omega=false) const;
 
     template<class V>
-    inline typename V::VectorType getCoeffVectorI_thSquareParan(const V &x, int i) const;
+    inline V getCoeffVectorI_thSquareParan(const V &x, int i) const;
 
     template<class V>
     V multiply(const V& a, const V& b);
 };
 
-//#include "ChebyshevOperatorFinite.old.old.old.tpp"
 #include "ChebyshevOperatorFinite.tpp"
-//#include "ChebyshevOperatorFiniteCopFor2Variables.tpp"
