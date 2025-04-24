@@ -34,6 +34,7 @@ public:
     static T evaluateFirstKind(int k, T x);
 
     VectorType getCoefficients() const;
+    void setCoefficients(const VectorType& x);
     int getN() const;
     void prettyPrint() const;
 

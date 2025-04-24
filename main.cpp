@@ -103,6 +103,11 @@ vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(vector<vector<int>> mul
     return g;
 }
 
+void checkSolution(T omega_approx,
+                   const vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION>& a_series_approx){
+
+}
+
 
 
 // ---------- TEST 1: ChebyshevSeries ----------
@@ -115,10 +120,12 @@ void testChebyshevSeries() {
     poly1[2] = 1.0;
 
     ChebyshevSeries<double> poly2(4);
-    poly2[0] = 2.0;
-    poly2[1] = 2.0;
-    poly2[2] = 2.0;
-    poly2[3] = 2.0;
+    vectalg::Vector<double, 0> tmp = {2,2,2,2};
+    poly2.setCoefficients(tmp);
+//    poly2[0] = 2.0;
+//    poly2[1] = 2.0;
+//    poly2[2] = 2.0;
+//    poly2[3] = 2.0;
 
     cout << "poly1: "; poly1.prettyPrint(); cout << "\n";
     cout << "poly2: "; poly2.prettyPrint(); cout << "\n";
@@ -177,12 +184,12 @@ void testChebyshevOperatorFinite() {
     vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
 
     //kazdy jest rozmiaru N
-    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{0.1, 1.0};
-    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{0.1, 0};
-    a_series_start[2] = ChebyshevSeries<T, DIMENSION>{0.1, 0};
+    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{5.0, 1.0};
+    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{5.0, 0};
+    a_series_start[2] = ChebyshevSeries<T, DIMENSION>{5.0, 0};
     //Definicja v i u - takiego rozmiaru jak n
     ChebyshevSeries<T, DIMENSION> v{1.0, 0, 0};
-    ChebyshevSeries<T, DIMENSION> w{0.2, 0, 0};
+    ChebyshevSeries<T, DIMENSION> w{6.0, 0, 0};
     //-------------------------------------------------------------------
 
     cout << "Ustawienia startowe:" << '\n';
@@ -214,8 +221,14 @@ void testChebyshevOperatorFinite() {
 
 
     ChebyshevOperatorFinite<T> op(N, n, u0, g, v, w, multiIndices);
-    int max_iterations = 10;
-    auto F = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
+    int max_iterations = 1;
+    auto solution_approx = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
+    auto omega_approx = solution_approx.first;
+    auto a_series_approx = solution_approx.second;
+    cout << "omega_approx: " << omega_approx << '\n';
+    cout << "a_series_approx: " << a_series_approx << '\n';
+    cout << "c_series_approx: " << op.getCSeries() << '\n';
+    cout << "jacobianDerivative: " << op.getDerivativeFinite() << '\n';
 }
 
 // ---------- MAIN ----------

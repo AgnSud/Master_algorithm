@@ -29,6 +29,17 @@ ChebyshevSeries<T, DIM>::getCoefficients() const {
 }
 
 template<typename T, int DIM>
+void ChebyshevSeries<T, DIM>::setCoefficients(const VectorType& x) {
+    if (x.dimension() != this->N) {
+        cerr << "Error: The size of the input vector does not match the number of coefficients.\n";
+        return;
+    }
+    for (int i = 0; i < this->N; ++i) {
+        (*this)[i] = x[i];
+    }
+}
+
+template<typename T, int DIM>
 int ChebyshevSeries<T, DIM>::getN() const {
     return this->N;
 }

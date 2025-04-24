@@ -29,6 +29,28 @@ void ChebyshevOperatorFinite<T>::setOmega(const T& omega_su) {
 }
 
 template <typename T>
+void ChebyshevOperatorFinite<T>::setCSeries(const VectorOfChebyshevsType& c_input) {
+    this->c_series = c_input;
+}
+
+template <typename T>
+ChebyshevOperatorFinite<T>::VectorOfChebyshevsType ChebyshevOperatorFinite<T>::getCSeries() const {
+    return this->c_series;
+}
+
+template <typename T>
+void ChebyshevOperatorFinite<T>::setDerivativeFinite(const MatrixType& derivative) {
+    this->derivative_finite = derivative;
+}
+
+template <typename T>
+ChebyshevOperatorFinite<T>::MatrixType ChebyshevOperatorFinite<T>::getDerivativeFinite() const {
+    return this->derivative_finite;
+}
+
+
+
+template <typename T>
 template <class V>
 V ChebyshevOperatorFinite<T>::multiply(const V& a, const V& b) {
     V result(a.dimension() + b.dimension() - 1);
@@ -36,12 +58,13 @@ V ChebyshevOperatorFinite<T>::multiply(const V& a, const V& b) {
     return result;
 }
 
+
+//ta funkcja przyjmuje x (spłaszczony) ale zwraca niespłaszczone
 template <typename T>
 template <class V>
-typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVType ChebyshevOperatorFinite<T>::compute_c(const V& x) {
-    typename Types<V>::VectorOfVType c_series_result(this->n);
-    for (int i = 0; i < this->n; ++i)
-        c_series_result[i] = typename V::VectorType(this->N + 1);
+V ChebyshevOperatorFinite<T>::compute_c(const V& x) {
+    V c_series_result_flatten(this->n * (this->N+1) + 1);
+    c_series_result_flatten[0] = 0;          //ustawienie domyślne dla przesunięc
 
     int numAlphas = multiIndices.size();  // A
     // Oblicz [a]_1^{alpha_1} * [a]_2^{alpha_2} * ... * [a]_n^{alpha_n}
@@ -54,7 +77,7 @@ typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVType ChebyshevO
         for (int alpha_idx = 0; alpha_idx < this->n; ++alpha_idx) {
             int exponent = multiIndices[alpha][alpha_idx];
             //compute power:
-            V a_square_paran_alpha_idx = getCoeffVectorI_thSquareParan(x, alpha_idx);
+            V a_square_paran_alpha_idx = getCoeffVectorI_thSquareParan(x, alpha_idx, this->N);
             V aj_pow(this->N);
 
             aj_pow[0] = 1;
@@ -71,19 +94,27 @@ typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVType ChebyshevO
 
         // Teraz dodaj g_alpha * term do c
         // Potrzebujemy wielkosc c_{k+1}, więc obetniemy c do N+1
-        for (int k = 0; k < this->n; ++k) {
-            for (int d = 0; d <= this->N; ++d) {
-                c_series_result[k][d] += this->g[alpha][k] * conv[d];
+        int index = 1;
+        for (int i = 0; i < this->n; ++i) {
+            for (int k = 0; k <= this->N; ++k) {
+                c_series_result_flatten[1 + k * this->n + i] += this->g[alpha][i] * conv[k];
             }
         }
     }
-    if constexpr (is_same<decltype(c_series_result[0][0]), double&>::value)
-        cout << "c_series_result: " << c_series_result << '\n';
+
+    if constexpr (is_same<decltype(c_series_result_flatten[0]), double&>::value)
+        cout << "c_series_result_flatten: " << c_series_result_flatten << '\n';
 
 
-    return c_series_result;
+    return c_series_result_flatten;
 }
 
+
+/*
+ * Konwersja jest następująca: omega typu T, a_series = [ [a]_1, [a]_2, ..., [a]_n ]
+ * do tego [a]_k = [ [a_0]_k, [a_1]_k, [a_2]_k, ..., [a_{N-1}]_k ]
+ * zamienia się na x = [omega, [a_0]_1, [a_0]_2,  ..., [a_0]_n, [a_1]_1, [a_1]_2, ...]
+ */
 template<typename T>
 typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::convertToXVector() {
     VectorType x(this->n * this->N + 1);
@@ -99,7 +130,7 @@ typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::conv
     return x;
 }
 
-//zwraca [a_k]_i
+//zwraca [a_k]_i lub [c_k]_i (ustawione c[0] = 0 dla przesunięcia)
 template<typename T>
 template<class V>
 inline typename V::ScalarType ChebyshevOperatorFinite<T>::getCoeff(const V& x, int i, int k, bool is_omega) const {
@@ -109,20 +140,34 @@ inline typename V::ScalarType ChebyshevOperatorFinite<T>::getCoeff(const V& x, i
 }
 
 
-//zwraca [a]_i
+//zwraca [a]_i lub [c]_i (ustawione c[0] = 0 dla przesunięcia)
 template<typename T>
 template<class V>
-inline V ChebyshevOperatorFinite<T>::getCoeffVectorI_thSquareParan(const V& x, int i) const {
-    V result(this->N);
-    for (int k = 0; k < this->N; ++k) {
+inline V ChebyshevOperatorFinite<T>::getCoeffVectorI_thSquareParan(const V& x, int i, int size) const {
+    V result(size);
+    for (int k = 0; k < size; ++k) {
         result[k] = x[1 + k * this->n + i];
     }
     return result;
 }
 
-
+//size się różni, bo czasem wywoluje na x, a czasem na c
 template<typename T>
-typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::findFiniteSolution(
+template<class V>
+typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType ChebyshevOperatorFinite<T>::convertToSeriesFromXForm(const V& x, int size){
+    VectorOfChebyshevsType series_form(this->n);
+    for (int i = 0; i < this->n; i++){
+        ChebyshevSeries<T, DIMENSION> tmp(size);
+        tmp.setCoefficients(getCoeffVectorI_thSquareParan(x, i, size));
+        series_form[i] = tmp;
+    }
+    return series_form;
+}
+
+//dziala jak operator Czebyszewa F z pracy - ma przyjmować (omega, a_series) i zwracać (omega, a_series) - wtedy jest zgodnośc z pracą
+//drugie podejście, to żeby zwracła void i były gettery do a_series i omega
+template<typename T>
+std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> ChebyshevOperatorFinite<T>::findFiniteSolution(
         T omega_start,
         const VectorOfChebyshevsType& a_series_start,
         int max_iterations, T tolerance) {
@@ -152,15 +197,42 @@ typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::find
         x = x - matrixAlgorithms::gauss(jacobian, F_x_k);
         cout << "x_next: " << x << "\n";
         norm_tolerance = myNorm.computeNorm(F_x_k);
-        cout << "norm_tolerance: " << setprecision(16) << norm_tolerance << '\n';
+        cout << "norm_tolerance: " << setprecision(6) << norm_tolerance << '\n';
         cout << "----------------------------------------------------------------" << '\n';
 
         iteration++;
     }
     cout << "FINAL number of iterations: " << iteration << '\n';
-    return F_x_k;
+
+    //odkodowanie a_series i omega i c_series
+    VectorOfChebyshevsType a_series_final = convertToSeriesFromXForm(x, this->N);
+    VectorOfChebyshevsType c_series_final = convertToSeriesFromXForm(compute_c(x), this->N + 1);
+    T omega_final = getCoeff(x, 0, 0, true);
+
+    this->setASeries(a_series_final);
+    this->setCSeries(c_series_final);
+    this->setOmega(omega_final);
+
+    //obliczenie odwrotnosci jacobianu
+    computeDerivativeInverse(x);
+
+    return std::make_pair(omega_final, a_series_final);
 }
 
+
+template <typename T>
+template<class V>
+void ChebyshevOperatorFinite<T>::computeDerivativeInverse(const V& x) {
+    // Obliczamy macierz Jacobiego w punkcie x
+    MatrixType jacobian(this->n * this->N + 1, this->n * this->N + 1);
+    computeDerivative(*this, x, jacobian);
+    cout << "Jacobian: " << jacobian << "\n";
+    MatrixType jacobianInversed = matrixAlgorithms::inverseMatrix(jacobian);
+    cout << "jacobianInversed: " << jacobianInversed << "\n";
+    this->setDerivativeFinite(jacobianInversed);
+}
+
+//ten operator() przyjmuje x i zwraca x (wewnetrzna funkcja)
 template<typename T>
 template<class V>
 V ChebyshevOperatorFinite<T>::operator() (const V& x) {
@@ -168,15 +240,11 @@ V ChebyshevOperatorFinite<T>::operator() (const V& x) {
 
     result[0] = compute_f_0(x);
     auto f1_result = compute_f_1(x);
-    int index = 1;
-    for (int k = 0; k < this->N; ++k) {
-        for (int i = 0; i < this->n; ++i) {
-            result[index] = f1_result[i][k];
-            index++;
-        }
+    for (int i = 0; i < f1_result.dimension(); i++){
+        result[i + 1] = f1_result[i];
     }
 
-    if constexpr (is_same<decltype(f1_result[0][0]), double&>::value) {
+    if constexpr (is_same<decltype(f1_result[0]), double&>::value) {
         cout << "f1_result: " << f1_result << '\n';
         cout << "result: " << result << '\n';
     }
@@ -206,22 +274,20 @@ typename V::ScalarType ChebyshevOperatorFinite<T>::compute_f_0(const V& x){
 
 template<typename T>
 template<class V>
-typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVType ChebyshevOperatorFinite<T>::compute_f_1(const V& x) {
-
-    typename Types<V>::VectorOfVType result(this->n);
-    auto c_series_input = compute_c(x);
+V ChebyshevOperatorFinite<T>::compute_f_1(const V& x) {
+    V result(this->n * this->N);
+    auto c = compute_c(x);
 
 
     // 1. Obliczenie f_1[0]
     for (int i = 0; i < this->n; i++){
-        result[i] = V(this->N);
-        result[i][0] = this->u0[i] - this->getCoeff(x, i, 0);
-        for (int l = 1; l < this->N; l++){
-            if (l % 2 == 0){
-                result[i][0] = result[i][0] - 2.0 * this->getCoeff(x, i, l);
+        result[i] = this->u0[i] - this->getCoeff(x, i, 0);
+        for (int k = 1; k < this->N; k++){
+            if (k % 2 == 0){
+                result[i] = result[i] - 2.0 * this->getCoeff(x, i, k);
             }
             else{
-                result[i][0] = result[i][0] + 2.0 * this->getCoeff(x, i, l);
+                result[i] = result[i] + 2.0 * this->getCoeff(x, i, k);
             }
         }
     }
@@ -229,7 +295,7 @@ typename ChebyshevOperatorFinite<T>::template Types<V>::VectorOfVType ChebyshevO
 //     2. Obliczanie f_1 dla k > 0
     for (int i = 0; i < this->n; i++){
         for (int k = 1; k < this->N; ++k) {
-            result[i][k] = this->getCoeff(x, 0, 0, true) * k * this->getCoeff(x, i, k) - 0.5 * (c_series_input[i][k-1] - c_series_input[i][k+1]);
+            result[k * this->n + i] = this->getCoeff(x, 0, 0, true) * k * this->getCoeff(x, i, k) - 0.5 * (this->getCoeff(c, i, k-1) - this->getCoeff(c, i, k+1));
         }
     }
     return result;

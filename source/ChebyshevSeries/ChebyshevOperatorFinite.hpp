@@ -52,6 +52,10 @@ public:
 
     void setASeries(const VectorOfChebyshevsType& a_input);
     void setOmega(const T& omega);
+    void setCSeries(const VectorOfChebyshevsType& c_input);
+    VectorOfChebyshevsType getCSeries() const;
+    void setDerivativeFinite(const MatrixType& derivative);
+    MatrixType getDerivativeFinite() const;
 
     /**
      * Oblicza przybliżone rozwiązanie w metodzie Newtona.
@@ -62,7 +66,7 @@ public:
      * @param tolerance Tolerancja obliczeniowa.
      * @return Wektor wynikowy.
      */
-    VectorType findFiniteSolution(
+    std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> findFiniteSolution(
             T omega_start,
             const VectorOfChebyshevsType& a_series_start,
             int max_iterations = 100,
@@ -80,30 +84,36 @@ private:
     ChebyshevSeries<T, 0> v;
     ChebyshevSeries<T, 0> w;
     vector<vector<int>> multiIndices;
+    MatrixType derivative_finite;
 
     T omega;
     VectorOfChebyshevsType a_series;
     VectorOfChebyshevsType c_series;
 
     template <class V>
-    typename Types<V>::VectorOfVType compute_c(const V& x);
+    V compute_c(const V& x);
 
     template<class V>
     typename V::ScalarType compute_f_0(const V& x);
 
     template<class V>
-    typename Types<V>::VectorOfVType compute_f_1(const V& x);
+    V compute_f_1(const V& x);
 
+    template<class V>
+    VectorOfChebyshevsType convertToSeriesFromXForm(const V& x, int size);
     VectorType convertToXVector();
 
     template<class V>
     inline typename V::ScalarType getCoeff(const V &x, int i, int k, bool is_omega=false) const;
 
     template<class V>
-    inline V getCoeffVectorI_thSquareParan(const V &x, int i) const;
+    inline V getCoeffVectorI_thSquareParan(const V &x, int i, int size) const;
 
     template<class V>
     V multiply(const V& a, const V& b);
+
+    template<class V>
+    void computeDerivativeInverse(const V& x);
 };
 
 #include "ChebyshevOperatorFinite.tpp"
