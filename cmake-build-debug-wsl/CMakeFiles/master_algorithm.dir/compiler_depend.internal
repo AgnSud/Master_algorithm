@@ -73,6 +73,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdAux/include/capd/settings/archSetting.h
  /home/agnieszka/CAPD/capdAux/include/capd/settings/compilerSetting.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/DagIndexer.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/DagIndexer.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalAcos.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalAdd.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalAsin.h
@@ -99,6 +100,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/BasicC2Curve.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/BasicCnCurve.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/BasicCurve.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/BasicCurve.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/C0TimeJet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/C1TimeJet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/C2Curve.h
@@ -108,9 +110,12 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/CnTimeJet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/CoeffTraits.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Curve.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Curve.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/CurveInterface.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Jet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Jet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/ParametricCurve.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/SolutionCurve.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/TimeRange.h
@@ -126,6 +131,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0AffineSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0BallSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0DoubletonSet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0DoubletonSet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0FlowballSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0HOSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0Set.h
@@ -133,6 +139,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C11Rect2Set.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C1AffineSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C1DoubletonSet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C1DoubletonSet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C1HOSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C1Set.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C2DoubletonSet.h
@@ -156,6 +163,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/BasicC2OdeSolver.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/BasicCnOdeSolver.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/BasicOdeSolver.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/BasicOdeSolver.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/C1DynSys.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/C2DynSys.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/C2OdeSolver.h
@@ -163,28 +171,41 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/CnOdeSolver.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/CnOdeSolver_templateMembers.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/DynSys.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/DynSys.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/FirstOrderEnclosure.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/FirstOrderEnclosure.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/HighOrderEnclosure.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/Move.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/OdeSolver.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/OdeSolver.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/SolverException.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/StepControl.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/approveRemainder.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/lib.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/typedefs.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/AffineSet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/AffineSet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredAffineSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredDoubletonSet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredDoubletonSet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredTripletonSet.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/DoubletonSet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/DoubletonSet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixAffineSet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixAffineSet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixDoubletonSet.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixDoubletonSet.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/map/Function.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map.hpp
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_codeTranslation.hpp
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_headerTemplate.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/map/Parser.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/map/lib.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/AbstractSection.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/AbstractSection.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/AffineSection.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/BasicPoincareMap.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/BasicPoincareMap.hpp
@@ -195,6 +216,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/NonlinearSection.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/PoincareException.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/PoincareMap.h
+ /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/PoincareMap.hpp
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/PoincareMap_templateMembers.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/PoincareMap_templateOperator.h
  /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/SaveStepControl.h

@@ -31,7 +31,7 @@ public:
     ChebyshevSeries(initializer_list<T> list);
 
     // Zwraca wartosc wielomianu T_k(x)
-    static T evaluateFirstKind(int k, T x);
+    static T evaluateFirstKind(int k, T t);
 
     VectorType getCoefficients() const;
     void setCoefficients(const VectorType& x);
@@ -39,8 +39,8 @@ public:
     void prettyPrint() const;
 
 
-    // wylicza wartosc w punkcie (do zmiany, narazie doslowny wzor zadany)
-    T operator()(T x) const;
+    // wylicza wartosc w punkcie - czasie t (do zmiany, narazie doslowny wzor zadany)
+    T operator()(T t) const;
 
     ChebyshevSeries<T, DIM> operator+(const ChebyshevSeries<T, DIM>& other) const;
     ChebyshevSeries<T, DIM> operator-(const ChebyshevSeries<T, DIM>& other) const;

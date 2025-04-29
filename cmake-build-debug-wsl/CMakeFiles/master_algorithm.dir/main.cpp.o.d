@@ -464,6 +464,28 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffIncl/DiffInclusionLN.h \
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffIncl/InclRect2Set.h \
  /home/agnieszka/CAPD/capdAlg/include/capd/matrixAlgorithms/lib.h \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/DagIndexer.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Jet.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_codeTranslation.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_headerTemplate.h \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/OdeSolver.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/DynSys.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/BasicOdeSolver.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/BasicCurve.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Curve.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/FirstOrderEnclosure.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/PoincareMap.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/AbstractSection.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0DoubletonSet.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredDoubletonSet.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/DoubletonSet.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/AffineSet.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C1DoubletonSet.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixDoubletonSet.hpp \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixAffineSet.hpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.hpp \

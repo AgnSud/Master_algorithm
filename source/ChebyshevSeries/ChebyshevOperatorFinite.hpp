@@ -3,6 +3,7 @@
 #include <capd/vectalg/lib.h>
 #include <capd/fadbad/differentiate.h>
 #include <cmath>
+#include <iostream>
 #include "ChebyshevSeries.hpp"
 #include "norm.hpp"
 
@@ -25,6 +26,7 @@ public:
     struct Types {
         typedef vectalg::Vector<V, DIMENSION> VectorOfVType;
     };
+    typedef vectalg::SumNorm<VectorType, MatrixType> NormType;
 
     /**
      * parametry konstruktora.
@@ -54,11 +56,15 @@ public:
     void setOmega(const T& omega);
     void setCSeries(const VectorOfChebyshevsType& c_input);
     VectorOfChebyshevsType getCSeries() const;
+    void setInverseDerivativeFinite(const MatrixType& derivative);
+    MatrixType getInverseDerivativeFinite() const;
     void setDerivativeFinite(const MatrixType& derivative);
     MatrixType getDerivativeFinite() const;
 
     /**
-     * Oblicza przybliżone rozwiązanie w metodzie Newtona.
+     * dziala jak operator Czebyszewa F z pracy - ma przyjmować (omega, a_series) i zwracać (omega, a_series) -
+     * wtedy jest zgodnośc z praca
+     * drugie podejście, to żeby zwracła void i były gettery do a_series i omega
      *
      * @param omega_start Początkowa wartość omega.
      * @param a_series_start Początkowy wektor szeregów Czebyszewa a_series.
@@ -70,9 +76,10 @@ public:
             T omega_start,
             const VectorOfChebyshevsType& a_series_start,
             int max_iterations = 100,
-            T tolerance = 1e-8);
+            T tolerance = 1e-13);
 
     // wylicza operator Czebyszewa skonczony F_N
+    //ten operator() przyjmuje x i zwraca x (wewnetrzna funkcja)
     template<class V>
     V operator() (const V& x);
 
@@ -101,11 +108,20 @@ private:
 
     template<class V>
     VectorOfChebyshevsType convertToSeriesFromXForm(const V& x, int size);
+
+    /*
+     * Konwersja jest następująca: omega typu T, a_series = [ [a]_1, [a]_2, ..., [a]_n ]
+     * do tego [a]_k = [ [a_0]_k, [a_1]_k, [a_2]_k, ..., [a_{N-1}]_k ]
+     * zamienia się na x = [omega, [a_0]_1, [a_0]_2,  ..., [a_0]_n, [a_1]_1, [a_1]_2, ...]
+     */
     VectorType convertToXVector();
 
+
+    //zwraca [a_k]_i lub [c_k]_i (ustawione c[0] = 0 dla przesunięcia)
     template<class V>
     inline typename V::ScalarType getCoeff(const V &x, int i, int k, bool is_omega=false) const;
 
+    //zwraca [a]_i lub [c]_i (ustawione c[0] = 0 dla przesunięcia)
     template<class V>
     inline V getCoeffVectorI_thSquareParan(const V &x, int i, int size) const;
 

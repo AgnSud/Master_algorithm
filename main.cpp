@@ -1,5 +1,12 @@
 #include <iostream>
 #include "capd/capdlib.h"
+#include "capd/map/Map.hpp"
+#include "capd/dynsys/OdeSolver.hpp"
+#include "capd/poincare/PoincareMap.hpp"
+#include "capd/poincare/AbstractSection.hpp"
+#include "capd/dynset/C0DoubletonSet.hpp"
+#include "capd/dynset/C1DoubletonSet.hpp"
+
 #include "source/ChebyshevSeries/ChebyshevSeries.hpp"
 #include "source/ChebyshevSeries/norm.hpp"
 #include "source/ChebyshevSeries/ChebyshevOperatorFinite.hpp"
@@ -103,9 +110,14 @@ vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(vector<vector<int>> mul
     return g;
 }
 
-void checkSolution(T omega_approx,
-                   const vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION>& a_series_approx){
-
+void checkSolution(const vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION>& a_series_approx,
+                   T argument){
+    vectalg::Vector<T, DIMENSION> value(a_series_approx.dimension());
+//    argument = argument * 2 - 1.;
+    for(int i = 0; i < a_series_approx.dimension(); i++){
+        value[i] = a_series_approx[i](argument * 2 - 1);
+    }
+    cout << "u(" << argument << ")= " << value << '\n';
 }
 
 
@@ -114,13 +126,11 @@ void checkSolution(T omega_approx,
 void testChebyshevSeries() {
     cout << "\n========== TEST: ChebyshevSeries ==========\n";
 
-    ChebyshevSeries<double> poly1(3);  // a_0 + a_1 T_1 + a_2 T_2
-    poly1[0] = 1.0;
-    poly1[1] = 1.0;
-    poly1[2] = 1.0;
-
-    ChebyshevSeries<double> poly2(4);
-    vectalg::Vector<double, 0> tmp = {2,2,2,2};
+    ChebyshevSeries<double> poly1(2);  // a_0 + a_1 T_1 + a_2 T_2
+    ChebyshevSeries<double> poly2(2);
+    vectalg::Vector<double, 0> tmp = {5.481443923147439, 0.2407219615737195};
+    poly1.setCoefficients(tmp);
+    tmp = {12.339608554714449, 3.6698042773572244};
     poly2.setCoefficients(tmp);
 //    poly2[0] = 2.0;
 //    poly2[1] = 2.0;
@@ -129,12 +139,12 @@ void testChebyshevSeries() {
 
     cout << "poly1: "; poly1.prettyPrint(); cout << "\n";
     cout << "poly2: "; poly2.prettyPrint(); cout << "\n";
+    cout << "convolve: " << ChebyshevSeries<T>::convolve(poly1, poly2) << endl;
 
     cout << "poly1 + poly2: " << poly1 + poly2;
     cout << "poly1 * poly2: " << poly1 * poly2;
     cout << "4.0 * poly2: " << 4.0 * poly2;
     cout << "poly2 * 2.0: " << poly2 * 2.0;
-//    cout << "poly1 ^ 2: " << poly1.power(2);
 
     double x = 0.5;
     cout << "\nEvaluations at x = " << x << ":\n";
@@ -174,22 +184,28 @@ void testNorms() {
 void testChebyshevOperatorFinite() {
     cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
 
-    constexpr int N = 2;
+    constexpr int N = 20;
     constexpr int n = 3;
     constexpr int N_g = 2;
 
     //Ponizej startowe parametry
-    constexpr T omega_start = 1; //omega jest czescia rownania
-    vectalg::Vector<T, 0> u0{0.1, 0.1, 0.1};
+    constexpr T omega_start = 0.27; //omega jest czescia rownania
+    vectalg::Vector<T, 0> u0{5., 5., 23.};
     vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
 
     //kazdy jest rozmiaru N
-    a_series_start[0] = ChebyshevSeries<T, DIMENSION>{5.0, 1.0};
-    a_series_start[1] = ChebyshevSeries<T, DIMENSION>{5.0, 0};
-    a_series_start[2] = ChebyshevSeries<T, DIMENSION>{5.0, 0};
+    a_series_start[0] = ChebyshevSeries<T, DIMENSION>(N);
+    a_series_start[1] = ChebyshevSeries<T, DIMENSION>(N);
+    a_series_start[2] = ChebyshevSeries<T, DIMENSION>(N);
+    a_series_start[0][0] = 5.0;
+    a_series_start[0][1] = 1e-8; //TODO: potrzebne aby macierz była odwracalna
+    a_series_start[1][0] = 5.0;
+    a_series_start[2][0] = 23.0;
+
+
     //Definicja v i u - takiego rozmiaru jak n
-    ChebyshevSeries<T, DIMENSION> v{1.0, 0, 0};
-    ChebyshevSeries<T, DIMENSION> w{6.0, 0, 0};
+    ChebyshevSeries<T, DIMENSION> v{0, 0, 1.};
+    ChebyshevSeries<T, DIMENSION> w{0, 0, 27.};
     //-------------------------------------------------------------------
 
     cout << "Ustawienia startowe:" << '\n';
@@ -221,20 +237,65 @@ void testChebyshevOperatorFinite() {
 
 
     ChebyshevOperatorFinite<T> op(N, n, u0, g, v, w, multiIndices);
-    int max_iterations = 1;
+    int max_iterations = 100;
     auto solution_approx = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
     auto omega_approx = solution_approx.first;
     auto a_series_approx = solution_approx.second;
+    cout << "-------------------------------------------------------" << '\n';
     cout << "omega_approx: " << omega_approx << '\n';
+    cout << "1/omega: " << 1/omega_approx << '\n';
     cout << "a_series_approx: " << a_series_approx << '\n';
     cout << "c_series_approx: " << op.getCSeries() << '\n';
-    cout << "jacobianDerivative: " << op.getDerivativeFinite() << '\n';
+//    cout << "jacobianDerivative: " << op.getInverseDerivativeFinite() << '\n';
+    cout << "-------------------------------------------------------" << '\n';
+
+    // TODO: Uwaga o skalowaniu czasu
+    T t = 0;
+    while (t < 1){
+        checkSolution(a_series_approx, t);
+        t += 0.1;
+    }
+
 }
 
 // ---------- MAIN ----------
 int main() {
+    cout.precision(17);
+
 //    testChebyshevSeries();
 //    testNorms();
     testChebyshevOperatorFinite();
+    cout << "##########################################################################################\n";
+
+    int order = 20;
+    {
+        DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
+        DOdeSolver solver(vectorField,order);
+        DCoordinateSection section(3,2,27.);
+        DPoincareMap pm(solver,section);
+        DTimeMap tm(solver);
+
+        DVector u{5,5,23};
+        DVector u1 = u;
+        double rt=0;
+        cout << pm(u,rt) << endl;
+        cout << rt << endl;
+
+        // TODO: Czy tutaj solution daje rozwiazanie po czasie zadanym? Chyba inaczej zrozumialam poprzednio,
+        // ze wynik powyzszego, powinien byc taki jak ponizszego po czasie 1?
+        // EDIT: NIE, czas zadany w ponizszym to czas przykladowy, aby byly te same wyniki potrzeba
+        // dac wyjscie czasu powyzszego
+        DTimeMap::SolutionCurve solution(0.);
+        tm(rt,u1,solution);
+
+        T t = 0;
+        T del = rt/10.;
+        while (t < rt){
+            cout << "sol(" << t << ") = " << solution(t) << endl;
+            t += del;
+        }
+        cout << "sol(" << rt << ") = " << solution(rt) << endl;
+
+    }
     return 0;
 }

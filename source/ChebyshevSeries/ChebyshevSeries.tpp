@@ -45,10 +45,14 @@ int ChebyshevSeries<T, DIM>::getN() const {
 }
 
 template <typename T, int DIM>
-T ChebyshevSeries<T, DIM>::operator()(T x) const {
+T ChebyshevSeries<T, DIM>::operator()(T t) const {
     T sum = (*this)[0];  // a_0
     for (int k = 1; k < this->N; ++k) {
-        sum += 2 * (*this)[k] * evaluateFirstKind(k, x);  // 2 * a_k * T_k(x)
+        T T_k = evaluateFirstKind(k, t);
+        auto a_k = (*this)[k];
+//        cout << "T_k(" << t << ")=" << T_k << "       ";
+//        cout << "a_k=" << a_k << '\n';
+        sum += 2 * a_k * T_k;  // 2 * a_k * T_k(x)
     }
     return sum;
 }
@@ -105,9 +109,11 @@ V ChebyshevSeries<T, DIM>::convolve(const V& a, const V& b) {
     int upper=std::max(a.dimension() -1, b.dimension() - 1);
     for (int k = 0; k < size; ++k) {
         result[k] = 0;
+//        cout << "negate=" << negate << endl;
         for (int k1 = negate; k1 <= upper; k1++) {
             int k2 = k - k1;
             if (abs(k1) < a.dimension() && abs(k2) < b.dimension()) {
+//                cout << "k1=" << k1 << ", k2=" << k2 << endl;
 //                if (a[abs(k1)] !=0 ||b[abs(k2)] !=0)
 //                    cout<<"tu ";
                 result[k] += a[abs(k1)] * b[abs(k2)];
