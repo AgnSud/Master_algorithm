@@ -53,7 +53,10 @@ public:
     );
 
     void setASeries(const VectorOfChebyshevsType& a_input);
+    VectorOfChebyshevsType getASeries() const;
     void setOmega(const T& omega);
+    T getOmega() const;
+
     void setCSeries(const VectorOfChebyshevsType& c_input);
     VectorOfChebyshevsType getCSeries() const;
     void setInverseDerivativeFinite(const MatrixType& derivative);
@@ -92,6 +95,8 @@ private:
     ChebyshevSeries<T, 0> w;
     vector<vector<int>> multiIndices;
     MatrixType derivative_finite;
+    MatrixType inverse_derivative_finite;
+
 
     T omega;
     VectorOfChebyshevsType a_series;

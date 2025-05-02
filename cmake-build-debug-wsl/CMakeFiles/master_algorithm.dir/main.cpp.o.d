@@ -501,4 +501,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/c++/13/bits/messages_members.h \
  /usr/include/libintl.h /usr/include/c++/13/bits/locale_facets_nonio.tcc \
  /usr/include/c++/13/bits/locale_conv.h \
- /usr/include/c++/13/bits/quoted_string.h
+ /usr/include/c++/13/bits/quoted_string.h \
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp \
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp

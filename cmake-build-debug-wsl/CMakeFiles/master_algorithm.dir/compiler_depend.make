@@ -239,6 +239,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadiff.h \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp \
+  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp \
+  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.hpp \
@@ -605,6 +607,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/HighOrderEnclosure.h:
 
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp:
+
+/usr/include/c++/13/bits/basic_string.h:
+
 /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadbad.h:
 
 /home/agnieszka/CAPD/capdExt/include/capd/alglib/reflections.h:
@@ -671,13 +677,15 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0BallSet.h:
 
-/usr/include/c++/13/bits/atomic_base.h:
-
 /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredTripletonSet.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
 /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h:
+
+/usr/include/c++/13/bits/ostream.tcc:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredDoubletonSet.hpp:
 
@@ -688,6 +696,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/ColumnVector.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/AffineSet.hpp:
+
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/lib.h:
 
@@ -1011,6 +1021,14 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/memory:
 
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h:
+
+/home/agnieszka/CAPD/capdDynSys/include/capd/poincare/BasicPoincareMap.hpp:
+
+/home/agnieszka/CAPD/capdAlg/include/capd/vectalg/Norm.h:
+
+/usr/include/x86_64-linux-gnu/bits/syscall.h:
+
 /usr/include/x86_64-linux-gnu/bits/types.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/intervals/intra/interval_atan2.h:
@@ -1195,6 +1213,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/iosfwd:
 
+/usr/include/c++/13/bits/atomic_base.h:
+
 /usr/include/c++/13/bits/atomic_wait.h:
 
 /usr/include/c++/13/string:
@@ -1206,8 +1226,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.hpp:
 
 /usr/include/c++/13/bits/basic_ios.tcc:
-
-/usr/include/c++/13/bits/basic_string.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
@@ -1505,14 +1523,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/typeinfo:
 
-/home/agnieszka/CAPD/capdDynSys/include/capd/poincare/BasicPoincareMap.hpp:
-
-/home/agnieszka/CAPD/capdAlg/include/capd/vectalg/Norm.h:
-
-/usr/include/x86_64-linux-gnu/bits/syscall.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h:
-
 /usr/include/c++/13/vector:
 
 /usr/include/ctype.h:
@@ -1684,7 +1694,3 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/ext/aligned_buffer.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
-
-/usr/include/c++/13/bits/ostream.tcc:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h:

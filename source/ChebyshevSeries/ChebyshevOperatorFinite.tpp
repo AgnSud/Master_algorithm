@@ -22,10 +22,18 @@ template<typename T>
 void ChebyshevOperatorFinite<T>::setASeries(const VectorOfChebyshevsType& a_input) {
     this->a_series = a_input;
 }
+template <typename T>
+ChebyshevOperatorFinite<T>::VectorOfChebyshevsType ChebyshevOperatorFinite<T>::getASeries() const {
+    return this->a_series;
+}
 
 template<typename T>
 void ChebyshevOperatorFinite<T>::setOmega(const T& omega_su) {
     this->omega = omega_su;
+}
+template <typename T>
+T ChebyshevOperatorFinite<T>::getOmega() const {
+    return this->omega;
 }
 
 template <typename T>
@@ -39,13 +47,13 @@ ChebyshevOperatorFinite<T>::VectorOfChebyshevsType ChebyshevOperatorFinite<T>::g
 }
 
 template <typename T>
-void ChebyshevOperatorFinite<T>::setInverseDerivativeFinite(const MatrixType& derivative) {
-    this->derivative_finite = derivative;
+void ChebyshevOperatorFinite<T>::setInverseDerivativeFinite(const MatrixType& inverse_derivative_finite) {
+    this->inverse_derivative_finite = inverse_derivative_finite;
 }
 
 template <typename T>
 ChebyshevOperatorFinite<T>::MatrixType ChebyshevOperatorFinite<T>::getInverseDerivativeFinite() const {
-    return this->derivative_finite;
+    return this->inverse_derivative_finite;
 }
 
 template <typename T>

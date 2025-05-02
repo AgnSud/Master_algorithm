@@ -10,6 +10,7 @@
 #include "source/ChebyshevSeries/ChebyshevSeries.hpp"
 #include "source/ChebyshevSeries/norm.hpp"
 #include "source/ChebyshevSeries/ChebyshevOperatorFinite.hpp"
+#include "source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp"
 
 using namespace capd;
 using T = double;
@@ -184,7 +185,7 @@ void testNorms() {
 void testChebyshevOperatorFinite() {
     cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
 
-    constexpr int N = 20;
+    constexpr int N = 2;
     constexpr int n = 3;
     constexpr int N_g = 2;
 
@@ -198,7 +199,7 @@ void testChebyshevOperatorFinite() {
     a_series_start[1] = ChebyshevSeries<T, DIMENSION>(N);
     a_series_start[2] = ChebyshevSeries<T, DIMENSION>(N);
     a_series_start[0][0] = 5.0;
-    a_series_start[0][1] = 1e-8; //TODO: potrzebne aby macierz była odwracalna
+    a_series_start[0][1] = 1e-8;
     a_series_start[1][0] = 5.0;
     a_series_start[2][0] = 23.0;
 
@@ -246,17 +247,59 @@ void testChebyshevOperatorFinite() {
     cout << "1/omega: " << 1/omega_approx << '\n';
     cout << "a_series_approx: " << a_series_approx << '\n';
     cout << "c_series_approx: " << op.getCSeries() << '\n';
-//    cout << "jacobianDerivative: " << op.getInverseDerivativeFinite() << '\n';
+    cout << "jacobianDerivative: " << op.getDerivativeFinite() << '\n';
+    cout << "-------------------------------------------------------" << '\n';
+    cout << "jacobianInverseDerivative: " << op.getInverseDerivativeFinite() << '\n';
     cout << "-------------------------------------------------------" << '\n';
 
-    // TODO: Uwaga o skalowaniu czasu
     T t = 0;
     while (t < 1){
         checkSolution(a_series_approx, t);
         t += 0.1;
     }
-
 }
+
+void testChebyshevOperatorInfiniteArtificial() {
+    cout << "\n========== TEST: ChebyshevOperatorInfinite (Sztuczne dane) ==========\n";
+
+    constexpr int N = 3;    // liczba współczynników
+    constexpr int n = 2;    // liczba zmiennych
+    constexpr int totalLength = N * n + 1;
+
+    using VectorType = vectalg::Vector<T, DIMENSION>;
+    using MatrixType = vectalg::Matrix<T, DIMENSION, DIMENSION>;
+
+    ChebyshevOperatorFinite<T> fakeFiniteOp;
+    fakeFiniteOp.setDerivativeFinite(MatrixType(totalLength, totalLength));
+
+    ChebyshevOperatorInfinite<T> op(N * n, fakeFiniteOp);
+
+    // Przykładowy wektor x = [omega, a0, a1, ..., a_{n*N-1}]
+    vectalg::Vector<T, DIMENSION> x(totalLength);
+    for (int i = 0; i < totalLength; ++i)
+        x[i] = static_cast<T>(i + 1);  // x = [1, 2, 3, ..., totalLength]
+
+    cout << "x = " << x << "\n";
+
+    // Test Pi0
+    T pi0 = op.Pi0(x);
+    cout << "Pi0(x) = " << pi0 << " (expected: 1)\n";
+
+    // Test Pi1
+    auto pi1 = op.Pi1(x);
+    cout << "Pi1(x) = " << pi1 << " (expected: [2, 3, ..., " << totalLength << "])\n";
+
+    // Test PiN (obetnij po N = 3 => 6 elementów z pi1, reszta 0)
+    auto piN = op.PiN(pi1);
+    cout << "PiN(Pi1(x)) = " << piN << " (expected: [2,3,4,5,6,7])\n";
+
+    // Test PiN_x
+    auto piN_x = op.PiN_x(x);
+    cout << "PiN_x(x) = " << piN_x << "\n";
+
+    cout << "========== KONIEC TESTU ==========\n";
+}
+
 
 // ---------- MAIN ----------
 int main() {
@@ -264,38 +307,46 @@ int main() {
 
 //    testChebyshevSeries();
 //    testNorms();
-    testChebyshevOperatorFinite();
+//    testChebyshevOperatorFinite();
+    testChebyshevOperatorInfiniteArtificial();
     cout << "##########################################################################################\n";
 
-    int order = 20;
-    {
-        DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
-        DOdeSolver solver(vectorField,order);
-        DCoordinateSection section(3,2,27.);
-        DPoincareMap pm(solver,section);
-        DTimeMap tm(solver);
-
-        DVector u{5,5,23};
-        DVector u1 = u;
-        double rt=0;
-        cout << pm(u,rt) << endl;
-        cout << rt << endl;
-
-        // TODO: Czy tutaj solution daje rozwiazanie po czasie zadanym? Chyba inaczej zrozumialam poprzednio,
-        // ze wynik powyzszego, powinien byc taki jak ponizszego po czasie 1?
-        // EDIT: NIE, czas zadany w ponizszym to czas przykladowy, aby byly te same wyniki potrzeba
-        // dac wyjscie czasu powyzszego
-        DTimeMap::SolutionCurve solution(0.);
-        tm(rt,u1,solution);
-
-        T t = 0;
-        T del = rt/10.;
-        while (t < rt){
-            cout << "sol(" << t << ") = " << solution(t) << endl;
-            t += del;
-        }
-        cout << "sol(" << rt << ") = " << solution(rt) << endl;
-
-    }
+//    int order = 20;
+//    {
+//        DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
+//        DOdeSolver solver(vectorField,order);
+//        DCoordinateSection section(3,2,27.);
+//        DPoincareMap pm(solver,section);
+//        DTimeMap tm(solver);
+//
+//        DVector u{5,5,23};
+//        DVector u1 = u;
+//        double rt=0;
+//        cout << pm(u,rt) << endl;
+//        cout << rt << endl;
+//
+//        // TODO: Czy tutaj solution daje rozwiazanie po czasie zadanym? Chyba inaczej zrozumialam poprzednio,
+//        // ze wynik powyzszego, powinien byc taki jak ponizszego po czasie 1?
+//        // EDIT: NIE, czas zadany w ponizszym to czas przykladowy, aby byly te same wyniki potrzeba
+//        // dac wyjscie czasu powyzszego
+//        tm.stopAfterStep(true);
+//        int counter = 0;
+//
+//        DTimeMap::SolutionCurve solution(0.);
+//        do {
+//            tm(rt,u1,solution);
+//            counter++;
+//        }while(!tm.completed());
+//
+//        cout << "counter= " << counter << endl;
+//        T t = 0;
+//        rt = 0.27713911300544136;
+//        T del = rt/10.;
+//        while (t < rt){
+//            cout << "sol(" << t << ") = " << solution(t) << endl;
+//            t += del;
+//        }
+//
+//    }
     return 0;
 }
