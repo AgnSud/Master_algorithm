@@ -86,6 +86,8 @@ public:
     template<class V>
     V operator() (const V& x);
 
+    VectorType convertToXVector();
+
 private:
     int N;
     int n;
@@ -99,6 +101,7 @@ private:
 
 
     T omega;
+    //TODO: przemyslec czy nie zmienic na po prostu Vector Vectorow, bo  juz nie wiem kiedy uzywam ChebyshevSeries faktycznie, a najwazniejsze to jest do mnozenia w zasadzie
     VectorOfChebyshevsType a_series;
     VectorOfChebyshevsType c_series;
 
@@ -119,7 +122,6 @@ private:
      * do tego [a]_k = [ [a_0]_k, [a_1]_k, [a_2]_k, ..., [a_{N-1}]_k ]
      * zamienia się na x = [omega, [a_0]_1, [a_0]_2,  ..., [a_0]_n, [a_1]_1, [a_1]_2, ...]
      */
-    VectorType convertToXVector();
 
 
     //zwraca [a_k]_i lub [c_k]_i (ustawione c[0] = 0 dla przesunięcia)

@@ -182,11 +182,9 @@ void testNorms() {
 // co za tym idzie, mamy dwa rozne N -> ustalajac liczbe wspolczynnikow niezerowych przyblizen jako N
 // czyli a_0, a_1, a_2, ..., a_N oraz c_0, c_1, c_2, ..., c_N
 // bedziemy wyznaczac F_{N-1}
-void testChebyshevOperatorFinite() {
+ChebyshevOperatorFinite<T> testChebyshevOperatorFinite(int N, int n) {
     cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
 
-    constexpr int N = 2;
-    constexpr int n = 3;
     constexpr int N_g = 2;
 
     //Ponizej startowe parametry
@@ -252,50 +250,61 @@ void testChebyshevOperatorFinite() {
     cout << "jacobianInverseDerivative: " << op.getInverseDerivativeFinite() << '\n';
     cout << "-------------------------------------------------------" << '\n';
 
-    T t = 0;
-    while (t < 1){
-        checkSolution(a_series_approx, t);
-        t += 0.1;
-    }
+//    T t = 0;
+//    while (t < 1){
+//        checkSolution(a_series_approx, t);
+//        t += 0.1;
+//    }
+    return op;
 }
 
-void testChebyshevOperatorInfiniteArtificial() {
+void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<T>& finiteOp) {
     cout << "\n========== TEST: ChebyshevOperatorInfinite (Sztuczne dane) ==========\n";
 
-    constexpr int N = 3;    // liczba współczynników
-    constexpr int n = 2;    // liczba zmiennych
-    constexpr int totalLength = N * n + 1;
+    int totalLength = 2 * N * n + 1;
 
     using VectorType = vectalg::Vector<T, DIMENSION>;
     using MatrixType = vectalg::Matrix<T, DIMENSION, DIMENSION>;
 
-    ChebyshevOperatorFinite<T> fakeFiniteOp;
-    fakeFiniteOp.setDerivativeFinite(MatrixType(totalLength, totalLength));
+    ChebyshevOperatorInfinite<T> op(N, n, finiteOp);
 
-    ChebyshevOperatorInfinite<T> op(N * n, fakeFiniteOp);
+    // Przykładowy wektor x = [omega, a0, a1, ..., a_{2*N*n+1}]
+//    vectalg::Vector<T, DIMENSION> x(totalLength);
+//    for (int i = 0; i < totalLength; ++i)
+//        x[i] = static_cast<T>(i + 1);  // x = [1, 2, 3, ..., totalLength]
 
-    // Przykładowy wektor x = [omega, a0, a1, ..., a_{n*N-1}]
-    vectalg::Vector<T, DIMENSION> x(totalLength);
-    for (int i = 0; i < totalLength; ++i)
-        x[i] = static_cast<T>(i + 1);  // x = [1, 2, 3, ..., totalLength]
-
-    cout << "x = " << x << "\n";
+    auto x = finiteOp.convertToXVector();
+    cout << x.dimension() << endl;
+    VectorType x_expanded(100 * N * n + 1);
+    for (int i = 0; i < x.dimension(); i++){
+        x_expanded[i] = x[i];
+    }
+    cout << "x = " << x_expanded << "\n";
 
     // Test Pi0
-    T pi0 = op.Pi0(x);
-    cout << "Pi0(x) = " << pi0 << " (expected: 1)\n";
+    T pi0 = op.Pi0(x_expanded);
+    cout << "Pi0(x_expanded) = " << pi0 << "\n";
 
     // Test Pi1
-    auto pi1 = op.Pi1(x);
-    cout << "Pi1(x) = " << pi1 << " (expected: [2, 3, ..., " << totalLength << "])\n";
+    auto pi1 = op.Pi1(x_expanded);
+    cout << "Pi1(x_expanded) = " << pi1 << "\n";
 
     // Test PiN (obetnij po N = 3 => 6 elementów z pi1, reszta 0)
     auto piN = op.PiN(pi1);
-    cout << "PiN(Pi1(x)) = " << piN << " (expected: [2,3,4,5,6,7])\n";
+    cout << "PiN(a) = " << piN << "\n";
 
     // Test PiN_x
-    auto piN_x = op.PiN_x(x);
-    cout << "PiN_x(x) = " << piN_x << "\n";
+    auto piN_x = op.PiN_x(x_expanded);
+    cout << "PiN_x(x_expanded) = " << piN_x << "\n";
+
+    // Pi0_HatA test
+    T Pi0_hatA = op.Pi0_HatA(x_expanded);
+    cout << "Pi0_HatA(x_expanded) = " << Pi0_hatA << "\n";
+
+    cout << "Pi1_HatA(x, 0) = " << op.Pi1_HatA_k(x_expanded, 0) << "\n";
+    cout << "Pi1_HatA(x, 1) = " << op.Pi1_HatA_k(x_expanded, 1) << "\n";
+    cout << "Pi1_HatA(x, 2) = " << op.Pi1_HatA_k(x_expanded, 2) << "\n";
+
 
     cout << "========== KONIEC TESTU ==========\n";
 }
@@ -303,12 +312,15 @@ void testChebyshevOperatorInfiniteArtificial() {
 
 // ---------- MAIN ----------
 int main() {
-    cout.precision(17);
+    cout.precision(10);
+
+    constexpr int N = 2;
+    constexpr int n = 3;
 
 //    testChebyshevSeries();
 //    testNorms();
-//    testChebyshevOperatorFinite();
-    testChebyshevOperatorInfiniteArtificial();
+    ChebyshevOperatorFinite<T> finiteOp = testChebyshevOperatorFinite(N, n);
+    testChebyshevOperatorInfinite(N, n, finiteOp);
     cout << "##########################################################################################\n";
 
 //    int order = 20;
