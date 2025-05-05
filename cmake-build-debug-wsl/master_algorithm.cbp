@@ -119,7 +119,13 @@
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp">
 			<Option target="master_algorithm"/>
 		</Unit>
-		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.hpp">
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/Norm.hpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp">
 			<Option target="master_algorithm"/>
 		</Unit>
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp">

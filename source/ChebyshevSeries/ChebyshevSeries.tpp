@@ -104,18 +104,13 @@ V ChebyshevSeries<T, DIM>::convolve(const V& a, const V& b) {
 
     int size = a.dimension() + b.dimension() - 1;
     V result(size);
-//    int n = std::max(a.getN() - 1, b.getN() - 1);
     int negate = -1 * std::max(a.dimension() -1, b.dimension() - 1);
     int upper=std::max(a.dimension() -1, b.dimension() - 1);
     for (int k = 0; k < size; ++k) {
         result[k] = 0;
-//        cout << "negate=" << negate << endl;
         for (int k1 = negate; k1 <= upper; k1++) {
             int k2 = k - k1;
             if (abs(k1) < a.dimension() && abs(k2) < b.dimension()) {
-//                cout << "k1=" << k1 << ", k2=" << k2 << endl;
-//                if (a[abs(k1)] !=0 ||b[abs(k2)] !=0)
-//                    cout<<"tu ";
                 result[k] += a[abs(k1)] * b[abs(k2)];
             }
         }

@@ -19,10 +19,10 @@ find_package(CAPD REQUIRED PATHS /home/agnieszka/CAPD/build)
 add_executable(master_algorithm main.cpp
         source/ChebyshevSeries/ChebyshevSeries.hpp
         source/ChebyshevSeries/ChebyshevSeries.tpp
-        source/ChebyshevSeries/norm.hpp
+        source/ChebyshevSeries/Norm.hpp
         source/ChebyshevSeries/norm.tpp
         source/ChebyshevSeries/ChebyshevOperatorFinite.hpp
-        source/ChebyshevSeries/ChebyshevOperatorFinite.tpp source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp)
+        source/ChebyshevSeries/ChebyshevOperatorFinite.tpp source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp source/ChebyshevSeries/RadiiPolynomials.hpp source/ChebyshevSeries/RadiiPolynomials.tpp)
 
 target_link_libraries(master_algorithm
         /home/agnieszka/CAPD/build/libcapd.a

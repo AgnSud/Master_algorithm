@@ -243,7 +243,9 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp \
-  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.hpp \
+  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/Norm.hpp \
+  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp \
+  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
@@ -595,17 +597,9 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h:
 
-/usr/include/c++/13/bits/allocated_ptr.h:
-
-/usr/include/c++/13/bit:
-
 /usr/include/c++/13/bits/alloc_traits.h:
 
 /usr/include/c++/13/bits/stl_iterator_base_funcs.h:
-
-/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.hpp:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/HighOrderEnclosure.h:
 
 /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp:
 
@@ -630,6 +624,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/bits/utility.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/CoordinateSection.h:
+
+/usr/include/c++/13/bit:
+
+/usr/include/c++/13/bits/allocated_ptr.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/BasicPoincareMap_operator.hpp:
 
@@ -713,6 +711,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/bits/locale_facets.h:
 
+/home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/HighOrderEnclosure.h:
+
 /home/agnieszka/CAPD/capdExt/include/capd/alglib/hsschur.h:
 
 /usr/include/x86_64-linux-gnu/bits/time.h:
@@ -761,8 +761,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/ext/concurrence.h:
 
-/home/agnieszka/CAPD/capdDynSys/include/capd/poincare/SaveStepControl.h:
-
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/DefaultPolicy.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/CnDoubletonSet.h:
@@ -780,6 +778,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/CnTimeJet.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C2Set.h:
+
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C1DoubletonSet.h:
 
@@ -856,8 +856,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/EmptyIntersectionException.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
-
-/usr/include/c++/13/bits/allocator.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/TypeTraits.h:
 
@@ -949,6 +947,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/Vector_Interval.hpp:
 
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp:
+
 /home/agnieszka/CAPD/capdExt/include/capd/alglib/rotations.h:
 
 /usr/include/c++/13/bits/istream.tcc:
@@ -988,6 +988,12 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/bits/ranges_uninitialized.h:
 
 /usr/include/c++/13/cwctype:
+
+/home/agnieszka/CAPD/capdDynSys/include/capd/poincare/SaveStepControl.h:
+
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/Norm.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/intervals/Interval_Deprecated.h:
 
@@ -1068,6 +1074,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/reorganization/FactorPolicy.h:
 
 /home/agnieszka/CAPD/capdAux/include/capd/settings/archSetting.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
+
+/usr/include/c++/13/ext/aligned_buffer.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/iobject.hpp:
 
@@ -1212,6 +1222,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/Matrix_Interval.hpp:
 
 /usr/include/c++/13/iosfwd:
+
+/usr/include/c++/13/bits/allocator.h:
 
 /usr/include/c++/13/bits/atomic_base.h:
 
@@ -1653,8 +1665,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
-
 /usr/include/c++/13/bits/list.tcc:
 
 /usr/include/c++/13/type_traits:
@@ -1690,7 +1700,3 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
-
-/usr/include/c++/13/ext/aligned_buffer.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "capd/capdlib.h"
 #include "capd/map/Map.hpp"
 #include "capd/dynsys/OdeSolver.hpp"
@@ -8,9 +9,11 @@
 #include "capd/dynset/C1DoubletonSet.hpp"
 
 #include "source/ChebyshevSeries/ChebyshevSeries.hpp"
-#include "source/ChebyshevSeries/norm.hpp"
+#include "source/ChebyshevSeries/Norm.hpp"
 #include "source/ChebyshevSeries/ChebyshevOperatorFinite.hpp"
 #include "source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp"
+#include "source/ChebyshevSeries/RadiiPolynomials.hpp"
+
 
 using namespace capd;
 using T = double;
@@ -111,14 +114,14 @@ vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(vector<vector<int>> mul
     return g;
 }
 
-void checkSolution(const vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION>& a_series_approx,
+vectalg::Vector<T, DIMENSION> checkSolution(const vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION>& a_series_approx,
                    T argument){
     vectalg::Vector<T, DIMENSION> value(a_series_approx.dimension());
 //    argument = argument * 2 - 1.;
     for(int i = 0; i < a_series_approx.dimension(); i++){
         value[i] = a_series_approx[i](argument * 2 - 1);
     }
-    cout << "u(" << argument << ")= " << value << '\n';
+    return value;
 }
 
 
@@ -169,26 +172,24 @@ void testNorms() {
     vec[0] = poly1;
     vec[1] = poly2;
 
-    norm<double> myNorm(2.0);
+    Norm<double> myNorm(2.0);
 
     cout << "Norm of poly1: " << myNorm.computeNorm(poly1) << "\n";
     cout << "Norm of vector: " << myNorm.computeNorm(vec, 2) << "\n";
 }
 
-// ---------- TEST 3: ChebyshevOperatorFinite (Van der Pol) ----------
+// ---------- TEST 3: ChebyshevOperatorFinite ----------
 // Przyjeta jest konwencja, ktora tez jest zgodna z tym co jest w pracy, ze N oznacza
 // liczbe wspolczynnikow niezerowych, startujac od a_0, czyli od k=N mamy a_k=0
 // ALE w tym celu, do wyliczenia operatora Czebyszewa F_N potrzebujemy wyznaczyc c_{k+1}
 // co za tym idzie, mamy dwa rozne N -> ustalajac liczbe wspolczynnikow niezerowych przyblizen jako N
 // czyli a_0, a_1, a_2, ..., a_N oraz c_0, c_1, c_2, ..., c_N
 // bedziemy wyznaczac F_{N-1}
-ChebyshevOperatorFinite<T> testChebyshevOperatorFinite(int N, int n) {
-    cout << "\n========== TEST: ChebyshevOperatorFinite Van der Pol ==========\n";
-
-    constexpr int N_g = 2;
+ChebyshevOperatorFinite<T> testChebyshevOperatorFinite(int N, int n, int N_g) {
+    cout << "\n========== TEST: ChebyshevOperatorFinite ==========\n";
 
     //Ponizej startowe parametry
-    constexpr T omega_start = 0.27; //omega jest czescia rownania
+    constexpr T omega_start = 1.; //omega jest czescia rownania
     vectalg::Vector<T, 0> u0{5., 5., 23.};
     vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
 
@@ -215,7 +216,7 @@ ChebyshevOperatorFinite<T> testChebyshevOperatorFinite(int N, int n) {
     cout << "w: " << w << '\n';
     cout << "n:" << n << '\n';
     cout << "N: " << N << '\n';
-    cout << "N_0: " << N_g << '\n';
+    cout << "N_g: " << N_g << '\n';
     //-------------------------------------------------------------------
 
 
@@ -245,23 +246,24 @@ ChebyshevOperatorFinite<T> testChebyshevOperatorFinite(int N, int n) {
     cout << "1/omega: " << 1/omega_approx << '\n';
     cout << "a_series_approx: " << a_series_approx << '\n';
     cout << "c_series_approx: " << op.getCSeries() << '\n';
-    cout << "jacobianDerivative: " << op.getDerivativeFinite() << '\n';
-    cout << "-------------------------------------------------------" << '\n';
-    cout << "jacobianInverseDerivative: " << op.getInverseDerivativeFinite() << '\n';
-    cout << "-------------------------------------------------------" << '\n';
+//    cout << "jacobianDerivative: " << op.getDerivativeFinite() << '\n';
+//    cout << "-------------------------------------------------------" << '\n';
+//    cout << "jacobianInverseDerivative: " << op.getInverseDerivativeFinite() << '\n';
+//    cout << "-------------------------------------------------------" << '\n';
+//    cout << op.getDerivativeFinite() * op.getInverseDerivativeFinite() << endl;
 
-//    T t = 0;
-//    while (t < 1){
-//        checkSolution(a_series_approx, t);
-//        t += 0.1;
-//    }
+
+    T t = 0;
+    while (t < 1){
+        auto value = checkSolution(a_series_approx, t);
+        cout << "u(" << t << ")= " << value << '\n';
+        t += 0.1;
+    }
     return op;
 }
 
 void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<T>& finiteOp) {
-    cout << "\n========== TEST: ChebyshevOperatorInfinite (Sztuczne dane) ==========\n";
-
-    int totalLength = 2 * N * n + 1;
+    cout << "\n========== TEST: ChebyshevOperatorInfinite ==========\n";
 
     using VectorType = vectalg::Vector<T, DIMENSION>;
     using MatrixType = vectalg::Matrix<T, DIMENSION, DIMENSION>;
@@ -274,91 +276,107 @@ void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<T>& fin
 //        x[i] = static_cast<T>(i + 1);  // x = [1, 2, 3, ..., totalLength]
 
     auto x = finiteOp.convertToXVector();
-    cout << x.dimension() << endl;
     VectorType x_expanded(100 * N * n + 1);
     for (int i = 0; i < x.dimension(); i++){
         x_expanded[i] = x[i];
     }
-    cout << "x = " << x_expanded << "\n";
+    //TODO: Zadaje punkt przyblizonego rozwiazania - potrzeba spojrzec na wyniki, ale najpierw pokazać pdf i ogólne rozumienie hatA, bo do tego mam watpliwosci
+    cout << "x_expanded = " << x_expanded << "\n";
 
-    // Test Pi0
-    T pi0 = op.Pi0(x_expanded);
-    cout << "Pi0(x_expanded) = " << pi0 << "\n";
+    cout << "pi1_0 = " << ChebyshevOperatorInfinite<T>::Pi1_j(x_expanded, 0, N, n) << endl;
+    cout << "pi1_1 = " << ChebyshevOperatorInfinite<T>::Pi1_j(x_expanded, 1, N, n) << endl;
+    cout << "pi1_2 = " << ChebyshevOperatorInfinite<T>::Pi1_j(x_expanded, 2, N, n) << endl;
 
-    // Test Pi1
-    auto pi1 = op.Pi1(x_expanded);
-    cout << "Pi1(x_expanded) = " << pi1 << "\n";
-
-    // Test PiN (obetnij po N = 3 => 6 elementów z pi1, reszta 0)
-    auto piN = op.PiN(pi1);
-    cout << "PiN(a) = " << piN << "\n";
-
-    // Test PiN_x
-    auto piN_x = op.PiN_x(x_expanded);
-    cout << "PiN_x(x_expanded) = " << piN_x << "\n";
-
-    // Pi0_HatA test
-    T Pi0_hatA = op.Pi0_HatA(x_expanded);
-    cout << "Pi0_HatA(x_expanded) = " << Pi0_hatA << "\n";
-
-    cout << "Pi1_HatA(x, 0) = " << op.Pi1_HatA_k(x_expanded, 0) << "\n";
-    cout << "Pi1_HatA(x, 1) = " << op.Pi1_HatA_k(x_expanded, 1) << "\n";
-    cout << "Pi1_HatA(x, 2) = " << op.Pi1_HatA_k(x_expanded, 2) << "\n";
-
+    auto hatA_approx = op.HatA(x_expanded);
+    auto pi0_HatA_approx = hatA_approx.first;
+    auto pi1_HatA_approx = hatA_approx.second;
+    cout << "pi0_HatA_approx(x_expanded) = " << pi0_HatA_approx << endl;
+    cout << "pi1_HatA_approx(x_expanded) = " << pi1_HatA_approx << endl;
 
     cout << "========== KONIEC TESTU ==========\n";
 }
 
 
+void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFinite<T>& finiteOp) {
+    cout << "\n========== TEST: ChebyshevOperatorInfinite ==========\n";
+
+    using VectorType = vectalg::Vector<T, DIMENSION>;
+    using MatrixType = vectalg::Matrix<T, DIMENSION, DIMENSION>;
+
+    RadiiPolynomials<T> radii_pol(N, n, nu, finiteOp);
+    auto Y_0 = radii_pol.computeY0();
+    cout << "Y_0 = " << Y_0 << endl;
+    auto Y_1_x = radii_pol.computeY1j(0, N_g);
+    cout << "Y_1_x = " << Y_1_x << endl;
+    auto Y_1_y = radii_pol.computeY1j(1, N_g);
+    cout << "Y_1_y = " << Y_1_y << endl;
+    auto Y_1_z = radii_pol.computeY1j(2, N_g);
+    cout << "Y_1_z = " << Y_1_z << endl;
+
+    cout << "========== KONIEC TESTU ==========\n";
+}
+
 // ---------- MAIN ----------
 int main() {
-    cout.precision(10);
+    cout.precision(15);
 
-    constexpr int N = 2;
+    constexpr int N = 30;
     constexpr int n = 3;
+    constexpr int N_g = 2;
+    double nu = 1.1;
 
 //    testChebyshevSeries();
 //    testNorms();
-    ChebyshevOperatorFinite<T> finiteOp = testChebyshevOperatorFinite(N, n);
-    testChebyshevOperatorInfinite(N, n, finiteOp);
+    ChebyshevOperatorFinite<T> finiteOp = testChebyshevOperatorFinite(N, n, N_g);
+//    testRadiiPolynomials(N, n, N_g, nu, finiteOp);
     cout << "##########################################################################################\n";
 
-//    int order = 20;
-//    {
-//        DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
-//        DOdeSolver solver(vectorField,order);
-//        DCoordinateSection section(3,2,27.);
-//        DPoincareMap pm(solver,section);
-//        DTimeMap tm(solver);
-//
-//        DVector u{5,5,23};
-//        DVector u1 = u;
-//        double rt=0;
-//        cout << pm(u,rt) << endl;
-//        cout << rt << endl;
-//
-//        // TODO: Czy tutaj solution daje rozwiazanie po czasie zadanym? Chyba inaczej zrozumialam poprzednio,
-//        // ze wynik powyzszego, powinien byc taki jak ponizszego po czasie 1?
-//        // EDIT: NIE, czas zadany w ponizszym to czas przykladowy, aby byly te same wyniki potrzeba
-//        // dac wyjscie czasu powyzszego
-//        tm.stopAfterStep(true);
-//        int counter = 0;
-//
-//        DTimeMap::SolutionCurve solution(0.);
-//        do {
-//            tm(rt,u1,solution);
-//            counter++;
-//        }while(!tm.completed());
-//
-//        cout << "counter= " << counter << endl;
+    {
+        DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
+        DOdeSolver solver(vectorField,N);
+        DCoordinateSection section(3,2,27.);
+        DPoincareMap pm(solver,section);
+        DTimeMap tm(solver);
+
+        DVector u{5,5,23};
+        DVector u1 = u;
+        double rt=0;
+        cout << pm(u,rt) << endl;
+        cout << rt << endl;
+
+        // ze wynik powyzszego, powinien byc taki jak ponizszego po czasie 1?
+        // EDIT: NIE, czas zadany w ponizszym to czas przykladowy, aby byly te same wyniki potrzeba
+        // dac wyjscie czasu powyzszego
+        tm.stopAfterStep(true);
+        int counter = 0;
+
+        DTimeMap::SolutionCurve solution(0.);
+        do {
+            tm(rt,u1,solution);
+            counter++;
+        }while(!tm.completed());
+
+        cout << "counter= " << counter << endl;
 //        T t = 0;
-//        rt = 0.27713911300544136;
+//        rt = 3.50971460024166;
 //        T del = rt/10.;
 //        while (t < rt){
 //            cout << "sol(" << t << ") = " << solution(t) << endl;
 //            t += del;
 //        }
-//
-//    }
+
+        auto omega_approx = finiteOp.getOmega();
+        auto a_series_approx = finiteOp.getASeries();
+        T t_chebyshev = 0;
+        T t_taylor = 0;
+        T del = 1 / (omega_approx * 10);
+        while (t_chebyshev < 1){
+            auto diff = checkSolution(a_series_approx, t_chebyshev) - solution(t_taylor);
+            cout << "u("<< t_chebyshev << ") - sol(" << t_taylor << ") = " << diff << endl;
+            t_chebyshev += 0.1;
+            t_taylor += del;
+        }
+        // TODO: pokazać error - czy on bierze się stąd, że solution jeszcze 'nie było w tym czasie'? - im większe N tym oczywiscie większa dokładność
+    }
     return 0;
 }

@@ -154,22 +154,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/c++/13/bits/locale_facets.tcc \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
- /usr/include/c++/13/bits/istream.tcc \
- /home/agnieszka/CAPD/capdDynSys/include/capd/capdlib.h \
- /home/agnieszka/CAPD/capdAlg/include/capd/intervals/lib.h \
- /home/agnieszka/CAPD/capdAlg/include/capd/intervals/minmax_interval.h \
- /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/minmax.h \
- /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/TypeTraits.h \
- /usr/include/c++/13/limits /usr/include/c++/13/algorithm \
- /usr/include/c++/13/bits/stl_algo.h \
- /usr/include/c++/13/bits/algorithmfwd.h \
- /usr/include/c++/13/bits/stl_heap.h \
- /usr/include/c++/13/bits/uniform_int_dist.h \
- /usr/include/c++/13/bits/stl_tempbuf.h \
- /usr/include/c++/13/bits/ranges_algo.h \
- /usr/include/c++/13/bits/ranges_algobase.h \
- /usr/include/c++/13/pstl/glue_algorithm_defs.h \
- /usr/include/c++/13/pstl/execution_defs.h /usr/include/c++/13/cmath \
+ /usr/include/c++/13/bits/istream.tcc /usr/include/c++/13/cmath \
  /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/math-vector.h \
  /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
  /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
@@ -179,7 +164,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
  /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
  /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
- /usr/include/c++/13/bits/specfun.h /usr/include/c++/13/tr1/gamma.tcc \
+ /usr/include/c++/13/bits/specfun.h /usr/include/c++/13/limits \
+ /usr/include/c++/13/tr1/gamma.tcc \
  /usr/include/c++/13/tr1/special_function_util.h \
  /usr/include/c++/13/tr1/bessel_function.tcc \
  /usr/include/c++/13/tr1/beta_function.tcc \
@@ -191,6 +177,20 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/c++/13/tr1/poly_hermite.tcc \
  /usr/include/c++/13/tr1/poly_laguerre.tcc \
  /usr/include/c++/13/tr1/riemann_zeta.tcc \
+ /home/agnieszka/CAPD/capdDynSys/include/capd/capdlib.h \
+ /home/agnieszka/CAPD/capdAlg/include/capd/intervals/lib.h \
+ /home/agnieszka/CAPD/capdAlg/include/capd/intervals/minmax_interval.h \
+ /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/minmax.h \
+ /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/TypeTraits.h \
+ /usr/include/c++/13/algorithm /usr/include/c++/13/bits/stl_algo.h \
+ /usr/include/c++/13/bits/algorithmfwd.h \
+ /usr/include/c++/13/bits/stl_heap.h \
+ /usr/include/c++/13/bits/uniform_int_dist.h \
+ /usr/include/c++/13/bits/stl_tempbuf.h \
+ /usr/include/c++/13/bits/ranges_algo.h \
+ /usr/include/c++/13/bits/ranges_algobase.h \
+ /usr/include/c++/13/pstl/glue_algorithm_defs.h \
+ /usr/include/c++/13/pstl/execution_defs.h \
  /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/doubleFun.h \
  /home/agnieszka/CAPD/capdAlg/include/capd/intervals/Interval.h \
  /home/agnieszka/CAPD/capdAlg/include/capd/intervals/IntervalSettings.h \
@@ -488,7 +488,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixAffineSet.hpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp \
- /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.hpp \
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/Norm.hpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.hpp \
  /home/agnieszka/CAPD/capdExt/include/capd/fadbad/differentiate.h \
@@ -503,4 +503,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/c++/13/bits/locale_conv.h \
  /usr/include/c++/13/bits/quoted_string.h \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp \
- /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp \
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp \
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp

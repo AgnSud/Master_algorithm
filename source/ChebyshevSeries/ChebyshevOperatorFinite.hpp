@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include "ChebyshevSeries.hpp"
-#include "norm.hpp"
+#include "Norm.hpp"
 
 
 #ifndef TRUNCATION
@@ -56,6 +56,8 @@ public:
     VectorOfChebyshevsType getASeries() const;
     void setOmega(const T& omega);
     T getOmega() const;
+    void setF_x_approx(const VectorType& F_x_approx);
+    VectorType getF_x_approx() const;
 
     void setCSeries(const VectorOfChebyshevsType& c_input);
     VectorOfChebyshevsType getCSeries() const;
@@ -88,7 +90,16 @@ public:
 
     VectorType convertToXVector();
 
+    //zwraca [a_k]_i lub [c_k]_i (ustawione c[0] = 0 dla przesunięcia)
+    template<class V>
+    static inline typename V::ScalarType getCoeff(const V &x, int i, int k, int n, bool is_omega = false);
+
+    //zwraca [a]_i lub [c]_i (ustawione c[0] = 0 dla przesunięcia)
+    template<class V>
+    static inline V getCoeffVectorI_thSquareParan(const V &x, int i, int size, int n);
+
 private:
+    // TODO: Czy wyciagnac tez do zmiennej F_x_approx?
     int N;
     int n;
     VectorType u0;
@@ -98,10 +109,13 @@ private:
     vector<vector<int>> multiIndices;
     MatrixType derivative_finite;
     MatrixType inverse_derivative_finite;
+    VectorType F_x_approx;
+
 
 
     T omega;
-    //TODO: przemyslec czy nie zmienic na po prostu Vector Vectorow, bo  juz nie wiem kiedy uzywam ChebyshevSeries faktycznie, a najwazniejsze to jest do mnozenia w zasadzie
+    // prev:    przemyslec czy nie zmienic na po prostu Vector Vectorow, bo  juz nie wiem kiedy uzywam ChebyshevSeries faktycznie, a najwazniejsze to jest do mnozenia w zasadzie
+    // TODO: a_series MUSI być VectorOfChebyshevsType, bo to później jest wykorzystywane w sprawdzeniu wartosci
     VectorOfChebyshevsType a_series;
     VectorOfChebyshevsType c_series;
 
@@ -124,13 +138,7 @@ private:
      */
 
 
-    //zwraca [a_k]_i lub [c_k]_i (ustawione c[0] = 0 dla przesunięcia)
-    template<class V>
-    inline typename V::ScalarType getCoeff(const V &x, int i, int k, bool is_omega=false) const;
 
-    //zwraca [a]_i lub [c]_i (ustawione c[0] = 0 dla przesunięcia)
-    template<class V>
-    inline V getCoeffVectorI_thSquareParan(const V &x, int i, int size) const;
 
     template<class V>
     V multiply(const V& a, const V& b);
