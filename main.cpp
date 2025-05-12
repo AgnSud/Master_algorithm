@@ -11,7 +11,6 @@
 #include "source/ChebyshevSeries/ChebyshevSeries.hpp"
 #include "source/ChebyshevSeries/Norm.hpp"
 #include "source/ChebyshevSeries/ChebyshevOperatorFinite.hpp"
-#include "source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp"
 #include "source/ChebyshevSeries/RadiiPolynomials.hpp"
 
 
@@ -193,6 +192,7 @@ ChebyshevOperatorFinite<T> testChebyshevOperatorFinite(int N, int n, int N_g) {
     vectalg::Vector<T, 0> u0{5., 5., 23.};
     vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
 
+
     //kazdy jest rozmiaru N
     a_series_start[0] = ChebyshevSeries<T, DIMENSION>(N);
     a_series_start[1] = ChebyshevSeries<T, DIMENSION>(N);
@@ -262,37 +262,10 @@ ChebyshevOperatorFinite<T> testChebyshevOperatorFinite(int N, int n, int N_g) {
     return op;
 }
 
+
+// USUWAM CAŁA KLASĘ ChebyshevOperatorInfinite
 void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<T>& finiteOp) {
     cout << "\n========== TEST: ChebyshevOperatorInfinite ==========\n";
-
-    using VectorType = vectalg::Vector<T, DIMENSION>;
-    using MatrixType = vectalg::Matrix<T, DIMENSION, DIMENSION>;
-
-    ChebyshevOperatorInfinite<T> op(N, n, finiteOp);
-
-    // Przykładowy wektor x = [omega, a0, a1, ..., a_{2*N*n+1}]
-//    vectalg::Vector<T, DIMENSION> x(totalLength);
-//    for (int i = 0; i < totalLength; ++i)
-//        x[i] = static_cast<T>(i + 1);  // x = [1, 2, 3, ..., totalLength]
-
-    auto x = finiteOp.convertToXVector();
-    VectorType x_expanded(100 * N * n + 1);
-    for (int i = 0; i < x.dimension(); i++){
-        x_expanded[i] = x[i];
-    }
-    //TODO: Zadaje punkt przyblizonego rozwiazania - potrzeba spojrzec na wyniki, ale najpierw pokazać pdf i ogólne rozumienie hatA, bo do tego mam watpliwosci
-    cout << "x_expanded = " << x_expanded << "\n";
-
-    cout << "pi1_0 = " << ChebyshevOperatorInfinite<T>::Pi1_j(x_expanded, 0, N, n) << endl;
-    cout << "pi1_1 = " << ChebyshevOperatorInfinite<T>::Pi1_j(x_expanded, 1, N, n) << endl;
-    cout << "pi1_2 = " << ChebyshevOperatorInfinite<T>::Pi1_j(x_expanded, 2, N, n) << endl;
-
-    auto hatA_approx = op.HatA(x_expanded);
-    auto pi0_HatA_approx = hatA_approx.first;
-    auto pi1_HatA_approx = hatA_approx.second;
-    cout << "pi0_HatA_approx(x_expanded) = " << pi0_HatA_approx << endl;
-    cout << "pi1_HatA_approx(x_expanded) = " << pi1_HatA_approx << endl;
-
     cout << "========== KONIEC TESTU ==========\n";
 }
 
@@ -318,9 +291,9 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
 
 // ---------- MAIN ----------
 int main() {
-    cout.precision(15);
+    cout.precision(17);
 
-    constexpr int N = 30;
+    constexpr int N = 25;
     constexpr int n = 3;
     constexpr int N_g = 2;
     double nu = 1.1;
@@ -328,6 +301,9 @@ int main() {
 //    testChebyshevSeries();
 //    testNorms();
     ChebyshevOperatorFinite<T> finiteOp = testChebyshevOperatorFinite(N, n, N_g);
+//    Interval omegaI = capd::vectalg::convertObject<Interval, double>(finiteOp.getOmega());
+    Interval omegaI(finiteOp.getOmega());
+    cout << omegaI << endl;
 //    testRadiiPolynomials(N, n, N_g, nu, finiteOp);
     cout << "##########################################################################################\n";
 
@@ -370,13 +346,14 @@ int main() {
         T t_chebyshev = 0;
         T t_taylor = 0;
         T del = 1 / (omega_approx * 10);
+        cout << "rt= " << rt << endl;
         while (t_chebyshev < 1){
             auto diff = checkSolution(a_series_approx, t_chebyshev) - solution(t_taylor);
             cout << "u("<< t_chebyshev << ") - sol(" << t_taylor << ") = " << diff << endl;
             t_chebyshev += 0.1;
             t_taylor += del;
+            t_taylor = capd::min(t_taylor, rt);
         }
-        // TODO: pokazać error - czy on bierze się stąd, że solution jeszcze 'nie było w tym czasie'? - im większe N tym oczywiscie większa dokładność
     }
     return 0;
 }

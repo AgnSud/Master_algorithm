@@ -6,6 +6,64 @@ template<typename T>
 RadiiPolynomials<T>::RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_)
         : N(N_), n(n_), nu(nu_), finiteOp(finiteOp_) {}
 
+template <typename T>
+T RadiiPolynomials<T>::Pi0(const VectorType& x) {
+    return x[0];
+}
+
+template <typename T>
+typename RadiiPolynomials<T>::VectorType
+RadiiPolynomials<T>::Pi1(const VectorType& x) {
+    VectorType result(x.dimension() - 1);
+    for (int i = 1; i < x.dimension(); ++i) {
+        result[i - 1] = x[i];
+    }
+    return result;
+}
+
+template <typename T>
+typename RadiiPolynomials<T>::VectorType
+RadiiPolynomials<T>::PiN(const VectorType& a, int N_, int n_) {
+    VectorType result(N_ * n_);
+    for (int i = 0; i < N_ * n_; ++i) {
+        result[i] = a[i];
+    }
+    return result;
+}
+
+template <typename T>
+typename RadiiPolynomials<T>::VectorType
+RadiiPolynomials<T>::PiN_x(const VectorType& x, int N_, int n_) {
+    VectorType result(N_ * n_ + 1);
+    result[0] = x[0];
+    VectorType a(N_ * n_);
+    for (int i = 0; i < a.dimension(); ++i) {
+        a[i] = x[i + 1];
+    }
+
+    VectorType projected = PiN(a, N_, n_);
+    for (int i = 0; i < projected.dimension(); ++i) {
+        result[i + 1] = projected[i];
+    }
+    return result;
+}
+
+template<typename T>
+template<class V>
+V RadiiPolynomials<T>::Pi1_j(const V &x, int j, int N_, int n_) {
+    return ChebyshevOperatorFinite<T>::getCoeffVectorI_thSquareParan(x, j, N_, n_);
+}
+
+template <typename T>
+typename RadiiPolynomials<T>::VectorType
+RadiiPolynomials<T>::get_kth(const VectorType& a, int k){
+    VectorType a_k(n);
+    for (int i = 0; i < n; ++i){
+        a_k[i] = a[k * n + i];
+    }
+    return a_k;
+}
+
 
 
 template <typename T>
@@ -20,7 +78,7 @@ T RadiiPolynomials<T>::computeY0() {
     VectorType AF = A_N * F_x_approx;                         // A_N F_N(x^*)
 //    cout << "A_N * F_x_approx = " << AF << endl;
 
-    return ChebyshevOperatorInfinite<T>::Pi0(AF); // Pi_0 — tylko pierwsza współrzędna
+    return Pi0(AF); // Pi_0 — tylko pierwsza współrzędna
 }
 
 template <typename T>
@@ -48,7 +106,7 @@ T RadiiPolynomials<T>::computeY1j(int j, int N_g) {
     VectorType x_approx = finiteOp.convertToXVector();
     VectorType F_x_approx = finiteOp.getF_x_approx();
     auto A_N = finiteOp.getInverseDerivativeFinite();
-    VectorType AF = ChebyshevOperatorInfinite<T>::Pi1_j(A_N * F_x_approx, j, N, n);
+    VectorType AF = Pi1_j(A_N * F_x_approx, j, N, n);
 
     // Pi_1,j — współczynniki j-tego ciągu a_k (czyli co n-ta współrzędna od j)
     Norm<T> weighted_norm(nu);
