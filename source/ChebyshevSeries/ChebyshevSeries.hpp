@@ -5,6 +5,10 @@
 #define DIMENSION 0
 #endif  //DIMENSION
 
+#include "capd/basicalg/TypeTraits.h"
+
+
+
 using namespace capd;
 using namespace std;
 
@@ -29,6 +33,14 @@ public:
 
     ChebyshevSeries(int N) : N(N), VectorType(N) {}
     ChebyshevSeries(initializer_list<T> list);
+
+    template<typename U>
+    ChebyshevSeries(const ChebyshevSeries<U, DIM>& other)
+            : N(other.getN()), vectalg::Vector<T, DIM>(other.getN()) {
+        for (int i = 0; i < N; ++i) {
+            (*this)[i] = static_cast<T>(other[i]);  // np. double → Interval
+        }
+    }
 
     // Zwraca wartosc wielomianu T_k(x)
     static T evaluateFirstKind(int k, T t);
@@ -56,7 +68,7 @@ public:
     friend ostream& operator<<(ostream& os, const ChebyshevSeries<T, DIM>& a){
         os << "{";
         for (int i = 0; i < a.N-1; ++i) {
-            os << a[i] << ", ";
+            os << a[i] <<  (i < a.size() - 1 ? "," : "");
         }
         os << a[a.N-1] << "}";
         return os;
@@ -94,3 +106,61 @@ private:
 
 
 #include "ChebyshevSeries.tpp"
+#include <capd/basicalg/TypeTraits.h>
+
+namespace capd {
+
+        template<typename T, int DIM>
+        struct TypeTraits<ChebyshevSeries<T, DIM>> {
+            using Real = typename TypeTraits<T>::Real;
+
+            // Jeżeli współczynniki są przedziałowe, to cała seria traktowana jako "interval-like"
+            static const bool isInterval = TypeTraits<T>::isInterval;
+
+            static ChebyshevSeries<T, DIM> zero() {
+                ChebyshevSeries<T, DIM> s(1);
+                s[0] = TypeTraits<T>::zero();
+                return s;
+            }
+
+            static ChebyshevSeries<T, DIM> one() {
+                ChebyshevSeries<T, DIM> s(1);
+                s[0] = TypeTraits<T>::one();
+                return s;
+            }
+
+            static ChebyshevSeries<T, DIM> max(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
+                ChebyshevSeries<T, DIM> result(a.getN());
+                for(int i = 0; i < a.getN(); ++i) {
+                    result[i] = TypeTraits<T>::max(a[i], b[i]);
+                }
+                return result;
+            }
+
+            static ChebyshevSeries<T, DIM> min(const ChebyshevSeries<T, DIM>& a, const ChebyshevSeries<T, DIM>& b) {
+                ChebyshevSeries<T, DIM> result(a.getN());
+                for(int i = 0; i < a.getN(); ++i) {
+                    result[i] = TypeTraits<T>::min(a[i], b[i]);
+                }
+                return result;
+            }
+
+            static bool isSingular(const ChebyshevSeries<T, DIM>& a) {
+                for(int i = 0; i < a.getN(); ++i) {
+                    if(!TypeTraits<T>::isSingular(a[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            static Real abs(const ChebyshevSeries<T, DIM>& a) {
+                Real maxVal = TypeTraits<T>::zero();
+                for(int i = 0; i < a.getN(); ++i) {
+                    maxVal = std::max(maxVal, TypeTraits<T>::abs(a[i]));
+                }
+                return maxVal;
+            }
+        };
+
+} // namespace capd

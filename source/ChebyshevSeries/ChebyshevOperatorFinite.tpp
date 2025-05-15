@@ -179,14 +179,14 @@ template<class V>
 typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType ChebyshevOperatorFinite<T>::convertToSeriesFromXForm(const V& x, int size){
     VectorOfChebyshevsType series_form(this->n);
     if (size > this->N){
-        cout << "c_flatten = " << x << endl;
+//        cout << "c_flatten = " << x << endl;
     }
     for (int i = 0; i < this->n; i++){
         ChebyshevSeries<T, DIMENSION> tmp(size);
         tmp.setCoefficients(getCoeffVectorI_thSquareParan(x, i, size, this->n));
-        if (size > this->N){
-            cout << "c_flatten[i] = " << tmp << endl;
-        }
+//        if (size > this->N){
+//            cout << "c_flatten[i] = " << tmp << endl;
+//        }
         series_form[i] = tmp;
     }
     return series_form;
@@ -245,9 +245,6 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
 
     //obliczenie odwrotnosci jacobianu
     computeDerivativeInverse(x);
-
-    cout << "FINAL number of iterations: " << iteration << ", with x=" << x << " and value F(x)= " << this->getF_x_approx() << '\n';
-
 
     return std::make_pair(omega_final, a_series_final);
 }

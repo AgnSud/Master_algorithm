@@ -95,7 +95,7 @@ T RadiiPolynomials<T>::computeY1j(int j, int N_g) {
         T diff = c_series[j][k - 1];
         if (k + 1 < c_series[j].dimension())
             diff -= c_series[j][k + 1];
-        diff = std::abs(diff);
+        diff = capd::abs<T>(diff);
 //        cout << "k=" << k << ", [c_{k-1} - c_{k+1}]_" << j << " = " << diff << endl;
         T weighted = diff * std::pow(nu, k) / k;
 //        cout << "weighted by nu^k/k =" << std::pow(nu, k) / k << " results: " << weighted << endl;
@@ -109,11 +109,17 @@ T RadiiPolynomials<T>::computeY1j(int j, int N_g) {
     VectorType AF = Pi1_j(A_N * F_x_approx, j, N, n);
 
     // Pi_1,j — współczynniki j-tego ciągu a_k (czyli co n-ta współrzędna od j)
-    Norm<T> weighted_norm(nu);
+    Norm<T> weighted_norm(nu, N, n);
     auto w_norm_AF = weighted_norm.computeNorm(AF);
-    cout << "w_norm_AF = " << w_norm_AF << endl;
-    cout << "sum = " << sum << endl;
+//    cout << "w_norm_AF = " << w_norm_AF << endl;
+//    cout << "sum = " << sum << endl;
     T result = sum / finiteOp.getOmega() + w_norm_AF;
 
     return result;
+}
+
+template <typename T>
+void RadiiPolynomials<T>::testOperatorNorm() {
+    Norm<T> weighted_norm(nu, N, n);
+    auto tmp = weighted_norm.computeOperatorNorm(finiteOp.getInverseDerivativeFinite());
 }

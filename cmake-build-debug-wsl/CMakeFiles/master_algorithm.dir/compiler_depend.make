@@ -239,8 +239,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadiff.h \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp \
-  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp \
-  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/Norm.hpp \
@@ -597,13 +595,13 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h:
 
+/usr/include/c++/13/bits/allocated_ptr.h:
+
+/usr/include/c++/13/bit:
+
 /usr/include/c++/13/bits/alloc_traits.h:
 
 /usr/include/c++/13/bits/stl_iterator_base_funcs.h:
-
-/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.hpp:
-
-/usr/include/c++/13/bits/basic_string.h:
 
 /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadbad.h:
 
@@ -624,10 +622,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/bits/utility.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/CoordinateSection.h:
-
-/usr/include/c++/13/bit:
-
-/usr/include/c++/13/bits/allocated_ptr.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/BasicPoincareMap_operator.hpp:
 
@@ -694,8 +688,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/ColumnVector.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/AffineSet.hpp:
-
-/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorInfinite.tpp:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/lib.h:
 
@@ -856,6 +848,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/EmptyIntersectionException.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
+
+/usr/include/c++/13/bits/allocator.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/TypeTraits.h:
 
@@ -1075,10 +1069,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /home/agnieszka/CAPD/capdAux/include/capd/settings/archSetting.h:
 
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
-
-/usr/include/c++/13/ext/aligned_buffer.h:
-
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/iobject.hpp:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/intervals/Interval.h:
@@ -1223,8 +1213,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/iosfwd:
 
-/usr/include/c++/13/bits/allocator.h:
-
 /usr/include/c++/13/bits/atomic_base.h:
 
 /usr/include/c++/13/bits/atomic_wait.h:
@@ -1238,6 +1226,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.hpp:
 
 /usr/include/c++/13/bits/basic_ios.tcc:
+
+/usr/include/c++/13/bits/basic_string.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
 
@@ -1700,3 +1690,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
+
+/usr/include/c++/13/ext/aligned_buffer.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:

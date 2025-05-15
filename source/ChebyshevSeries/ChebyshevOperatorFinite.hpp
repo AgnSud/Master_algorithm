@@ -88,6 +88,11 @@ public:
     template<class V>
     V operator() (const V& x);
 
+    /*
+     * Konwersja jest następująca: omega typu T, a_series = [ [a]_1, [a]_2, ..., [a]_n ]
+     * do tego [a]_k = [ [a_0]_k, [a_1]_k, [a_2]_k, ..., [a_{N-1}]_k ]
+     * zamienia się na x = [omega, [a_0]_1, [a_0]_2,  ..., [a_0]_n, [a_1]_1, [a_1]_2, ...]
+     */
     VectorType convertToXVector();
 
     //zwraca [a_k]_i lub [c_k]_i (ustawione c[0] = 0 dla przesunięcia)
@@ -97,6 +102,29 @@ public:
     //zwraca [a]_i lub [c]_i (ustawione c[0] = 0 dla przesunięcia)
     template<class V>
     static inline V getCoeffVectorI_thSquareParan(const V &x, int i, int size, int n);
+
+    friend std::ostream& operator<<(std::ostream& os, const ChebyshevOperatorFinite<T>& op) {
+        os << "\n========= ChebyshevOperatorFinite =========\n";
+        os << "Omega: " << op.omega << "\n";
+
+        os << "\nA Series:\n";
+        os << op.a_series << "\n";
+
+        os << "\nC Series:\n";
+        os << op.c_series << "\n";
+
+        os << "\nF_x_approx:\n";
+        os << op.F_x_approx << "\n";
+
+        os << "\nDerivative Finite:\n";
+        os << op.derivative_finite << "\n";
+
+        os << "\nInverse Derivative Finite:\n";
+        os << op.inverse_derivative_finite << "\n";
+
+        os << "===========================================\n";
+
+        return os;    }
 
 private:
     // TODO: Czy wyciagnac tez do zmiennej F_x_approx?
@@ -110,8 +138,6 @@ private:
     MatrixType derivative_finite;
     MatrixType inverse_derivative_finite;
     VectorType F_x_approx;
-
-
 
     T omega;
     // prev:    przemyslec czy nie zmienic na po prostu Vector Vectorow, bo  juz nie wiem kiedy uzywam ChebyshevSeries faktycznie, a najwazniejsze to jest do mnozenia w zasadzie
@@ -130,15 +156,6 @@ private:
 
     template<class V>
     VectorOfChebyshevsType convertToSeriesFromXForm(const V& x, int size);
-
-    /*
-     * Konwersja jest następująca: omega typu T, a_series = [ [a]_1, [a]_2, ..., [a]_n ]
-     * do tego [a]_k = [ [a_0]_k, [a_1]_k, [a_2]_k, ..., [a_{N-1}]_k ]
-     * zamienia się na x = [omega, [a_0]_1, [a_0]_2,  ..., [a_0]_n, [a_1]_1, [a_1]_2, ...]
-     */
-
-
-
 
     template<class V>
     V multiply(const V& a, const V& b);
