@@ -4,7 +4,7 @@
 
 template<typename T>
 RadiiPolynomials<T>::RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_)
-        : N(N_), n(n_), nu(nu_), finiteOp(finiteOp_) {}
+        : N(N_), n(n_), nu(nu_), h(1+n), finiteOp(finiteOp_) {}
 
 template <typename T>
 T RadiiPolynomials<T>::Pi0(const VectorType& x) {
@@ -64,12 +64,36 @@ RadiiPolynomials<T>::get_kth(const VectorType& a, int k){
     return a_k;
 }
 
+/// obliczy wszystkie h = [h0, h1x, h1y, hjz]
+template <typename T>
+typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_h() {
+    VectorType result_h(1 + n);
+    MatrixType identity_matrix(1 + n * N, 1 + n * N);  // Utworzenie macierzy identycznościowej o odpowiednich rozmiarach
+    identity_matrix.setToIdentity();  // Inicjalizacja macierzy jako macierz identycznościowa
 
+    MatrixType DF_N = finiteOp.getDerivativeFinite();
+    MatrixType A_N = finiteOp.getInverseDerivativeFinite();
+//    MatrixType identity_matrix = capd::vectalg::Matrix<T, 1+n*N, 1+n*N>::Identity(1+n*N);
+    MatrixType diff = identity_matrix - A_N * DF_N;
+    Norm<T> weighted_norm(nu, N, n);
+
+    result_h[0] = weighted_norm.computeOperatorNorm_Pi0(diff);
+    for (int j = 0; j < n; j++){
+        result_h[j+1] = weighted_norm.computeOperatorNorm_Pi1j(diff, j);
+    }
+
+    this->h = result_h;
+    return result_h;
+}
+
+template <typename T>
+T RadiiPolynomials<T>::compute_hj(int j) {
+}
 
 template <typename T>
 T RadiiPolynomials<T>::computeY0() {
 
-    VectorType x_approx = finiteOp.convertToXVector();          // x^*
+    VectorType x_approx = finiteOp.getX_approx();          // x^*
 //    cout << "x_approx = " << x_approx << endl;
     VectorType F_x_approx = finiteOp.getF_x_approx();                        // F_N(x^*)
 //    cout << "F_x_approx = " << F_x_approx << endl;
@@ -78,7 +102,7 @@ T RadiiPolynomials<T>::computeY0() {
     VectorType AF = A_N * F_x_approx;                         // A_N F_N(x^*)
 //    cout << "A_N * F_x_approx = " << AF << endl;
 
-    return Pi0(AF); // Pi_0 — tylko pierwsza współrzędna
+    return capd::abs(Pi0(AF)); // Pi_0 — tylko pierwsza współrzędna
 }
 
 template <typename T>
@@ -103,7 +127,7 @@ T RadiiPolynomials<T>::computeY1j(int j, int N_g) {
     }
 
     // część druga: || Pi_{1,j} A_N F_N(x^*) ||_nu
-    VectorType x_approx = finiteOp.convertToXVector();
+    VectorType x_approx = finiteOp.getX_approx();
     VectorType F_x_approx = finiteOp.getF_x_approx();
     auto A_N = finiteOp.getInverseDerivativeFinite();
     VectorType AF = Pi1_j(A_N * F_x_approx, j, N, n);
@@ -113,7 +137,8 @@ T RadiiPolynomials<T>::computeY1j(int j, int N_g) {
     auto w_norm_AF = weighted_norm.computeNorm(AF);
 //    cout << "w_norm_AF = " << w_norm_AF << endl;
 //    cout << "sum = " << sum << endl;
-    T result = sum / finiteOp.getOmega() + w_norm_AF;
+    T result = sum / 2 * finiteOp.getOmega() + w_norm_AF;
+    /// tutaj czesc sum/2*omega sprawia, ze przedzial nie jest od 0 (jest jak najmniejszy ale dodatni)
 
     return result;
 }

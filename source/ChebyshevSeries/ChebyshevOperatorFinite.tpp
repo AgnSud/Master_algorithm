@@ -16,7 +16,7 @@ ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
         const ChebyshevSeries<T, 0>& v,
         const ChebyshevSeries<T, 0>& w,
         const vector<vector<int>>& multiIndices
-) : N(N), n(n), omega(0), u0(u0_init), g(g_init), a_series(n), c_series(n), v(v), w(w), multiIndices(multiIndices), F_x_approx(N*n+1) {}
+) : N(N), n(n), omega(0), u0(u0_init), g(g_init), a_series(n), c_series(n), v(v), w(w), multiIndices(multiIndices), F_x_approx(N*n+1), x_approx(N*n+1) {}
 
 template<typename T>
 void ChebyshevOperatorFinite<T>::setASeries(const VectorOfChebyshevsType& a_input) {
@@ -43,6 +43,15 @@ void ChebyshevOperatorFinite<T>::setF_x_approx(const VectorType& F_x_approx_) {
 template <typename T>
 ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::getF_x_approx() const {
     return this->F_x_approx;
+}
+
+template<typename T>
+void ChebyshevOperatorFinite<T>::setX_approx(const VectorType& x_approx) {
+    this->x_approx = x_approx;
+}
+template <typename T>
+ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::getX_approx() const {
+    return this->x_approx;
 }
 
 
@@ -178,9 +187,6 @@ template<typename T>
 template<class V>
 typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType ChebyshevOperatorFinite<T>::convertToSeriesFromXForm(const V& x, int size){
     VectorOfChebyshevsType series_form(this->n);
-    if (size > this->N){
-//        cout << "c_flatten = " << x << endl;
-    }
     for (int i = 0; i < this->n; i++){
         ChebyshevSeries<T, DIMENSION> tmp(size);
         tmp.setCoefficients(getCoeffVectorI_thSquareParan(x, i, size, this->n));
@@ -242,12 +248,31 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
     this->setCSeries(c_series_final);
     this->setOmega(omega_final);
     this->setF_x_approx((*this)(x));
+    this->setX_approx(x);
 
     //obliczenie odwrotnosci jacobianu
     computeDerivativeInverse(x);
 
     return std::make_pair(omega_final, a_series_final);
 }
+
+template <typename T>
+typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::NewtonLikeOperatorTx_x(const VectorType& x) {
+    /// poniżej test dosłowny ze wzorów
+//    auto F_x = (*this)(x);
+//    VectorType mult_A_F_x = getInverseDerivativeFinite() * F_x;
+//    cout << "mult_A_F_x= " << mult_A_F_x << endl;
+//    VectorType result = x - mult_A_F_x;
+//    cout << "T(x)= " << result << endl;
+//    return result - x;
+
+    /// poniżej test wykorzystujacy wczesniejsze T(x) - x = x - AF(x) - x = -AF(x) - czyli roznica ktora tak naprawde sprawdzamy
+    auto F_x = (*this)(x);
+    VectorType mult_A_F_x = getInverseDerivativeFinite() * F_x;
+    VectorType result = mult_A_F_x;
+    return result;
+}
+
 
 
 template <typename T>

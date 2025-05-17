@@ -24,6 +24,7 @@ typedef vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> VectorOfChebys
 typedef vectalg::Vector<Interval, DIMENSION> IVectorType;
 typedef vectalg::Matrix<Interval, DIMENSION, DIMENSION> IMatrixType;
 typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVectorOfChebyshevsType;
+typedef vectalg::SumNorm<VectorType, MatrixType> NormType;
 
 
 // ---------- Pomocnicze ----------
@@ -208,11 +209,11 @@ void printPreparation(int N, int n, int N_g,
 // co za tym idzie, mamy dwa rozne N -> ustalajac liczbe wspolczynnikow niezerowych przyblizen jako N
 // czyli a_0, a_1, a_2, ..., a_N oraz c_0, c_1, c_2, ..., c_N
 // bedziemy wyznaczac F_{N-1}
-ChebyshevOperatorFinite<T> prepareChebyshevOperatorAndFindFiniteSolution(int N, int n, int N_g,
-                                                                         vectalg::Vector<T, 0>& u0,
+ChebyshevOperatorFinite<T> prepareChebyshevOperatorAndFindFiniteSolution(int N, int n,
+                                                                         VectorType u0,
                                                                          ChebyshevSeries<T>& v,
                                                                          ChebyshevSeries<T>& w,
-                                                                         vectalg::Matrix<T, DIMENSION, DIMENSION>& g,
+                                                                         MatrixType& g,
                                                                          vector<vector<int>>& multiIndices) {
     cout << "============= WYLICZANIE PRZYBLIŻONEGO ROZWIĄZANIA =============" << endl;
 
@@ -244,50 +245,84 @@ void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<T>& fin
     cout << "========== KONIEC TESTU ==========\n";
 }
 
+ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const VectorType& u0,
+                                                    ChebyshevSeries<T>& v,
+                                                    ChebyshevSeries<T>& w,
+                                                    MatrixType& g,
+                                                    vector<vector<int>>& multiIndices,
+                                                    const ChebyshevOperatorFinite<double>& finiteOp){
+    // zamiana na arytmetyke przedziałowa
+    ChebyshevOperatorFinite<Interval> IFiniteOp(N, n,
+                                                capd::vectalg::convertObject<IVectorType, VectorType>(u0),
+                                                capd::vectalg::convertObject<IMatrixType, MatrixType>(g),
+                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, ChebyshevSeries<T>>(v),
+                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, ChebyshevSeries<T>>(w),
+                                                multiIndices);
 
-void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFinite<T>& finiteOp) {
+    IFiniteOp.setOmega( Interval(finiteOp.getOmega()));
+    IFiniteOp.setASeries( capd::vectalg::convertObject<IVectorOfChebyshevsType, VectorOfChebyshevsType>(finiteOp.getASeries()) );
+    IFiniteOp.setX_approx( capd::vectalg::convertObject<IVectorType, VectorType>(finiteOp.getX_approx()) );
+
+    /// do powyzszego momentu uzywam convertObject, a reszta obliczyc już dla ŚCISŁEJ werjsji przybliżonego punktu?
+    IVectorOfChebyshevsType IC_series = IFiniteOp.convertToSeriesFromXForm(IFiniteOp.compute_c(IFiniteOp.getX_approx()), 2*N-1);
+    IFiniteOp.setCSeries(IC_series);
+
+    IVectorType IF_x_approx = IFiniteOp(IFiniteOp.getX_approx());
+    IFiniteOp.setF_x_approx(IF_x_approx);
+
+    IFiniteOp.computeDerivativeInverse(IFiniteOp.getX_approx());
+//    IFiniteOp.setCSeries( capd::vectalg::convertObject<IVectorOfChebyshevsType, VectorOfChebyshevsType>(finiteOp.getCSeries()) );
+//    IFiniteOp.setF_x_approx( capd::vectalg::convertObject<IVectorType, VectorType>(finiteOp.getF_x_approx()) );
+//    IFiniteOp.setDerivativeFinite( capd::vectalg::convertObject<IMatrixType, MatrixType>(finiteOp.getDerivativeFinite()) );
+//    IFiniteOp.setInverseDerivativeFinite( capd::vectalg::convertObject<IMatrixType, MatrixType>(finiteOp.getInverseDerivativeFinite()) );
+
+    return IFiniteOp;
+}
+
+
+void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFinite<Interval>& IFiniteOp) {
     cout << "\n========== TEST: ChebyshevOperatorInfinite ==========\n";
 
-    // zamiana na arytmetyke przedziałowa
-    ChebyshevOperatorFinite<Interval> IFiniteOp;
-    IFiniteOp.setOmega( Interval(finiteOp.getOmega()) );
-    IFiniteOp.setASeries( capd::vectalg::convertObject<IVectorOfChebyshevsType, VectorOfChebyshevsType>(finiteOp.getASeries()) );
-    IFiniteOp.setCSeries( capd::vectalg::convertObject<IVectorOfChebyshevsType, VectorOfChebyshevsType>(finiteOp.getCSeries()) );
-    IFiniteOp.setF_x_approx( capd::vectalg::convertObject<IVectorType, VectorType>(finiteOp.getF_x_approx()) );
-    IFiniteOp.setDerivativeFinite( capd::vectalg::convertObject<IMatrixType, MatrixType>(finiteOp.getDerivativeFinite()) );
-    IFiniteOp.setInverseDerivativeFinite( capd::vectalg::convertObject<IMatrixType, MatrixType>(finiteOp.getInverseDerivativeFinite()) );
-
-
-    cout << IFiniteOp << endl;
+    RadiiPolynomials<Interval> radii_pol(N, n, nu, IFiniteOp);
 
     //test na odwrocenie macierzy odwrotnej - odwrócona, powinna być zbliżona do IFiniteOp.derivative_finite
     IMatrixType interval_inverse_of_inverse_of_derivative_test = matrixAlgorithms::gaussInverseMatrix(IFiniteOp.getInverseDerivativeFinite());
 //    cout << interval_inverse_of_inverse_of_derivative_test << endl;
 
+    auto diff_T_x =  IFiniteOp.NewtonLikeOperatorTx_x(IFiniteOp.getX_approx());
+    cout << "T(x*) - x* = " << diff_T_x << endl;
+    auto Pi_0_diff_T_x = radii_pol.Pi0(diff_T_x);
+    auto abs_Pi_0_diff_T_x = capd::abs(Pi_0_diff_T_x);
 
-    // wyliczenie Y_bound w arytmetyce przedziałowej
-    RadiiPolynomials<Interval> radii_pol(N, n, nu, IFiniteOp);
-//    auto Y_0 = radii_pol.computeY0();
-//    cout << "Y_0 = " << Y_0 << endl;
-//    auto Y_1_x = radii_pol.computeY1j(0, N_g);
-//    cout << "Y_1_x = " << Y_1_x << endl;
-//    auto Y_1_y = radii_pol.computeY1j(1, N_g);
-//    cout << "Y_1_y = " << Y_1_y << endl;
-//    auto Y_1_z = radii_pol.computeY1j(2, N_g);
-//    cout << "Y_1_z = " << Y_1_z << endl;
+    auto Y_0 = radii_pol.computeY0();
+    cout << "|Pi_0 (T(x*) - x*)| = " << abs_Pi_0_diff_T_x << ", Y_0 = " << Y_0 << endl;
+    if (abs_Pi_0_diff_T_x == Y_0) //czemu dziala ==, ale nie dziala <= ???
+        cout << "Y_0 bound OK" << endl;
+    else
+        cout << "Y_0 bound NOT OK" << endl;
 
-    radii_pol.testOperatorNorm();
+    /// zawsze 0 będzie na dole przedziału i trochę nie wiem jak to poprawić (bo  wspolczynniki sa przedzialami [-,+])
+    for(int i = 0; i < n; i++){
+        Norm<Interval> weighted_norm(nu, N, n);
+        auto Y_1_i = radii_pol.computeY1j(i, N_g);
+        auto Pi_1i_diff_T_x = radii_pol.Pi1_j(diff_T_x, i, N, n);
+        auto norm_Pi_1i_diff_T_x = weighted_norm.computeNorm(Pi_1i_diff_T_x);
+        cout << "||Pi_1" << i << "(T(x*) - x*)|| = " << norm_Pi_1i_diff_T_x << ", Y_1_" << i << "= " << Y_1_i << endl;
+    }
+
+    auto h = radii_pol.compute_h();
+    cout << "h=" << h << endl;
     cout << "========== KONIEC TESTU ==========\n";
 }
 
 // ---------- MAIN ----------
 int main() {
-    cout.precision(17);
+    cout.precision(23);
 
     constexpr int N = 25;
     constexpr int n = 3;
     constexpr int N_g = 2;
-    double nu = 1.1;
+    double nu = 1.01;
     vectalg::Vector<T, 0> u0{5., 5., 23.};
     ChebyshevSeries<T, DIMENSION> v{0, 0, 1.};
     ChebyshevSeries<T, DIMENSION> w{0, 0, 27.};
@@ -298,9 +333,11 @@ int main() {
 
 //    testChebyshevSeries();
 //    testNorms();
-    ChebyshevOperatorFinite<T> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, N_g, u0, v, w, g, multiIndices);
+    ChebyshevOperatorFinite<T> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
+    ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
+    cout << IFiniteOp << endl;
 //    Interval omegaI = capd::vectalg::convertObject<Interval, double>(finiteOp.getOmega()); - czemu to nie działa?
-    testRadiiPolynomials(N, n, N_g, nu, finiteOp);
+    testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
     cout << "##########################################################################################\n";
 
     {

@@ -32,7 +32,6 @@ public:
     T computeOperatorNorm_Pi0(const MatrixType& C);
     T computeOperatorNorm_Pi1j(const MatrixType& C, int j);
 
-
     // Norma operatorowa
     T computeOperatorNorm(const MatrixType& C);
 

@@ -10,6 +10,7 @@ T Norm<T, DIM>::computeNorm(const V& a) const {
     T sum = capd::abs<T>(a[0]); // Zaczynamy od |a_0|
     for (int k = 1; k < a.dimension(); ++k) {
         sum += 2 * capd::abs<T>(a[k]) * std::pow(nu, k); // 2 * |a_k| * nu^k
+//        cout << sum << endl;
     }
     return sum;
 }
@@ -44,7 +45,7 @@ T Norm<T, DIM>::computeNorm_n(const capd::vectalg::Vector<V, DIM>& vec) const {
 
 template <typename T, int DIM>
 T Norm<T, DIM>::computeOperatorNorm_Pi0(const MatrixType& C) {
-    T result_norm = C[0][0];
+    T result_norm = capd::abs(C[0][0]);
     for(int j_tilde = 0; j_tilde < n; j_tilde++){
         result_norm += mu_j(C, j_tilde);
     }

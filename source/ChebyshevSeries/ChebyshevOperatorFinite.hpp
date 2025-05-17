@@ -58,6 +58,8 @@ public:
     T getOmega() const;
     void setF_x_approx(const VectorType& F_x_approx);
     VectorType getF_x_approx() const;
+    void setX_approx(const VectorType& x_approx);
+    VectorType getX_approx() const;
 
     void setCSeries(const VectorOfChebyshevsType& c_input);
     VectorOfChebyshevsType getCSeries() const;
@@ -83,10 +85,15 @@ public:
             int max_iterations = 100,
             T tolerance = 1e-13);
 
+    VectorType NewtonLikeOperatorTx_x(const VectorType& x);
+
     // wylicza operator Czebyszewa skonczony F_N
     //ten operator() przyjmuje x i zwraca x (wewnetrzna funkcja)
     template<class V>
     V operator() (const V& x);
+
+    template <class V>
+    V compute_c(const V& x);
 
     /*
      * Konwersja jest następująca: omega typu T, a_series = [ [a]_1, [a]_2, ..., [a]_n ]
@@ -94,6 +101,8 @@ public:
      * zamienia się na x = [omega, [a_0]_1, [a_0]_2,  ..., [a_0]_n, [a_1]_1, [a_1]_2, ...]
      */
     VectorType convertToXVector();
+    template<class V>
+    VectorOfChebyshevsType convertToSeriesFromXForm(const V& x, int size);
 
     //zwraca [a_k]_i lub [c_k]_i (ustawione c[0] = 0 dla przesunięcia)
     template<class V>
@@ -102,6 +111,9 @@ public:
     //zwraca [a]_i lub [c]_i (ustawione c[0] = 0 dla przesunięcia)
     template<class V>
     static inline V getCoeffVectorI_thSquareParan(const V &x, int i, int size, int n);
+
+    template<class V>
+    void computeDerivativeInverse(const V& x);
 
     friend std::ostream& operator<<(std::ostream& os, const ChebyshevOperatorFinite<T>& op) {
         os << "\n========= ChebyshevOperatorFinite =========\n";
@@ -138,6 +150,8 @@ private:
     MatrixType derivative_finite;
     MatrixType inverse_derivative_finite;
     VectorType F_x_approx;
+    // TODO: dodałam jako dodatkowe pole, bo w sumie uzywam naprzemiennie? Tylko co jest bardziej kosztowne, trzymanie obu form rozwiazania czy konwersja
+    VectorType x_approx;
 
     T omega;
     // prev:    przemyslec czy nie zmienic na po prostu Vector Vectorow, bo  juz nie wiem kiedy uzywam ChebyshevSeries faktycznie, a najwazniejsze to jest do mnozenia w zasadzie
@@ -145,8 +159,7 @@ private:
     VectorOfChebyshevsType a_series;
     VectorOfChebyshevsType c_series;
 
-    template <class V>
-    V compute_c(const V& x);
+
 
     template<class V>
     typename V::ScalarType compute_f_0(const V& x);
@@ -154,14 +167,11 @@ private:
     template<class V>
     V compute_f_1(const V& x);
 
-    template<class V>
-    VectorOfChebyshevsType convertToSeriesFromXForm(const V& x, int size);
 
     template<class V>
     V multiply(const V& a, const V& b);
 
-    template<class V>
-    void computeDerivativeInverse(const V& x);
+
 };
 
 #include "ChebyshevOperatorFinite.tpp"
