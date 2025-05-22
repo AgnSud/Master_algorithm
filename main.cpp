@@ -316,26 +316,27 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
         Norm<Interval> weighted_norm(nu, N, n);
         auto Y_1_i = radii_pol.computeY1j(i, N_g);
         auto Pi_1i_diff_T_x = radii_pol.Pi1_j(diff_T_x, i, N, n);
+        cout << "Pi_1i_diff_T_x = " << Pi_1i_diff_T_x << endl;
         auto norm_Pi_1i_diff_T_x = weighted_norm.computeNorm(Pi_1i_diff_T_x);
         cout << "||Pi_1" << i << "(T(x*) - x*)|| = " << norm_Pi_1i_diff_T_x << ", Y_1_" << i << "= " << Y_1_i << endl;
     }
 
-    auto h = radii_pol.compute_h();
-    cout << "h = " << h << endl;
-
-    ///briefly tested
-//    IVectorType dummy_vector({1,2,3});
-    auto Phi_ax_1 = radii_pol.operatorNormPsi_ak(IFiniteOp.getASeries()[0], 1);
-    cout << "Phi_ax_1 = " << Phi_ax_1 << endl;
-
-    auto gamma = radii_pol.compute_gamma();
-    cout << "gamma= " << gamma << endl;
+//    auto h = radii_pol.compute_h();
+//    cout << "h = " << h << endl;
+//
+//    auto Phi_ax_1 = radii_pol.operatorNormPsi_ak(IFiniteOp.getASeries()[0], 1);
+//    cout << "Phi_ax_1 = " << Phi_ax_1 << endl;
+//
+//    auto gamma = radii_pol.compute_gamma();
+//    cout << "gamma= " << gamma << endl;
 
 //    auto B_1 = radii_pol.computeB_k(24);
 //    cout << "B_24= " << B_1 << endl;
 
-    auto Z1 = radii_pol.compute_Z1();
-    cout << "Z1= " << Z1 << endl;
+//    auto Z1 = radii_pol.compute_Z1();
+//    cout << "Z1= " << Z1 << endl;
+//
+//    radii_pol.testOperatorNorm();
 
 
     cout << "========== KONIEC TESTU ==========\n";
@@ -345,7 +346,7 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
 int main() {
     cout.precision(17);
 
-    constexpr int N = 5;
+    constexpr int N = 25;
     constexpr int n = 3;
     constexpr int N_g = 2;
     double nu = 1.01; ///wartosc nu jest mocno powiazana z N
@@ -355,13 +356,13 @@ int main() {
     auto multiIndices = generateMultiIndices(n, N_g);
     vectalg::Matrix<T, DIMENSION, DIMENSION> g = defineFunctionG(multiIndices, n);
 
-    printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
+//    printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
 
 //    testChebyshevSeries();
 //    testNorms();
     ChebyshevOperatorFinite<T> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
     ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
-    cout << IFiniteOp << endl;
+//    cout << IFiniteOp << endl;
 //    Interval omegaI = capd::vectalg::convertObject<Interval, double>(finiteOp.getOmega()); - czemu to nie działa?
     testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
     cout << "##########################################################################################\n";

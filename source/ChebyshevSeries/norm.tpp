@@ -7,9 +7,9 @@ template <typename T, int DIM>
 //T Norm<T, DIM>::computeNorm(const ChebyshevSeries<T, DIM>& a) const {
 template<class V>
 T Norm<T, DIM>::computeNorm(const V& a) const {
-    T sum = capd::abs<T>(a[0]); // Zaczynamy od |a_0|
+    T sum = capd::abs(a[0]); // Zaczynamy od |a_0|
     for (int k = 1; k < a.dimension(); ++k) {
-        sum += 2 * capd::abs<T>(a[k]) * std::pow(nu, k); // 2 * |a_k| * nu^k
+        sum += 2 * capd::abs(a[k]) * std::pow(nu, k); // 2 * |a_k| * nu^k
 //        cout << sum << endl;
     }
     return sum;
