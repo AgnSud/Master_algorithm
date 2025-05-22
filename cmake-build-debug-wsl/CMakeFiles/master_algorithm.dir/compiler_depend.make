@@ -337,6 +337,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /usr/include/c++/13/bits/stl_map.h \
   /usr/include/c++/13/bits/stl_multimap.h \
   /usr/include/c++/13/bits/stl_multiset.h \
+  /usr/include/c++/13/bits/stl_numeric.h \
   /usr/include/c++/13/bits/stl_pair.h \
   /usr/include/c++/13/bits/stl_raw_storage_iter.h \
   /usr/include/c++/13/bits/stl_relops.h \
@@ -399,10 +400,12 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /usr/include/c++/13/memory \
   /usr/include/c++/13/new \
   /usr/include/c++/13/numbers \
+  /usr/include/c++/13/numeric \
   /usr/include/c++/13/ostream \
   /usr/include/c++/13/pstl/execution_defs.h \
   /usr/include/c++/13/pstl/glue_algorithm_defs.h \
   /usr/include/c++/13/pstl/glue_memory_defs.h \
+  /usr/include/c++/13/pstl/glue_numeric_defs.h \
   /usr/include/c++/13/pstl/pstl_config.h \
   /usr/include/c++/13/set \
   /usr/include/c++/13/sstream \
@@ -594,6 +597,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
 
 /usr/include/c++/13/bits/allocated_ptr.h:
 
@@ -816,8 +821,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/backward/auto_ptr.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/basicalg/factrial.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h:
 
@@ -1069,6 +1072,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /home/agnieszka/CAPD/capdAux/include/capd/settings/archSetting.h:
 
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
+
+/usr/include/c++/13/ext/aligned_buffer.h:
+
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/iobject.hpp:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/intervals/Interval.h:
@@ -1182,6 +1189,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/bits/ios_base.h:
 
 /usr/include/c++/13/iterator:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
+
+/usr/include/c++/13/numeric:
 
 /usr/include/c++/13/bits/stl_algo.h:
 
@@ -1365,6 +1376,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/bits/stl_multiset.h:
 
+/usr/include/c++/13/bits/stl_numeric.h:
+
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/RowVector.h:
 
 /usr/include/c++/13/bits/stl_raw_storage_iter.h:
@@ -1398,10 +1411,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/x86_64-linux-gnu/bits/posix_opt.h:
 
 /usr/include/c++/13/cmath:
-
-/home/agnieszka/CAPD/capdAlg/include/capd/intervals/IntervalError.h:
-
-/usr/include/c++/13/concepts:
 
 /usr/include/c++/13/cstdint:
 
@@ -1490,6 +1499,12 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/pstl/execution_defs.h:
 
 /usr/include/c++/13/pstl/glue_algorithm_defs.h:
+
+/home/agnieszka/CAPD/capdAlg/include/capd/intervals/IntervalError.h:
+
+/usr/include/c++/13/concepts:
+
+/usr/include/c++/13/pstl/glue_numeric_defs.h:
 
 /usr/include/c++/13/pstl/pstl_config.h:
 
@@ -1611,11 +1626,11 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/x86_64-linux-gnu/bits/local_lim.h:
 
-/usr/include/x86_64-linux-gnu/bits/math-vector.h:
+/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
 
 /usr/include/x86_64-linux-gnu/bits/locale.h:
 
-/usr/include/x86_64-linux-gnu/bits/posix1_lim.h:
+/usr/include/x86_64-linux-gnu/bits/math-vector.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0Set.h:
 
@@ -1688,9 +1703,3 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdAux/include/capd/auxil/Dll.h:
 
 /usr/include/x86_64-linux-gnu/bits/xopen_lim.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
-
-/usr/include/c++/13/ext/aligned_buffer.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:

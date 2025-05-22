@@ -503,4 +503,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/c++/13/bits/quoted_string.h \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp \
- /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp \
+ /usr/include/c++/13/numeric /usr/include/c++/13/bits/stl_numeric.h \
+ /usr/include/c++/13/pstl/glue_numeric_defs.h

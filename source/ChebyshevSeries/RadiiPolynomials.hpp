@@ -11,6 +11,8 @@ class RadiiPolynomials {
 public:
     typedef typename ChebyshevOperatorFinite<T>::VectorType VectorType;
     typedef typename ChebyshevOperatorFinite<T>::MatrixType MatrixType;
+    typedef typename ChebyshevOperatorFinite<double>::VectorType DVectorType;
+    typedef typename ChebyshevOperatorFinite<double>::MatrixType DMatrixType;
     typedef vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> VectorOfChebyshevsType;
 
     RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_);
@@ -25,7 +27,19 @@ public:
 
     /// obliczy wszystkie h = [h0, h1x, h1y, hjz]
     VectorType compute_h();
-    T compute_hj(int j);
+
+    /// gamma bedzie double, jesli g bedzie double - jesli g bedzie interval to gamma bedzie interval
+    /// ale g chyba powinno zostac double, tak?
+    double compute_gamma();
+
+    /// B_k jest interval, bo operatorNormPsi_ak jest interval oraz B_k jest Vectorem
+    VectorType computeB_k(int k);
+    /// to jest rowniez w takim formacie jak x
+    VectorType compute_Z1_tilde();
+    VectorType compute_Z1();
+
+    T operatorNormPsi_ak(VectorType& a, int k);
+
 
     T computeY0();
     //N_g przekazany jako argument
@@ -43,8 +57,14 @@ private:
     VectorType h;
     ChebyshevOperatorFinite<T> finiteOp;
 
+    DVectorType g_unit_vector(int j);
+    DVectorType g_ls(int l, int s);
 
-
+    /// jesli g bedzie interval to to bedzie tez interval
+    template <class V>
+    double vector_sum(const V & v);
+    template <class V>
+    V vector_abs(const V & v);
 };
 
 

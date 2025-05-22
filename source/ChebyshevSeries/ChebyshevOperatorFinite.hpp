@@ -20,7 +20,9 @@ class ChebyshevOperatorFinite {
 public:
     ChebyshevOperatorFinite() : N(1), n(1), omega(1), u0(1), g(1, 1), v(1), w(1), multiIndices(1), a_series(1), c_series(1) {}
     typedef  vectalg::Matrix<T, DIMENSION, DIMENSION> MatrixType;
+    typedef  vectalg::Matrix<double, DIMENSION, DIMENSION> DMatrixType;
     typedef vectalg::Vector<T, DIMENSION> VectorType;
+    typedef vectalg::Vector<double, DIMENSION> DVectorType;
     typedef vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> VectorOfChebyshevsType;
     template <class V>
     struct Types {
@@ -46,7 +48,7 @@ public:
     ChebyshevOperatorFinite(
             int N, int n,
             const VectorType& u0_init,
-            const MatrixType& g_init,
+            const DMatrixType& g_init,
             const ChebyshevSeries<T, 0>& v,
             const ChebyshevSeries<T, 0>& w,
             const vector<vector<int>>& multiIndices
@@ -60,6 +62,9 @@ public:
     VectorType getF_x_approx() const;
     void setX_approx(const VectorType& x_approx);
     VectorType getX_approx() const;
+
+    DMatrixType getG() const;
+    vector<vector<int>> getMultiIndices() const;
 
     void setCSeries(const VectorOfChebyshevsType& c_input);
     VectorOfChebyshevsType getCSeries() const;
@@ -143,7 +148,7 @@ private:
     int N;
     int n;
     VectorType u0;
-    MatrixType g;
+    DMatrixType g;
     ChebyshevSeries<T, 0> v;
     ChebyshevSeries<T, 0> w;
     vector<vector<int>> multiIndices;
@@ -155,7 +160,7 @@ private:
 
     T omega;
     // prev:    przemyslec czy nie zmienic na po prostu Vector Vectorow, bo  juz nie wiem kiedy uzywam ChebyshevSeries faktycznie, a najwazniejsze to jest do mnozenia w zasadzie
-    // TODO: a_series MUSI być VectorOfChebyshevsType, bo to później jest wykorzystywane w sprawdzeniu wartosci
+    // TODO: a_series MUSI być DVectorOfChebyshevsType, bo to później jest wykorzystywane w sprawdzeniu wartosci
     VectorOfChebyshevsType a_series;
     VectorOfChebyshevsType c_series;
 

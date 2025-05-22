@@ -1,10 +1,70 @@
 #pragma once
 
+#include <numeric>
 #include "RadiiPolynomials.hpp"
 
 template<typename T>
 RadiiPolynomials<T>::RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_)
         : N(N_), n(n_), nu(nu_), h(1+n), finiteOp(finiteOp_) {}
+
+template <typename T>
+typename RadiiPolynomials<T>::DVectorType RadiiPolynomials<T>::g_unit_vector(int j) {
+    std::vector<int> e_j(n, 0);
+    e_j[j] = 1.0;
+    auto m_idx = finiteOp.getMultiIndices();
+    for (int i = 0; i < m_idx.size(); i++){
+        if (e_j == m_idx[i]){
+           return finiteOp.getG()[i];
+        }
+    }
+    throw std::runtime_error("g_unit_vector: unit vector not found in multiIndices");
+}
+
+template <typename T>
+typename RadiiPolynomials<T>::DVectorType RadiiPolynomials<T>::g_ls(int l, int s) {
+//    DVectorType e_l(n, 0.0), e_s(n, 0.0);
+//    e_l[l] = 1.0;
+//    e_s[s] = 1.0;
+    return g_unit_vector(l) + g_unit_vector(s);
+}
+
+template <typename T>
+template <class V>
+double RadiiPolynomials<T>::vector_sum(const V& v) {
+//    typename V::ScalarType sum = 0;
+    double sum = 0;
+    /// czy tutaj niżej ma być abs???? odnosze sie do wzoru |alpha| = alpha_1 + ... + alpha_n
+    for (const auto& val : v) sum += val;
+//    cout << "sum = " << sum << endl;
+    return capd::abs(sum);
+}
+
+template <typename T>
+template <class V>
+V RadiiPolynomials<T>::vector_abs(const V& v) {
+    V result(v.dimension());
+    for (int j = 0; j < v.dimension(); j++)
+        result[j] = capd::abs(v[j]);
+    return result;
+}
+
+template <typename T>
+T RadiiPolynomials<T>::operatorNormPsi_ak(VectorType& a, int k) {
+    T max_result = capd::max(capd::abs(a[N-1]) / std::pow(nu, k+N),
+                             capd::abs(a[capd::abs(N-2)]) / std::pow(nu, k+N-1));
+//    cout << "a_{N-2}/nu = " << capd::abs(a[N-1]) / std::pow(nu, k+N) << endl;
+//    cout << "a_{N-1}/nu = " << capd::abs(a[capd::abs(N-2)]) / std::pow(nu, k+N-1)  << endl;
+    for (int l = N; l <= k+N-2; l++){
+        auto diff = capd::abs(a[capd::abs(k-l-1)] - a[capd::abs(k-l+1)]);
+//        cout << "diff for l = " << l << " = " << diff << "BEFORE DIV" << endl;
+        diff = diff / std::pow(nu, l);
+//        cout << "diff for l = " << l << " = " << diff << "AFTER DIV" << endl;
+        max_result = capd::max(max_result, diff);
+    }
+    return max_result / 2;
+}
+
+
 
 template <typename T>
 T RadiiPolynomials<T>::Pi0(const VectorType& x) {
@@ -73,7 +133,7 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_h() {
 
     MatrixType DF_N = finiteOp.getDerivativeFinite();
     MatrixType A_N = finiteOp.getInverseDerivativeFinite();
-//    MatrixType identity_matrix = capd::vectalg::Matrix<T, 1+n*N, 1+n*N>::Identity(1+n*N);
+//    DMatrixType identity_matrix = capd::vectalg::Matrix<T, 1+n*N, 1+n*N>::Identity(1+n*N);
     MatrixType diff = identity_matrix - A_N * DF_N;
     Norm<T> weighted_norm(nu, N, n);
 
@@ -86,9 +146,101 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_h() {
     return result_h;
 }
 
+/// zapis na gamme rozumiem rozlacznie? Jako że zbiór i maksymalny element
+/// (np \Gamma_{1,2} + 2(N-1) + c \sum_{alpha = 2} |g_alpha|
+/// element (2(N-1) jest jednowymiarowy, suma będzie n-wymiarowa)
 template <typename T>
-T RadiiPolynomials<T>::compute_hj(int j) {
+double RadiiPolynomials<T>::compute_gamma() {
+    DVectorType sum_g_for_alpha_2(n);
+    auto multiIndices = finiteOp.getMultiIndices();
+    auto g = finiteOp.getG();
+
+    for (int alpha = 0; alpha < multiIndices.size(); alpha++){
+        auto sum_alpha = std::reduce(multiIndices[alpha].begin(), multiIndices[alpha].end());
+        if (sum_alpha == 2){
+//            cout << "|alpha| == 2 : " << multiIndices[alpha] << endl;
+//            cout << "g_alpha : " << g[alpha] << endl;
+            DVectorType abs_g_alpha(n);
+            for (int j = 0; j < n; j++)
+                abs_g_alpha[j] = capd::abs(g[alpha][j]);
+//            cout << "abs_g_alpha : " << abs_g_alpha << endl;
+            sum_g_for_alpha_2 += abs_g_alpha;
+        }
+    }
+    sum_g_for_alpha_2 = ((2 * nu * nu + 1) * sum_g_for_alpha_2) / (2 * nu);
+    for (int j = 0; j < n; j++)
+        sum_g_for_alpha_2[j] += 2*(N-1);
+
+    cout << "sum_g_for_alpha_2 = " << sum_g_for_alpha_2 << endl;
+    return *std::max_element(sum_g_for_alpha_2.begin(), sum_g_for_alpha_2.end());
 }
+
+
+template <typename T>
+typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::computeB_k(int k){
+    DVectorType first_sum(n);
+    vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series = finiteOp.getASeries();
+    if (k == N-1){
+        for (int j = 0; j < n; j++){
+//            first_sum = vector_sum(g_unit_vector(j));
+            first_sum = vector_abs(g_unit_vector(j));
+//            for (int j = 0; j < n; j++)
+//                first_sum[j] = capd:i \:abs(g[alpha][j]);
+            first_sum = first_sum / (std::pow(nu, N) * 2);
+        }
+    }
+
+//    T result = T(first_sum);
+    VectorType result = vectalg::convertObject<VectorType, DVectorType>(first_sum);
+    cout << "first_sum = " << first_sum << endl;
+    for (int l = 0; l < n; l++){
+        auto operatorNormPsi_al_k = operatorNormPsi_ak(a_series[l], k);
+        for (int s = l; s < n; s++){
+            auto operatorNormPsi_as_k = operatorNormPsi_ak(a_series[s], k);
+//            double sum_g_ls = vector_sum( g_ls(l, s) );
+            auto abs_g_ls = vector_abs(g_ls(l, s));
+            auto I_abs_g_ls = vectalg::convertObject<VectorType, DVectorType>(abs_g_ls);
+//            cout << "||Psi_al_k|| + ||Psi_as_k|| =" << (operatorNormPsi_al_k + operatorNormPsi_as_k) << endl;
+//            cout << "I_abs_g_ls, for l, s =  " << l << " " << s << " = "  << I_abs_g_ls << endl;
+            result += I_abs_g_ls * (operatorNormPsi_al_k + operatorNormPsi_as_k);
+        }
+    }
+    cout << "B_k for k = " << k << " = " << result << endl;
+    cout << "===========================" << endl;
+    return result;
+}
+
+template <typename T>
+typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_Z1_tilde() {
+    int totalDim = 1 + n * N;
+    VectorType Z1_tilde(totalDim);
+    Z1_tilde[0] = T(0);
+
+    int index = 1 + n; //od tego momentu zaczynamy
+    for (int k = 1; k < N; ++k) {
+        auto B_k = computeB_k(k);
+        cout << "B_k = " << B_k << endl;
+        for (int j = 0; j < n; ++j) {
+            Z1_tilde[index++] = B_k[j] / 4;
+        }
+    }
+    cout << "Z1_tilde = " << Z1_tilde << endl;
+    return Z1_tilde;
+}
+
+// Final step: Z1 = |A_N| * Z1_tilde
+template <typename T>
+typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_Z1() {
+    auto Z1_tilde = compute_Z1_tilde();
+    auto AN = finiteOp.getInverseDerivativeFinite();  // assuming A_N is defined
+    for (int i = 0; i < AN[0].dimension(); i++){
+        for (int j = 0; j < AN[0].dimension(); j++) {
+            AN[i][j] = capd::abs(AN[i][j]);
+        }
+    }
+    return AN * Z1_tilde;
+}
+
 
 template <typename T>
 T RadiiPolynomials<T>::computeY0() {
@@ -148,3 +300,5 @@ void RadiiPolynomials<T>::testOperatorNorm() {
     Norm<T> weighted_norm(nu, N, n);
     auto tmp = weighted_norm.computeOperatorNorm(finiteOp.getInverseDerivativeFinite());
 }
+
+

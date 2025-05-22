@@ -12,7 +12,7 @@ template<typename T>
 ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
         const int N, const int n,
         const VectorType& u0_init,
-        const MatrixType& g_init,
+        const DMatrixType& g_init,
         const ChebyshevSeries<T, 0>& v,
         const ChebyshevSeries<T, 0>& w,
         const vector<vector<int>>& multiIndices
@@ -52,6 +52,16 @@ void ChebyshevOperatorFinite<T>::setX_approx(const VectorType& x_approx) {
 template <typename T>
 ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::getX_approx() const {
     return this->x_approx;
+}
+
+template <typename T>
+ChebyshevOperatorFinite<T>::DMatrixType ChebyshevOperatorFinite<T>::getG() const {
+    return this->g;
+}
+
+template <typename T>
+vector<vector<int>> ChebyshevOperatorFinite<T>::getMultiIndices() const {
+    return this->multiIndices;
 }
 
 
@@ -260,9 +270,9 @@ template <typename T>
 typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::NewtonLikeOperatorTx_x(const VectorType& x) {
     /// poniżej test dosłowny ze wzorów
 //    auto F_x = (*this)(x);
-//    VectorType mult_A_F_x = getInverseDerivativeFinite() * F_x;
+//    DVectorType mult_A_F_x = getInverseDerivativeFinite() * F_x;
 //    cout << "mult_A_F_x= " << mult_A_F_x << endl;
-//    VectorType result = x - mult_A_F_x;
+//    DVectorType result = x - mult_A_F_x;
 //    cout << "T(x)= " << result << endl;
 //    return result - x;
 
