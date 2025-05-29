@@ -7,11 +7,23 @@ template <typename T, int DIM>
 //T Norm<T, DIM>::computeNorm(const ChebyshevSeries<T, DIM>& a) const {
 template<class V>
 T Norm<T, DIM>::computeNorm(const V& a) const {
-    T sum = capd::abs(a[0]); // Zaczynamy od |a_0|
-    for (int k = 1; k < a.dimension(); ++k) {
-        sum += 2 * capd::abs(a[k]) * std::pow(nu, k); // 2 * |a_k| * nu^k
-//        cout << sum << endl;
+//    T sum = capd::abs(a[0]); // Zaczynamy od |a_0|
+//    for (int k = 1; k < a.dimension(); ++k) {
+//        sum += 2 * capd::abs(a[k]) * std::pow(nu, k); // 2 * |a_k| * nu^k
+////        cout << sum << endl;
+//    }
+
+    T horner_sum = (N > 1) ? capd::abs(a[N - 1]) : 0;
+
+    // Schemat Hornera: od końca w stronę k = 1
+    for (int k = N - 2; k >= 1; k--) {
+        horner_sum = (horner_sum * nu) + capd::abs(a[k]);
     }
+    horner_sum *= nu;
+
+    T sum = capd::abs(a[0]);
+    sum += 2 * horner_sum;
+
     return sum;
 }
 

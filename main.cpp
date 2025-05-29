@@ -1,12 +1,11 @@
 #include <iostream>
-#include <cmath>
 #include "capd/capdlib.h"
 #include "capd/map/Map.hpp"
 #include "capd/dynsys/OdeSolver.hpp"
-#include "capd/poincare/PoincareMap.hpp"
 #include "capd/poincare/AbstractSection.hpp"
 #include "capd/dynset/C0DoubletonSet.hpp"
-#include "capd/dynset/C1DoubletonSet.hpp"
+
+#define LOGGER(A) cout << (#A) << " = " << (A) << endl
 
 #include "source/ChebyshevSeries/ChebyshevSeries.hpp"
 #include "source/ChebyshevSeries/Norm.hpp"
@@ -15,16 +14,19 @@
 
 
 using namespace capd;
-using T = double;
+//using T = double;
 using namespace std;
 
 typedef vectalg::Vector<double, DIMENSION> DVectorType;
 typedef vectalg::Matrix<double, DIMENSION, DIMENSION> DMatrixType;
 typedef vectalg::Vector<ChebyshevSeries<double, DIMENSION>, DIMENSION> DVectorOfChebyshevsType;
+typedef ChebyshevSeries<double, DIMENSION> DChebyshevsVectorType;
+
 typedef vectalg::Vector<Interval, DIMENSION> IVectorType;
 typedef vectalg::Matrix<Interval, DIMENSION, DIMENSION> IMatrixType;
 typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVectorOfChebyshevsType;
 typedef vectalg::SumNorm<DVectorType, DMatrixType> NormType;
+
 
 
 // ---------- Pomocnicze ----------
@@ -49,12 +51,12 @@ vector<vector<int>> generateMultiIndices(int order, int maxDegree) {
     return result;
 }
 
-vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(vector<vector<int>> multiIndices, int n){
+DMatrixType defineFunctionG(vector<vector<int>> multiIndices, int n){
     int A = multiIndices.size();
     double rho = 28;
     double beta = 8/3.;
     double sigma = 10;
-    vectalg::Matrix<T, DIMENSION, DIMENSION> g(A, n);
+    DMatrixType g(A, n);
 
     //definiuje poprzez wielowskazniki
     //Lorenz
@@ -121,9 +123,9 @@ vectalg::Matrix<T, DIMENSION, DIMENSION> defineFunctionG(vector<vector<int>> mul
     return g;
 }
 
-vectalg::Vector<T, DIMENSION> checkSolution(const vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION>& a_series_approx,
-                   T argument){
-    vectalg::Vector<T, DIMENSION> value(a_series_approx.dimension());
+DVectorType checkSolution(const DVectorOfChebyshevsType& a_series_approx,
+                   double argument){
+    DVectorType value(a_series_approx.dimension());
 //    argument = argument * 2 - 1.;
     for(int i = 0; i < a_series_approx.dimension(); i++){
         value[i] = a_series_approx[i](argument * 2 - 1);
@@ -137,16 +139,16 @@ vectalg::Vector<T, DIMENSION> checkSolution(const vectalg::Vector<ChebyshevSerie
 void testChebyshevSeries() {
     cout << "\n========== TEST: ChebyshevSeries ==========\n";
 
-    ChebyshevSeries<double> poly1(2);  // a_0 + a_1 T_1 + a_2 T_2
-    ChebyshevSeries<double> poly2(2);
-    vectalg::Vector<double, 0> tmp = {5.481443923147439, 0.2407219615737195};
+    DChebyshevsVectorType poly1(2);  // a_0 + a_1 T_1 + a_2 T_2
+    DChebyshevsVectorType poly2(2);
+    DVectorType tmp = {5.481443923147439, 0.2407219615737195};
     poly1.setCoefficients(tmp);
     tmp = {12.339608554714449, 3.6698042773572244};
     poly2.setCoefficients(tmp);
 
     cout << "poly1: "; poly1.prettyPrint(); cout << "\n";
     cout << "poly2: "; poly2.prettyPrint(); cout << "\n";
-    cout << "convolve: " << ChebyshevSeries<T>::convolve(poly1, poly2) << endl;
+    cout << "convolve: " << ChebyshevSeries<double>::convolve(poly1, poly2) << endl;
 
     cout << "poly1 + poly2: " << poly1 + poly2;
     cout << "poly1 * poly2: " << poly1 * poly2;
@@ -165,27 +167,27 @@ void testChebyshevSeries() {
 void testNorms() {
     cout << "\n========== TEST: Norm ==========\n";
 
-    ChebyshevSeries<double> poly1(3);
+    DChebyshevsVectorType poly1(3);
     poly1[0] = 1.0; poly1[1] = 1.0; poly1[2] = 1.0;
 
-    ChebyshevSeries<double> poly2(3);
+    DChebyshevsVectorType poly2(3);
     poly2[0] = 2.0; poly2[1] = 2.0; poly2[2] = 2.0;
 
-    vectalg::Vector<ChebyshevSeries<double>, DIMENSION> vec(2);
+    vectalg::Vector<DChebyshevsVectorType, DIMENSION> vec(2);
     vec[0] = poly1;
     vec[1] = poly2;
 
     Norm<double> myNorm(2.0, 3, 2);
 
-    cout << "Norm of poly1: " << myNorm.computeNorm(poly1) << "\n";
+    cout << "Norm of poly1: " << myNorm.computeNorm(poly2) << "\n";
 //    cout << "Norm of vector: " << myNorm.computeNorm(vec) << "\n";
 }
 
 void printPreparation(int N, int n, int N_g,
-                      vectalg::Vector<T, 0>& u0,
-                      ChebyshevSeries<T>& v,
-                      ChebyshevSeries<T>& w,
-                      vectalg::Matrix<T, DIMENSION, DIMENSION>& g,
+                      DVectorType & u0,
+                      DChebyshevsVectorType & v,
+                      DChebyshevsVectorType & w,
+                      DMatrixType& g,
                       vector<vector<int>>& multiIndices){
     cout << "=============PRZYGOTOWANIE=============" << endl;
     cout << "Znalezienie rozwiązania dla układu Lorenza przy użyciu wielomianów Czebyszewa." << endl;
@@ -209,25 +211,25 @@ void printPreparation(int N, int n, int N_g,
 // co za tym idzie, mamy dwa rozne N -> ustalajac liczbe wspolczynnikow niezerowych przyblizen jako N
 // czyli a_0, a_1, a_2, ..., a_N oraz c_0, c_1, c_2, ..., c_N
 // bedziemy wyznaczac F_{N-1}
-ChebyshevOperatorFinite<T> prepareChebyshevOperatorAndFindFiniteSolution(int N, int n,
-                                                                         DVectorType u0,
-                                                                         ChebyshevSeries<T>& v,
-                                                                         ChebyshevSeries<T>& w,
-                                                                         DMatrixType& g,
-                                                                         vector<vector<int>>& multiIndices) {
+ChebyshevOperatorFinite<double> prepareChebyshevOperatorAndFindFiniteSolution(int N, int n,
+                                                                              DVectorType u0,
+                                                                              DChebyshevsVectorType & v,
+                                                                              DChebyshevsVectorType & w,
+                                                                              DMatrixType& g,
+                                                                              vector<vector<int>>& multiIndices) {
     cout << "============= WYLICZANIE PRZYBLIŻONEGO ROZWIĄZANIA =============" << endl;
 
     //Ponizej startowe parametry
-    constexpr T omega_start = 1.; //omega jest czescia rownania
-    vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series_start(n);
+    constexpr double omega_start = 1.; //omega jest czescia rownania
+    DVectorOfChebyshevsType a_series_start(n);
     for (int i = 0; i < n; i++){
-        a_series_start[i] = ChebyshevSeries<T, DIMENSION>(N);
+        a_series_start[i] = DChebyshevsVectorType (N);
         a_series_start[i][0] = u0[i];
     }
     a_series_start[0][1] = 1e-8; //zadanie, aby macierz pochodnej byla odwracalna (pierwsza kolumna byla niezerowa)
 
 
-    ChebyshevOperatorFinite<T> op(N, n, u0, g, v, w, multiIndices);
+    ChebyshevOperatorFinite<double> op(N, n, u0, g, v, w, multiIndices);
     int max_iterations = 100;
     auto solution_approx = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
 
@@ -240,21 +242,22 @@ ChebyshevOperatorFinite<T> prepareChebyshevOperatorAndFindFiniteSolution(int N, 
 
 
 // USUWAM CAŁA KLASĘ ChebyshevOperatorInfinite
-void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<T>& finiteOp) {
+void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<double>& finiteOp) {
     cout << "\n========== TEST: ChebyshevOperatorInfinite ==========\n";
     cout << "========== KONIEC TESTU ==========\n";
 }
 
 ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const DVectorType& u0,
-                                                    ChebyshevSeries<T>& v,
-                                                    ChebyshevSeries<T>& w,
+                                                    DChebyshevsVectorType & v,
+                                                    DChebyshevsVectorType & w,
                                                     DMatrixType& g,
                                                     vector<vector<int>>& multiIndices,
                                                     const ChebyshevOperatorFinite<double>& finiteOp){
     /// to co zostało przekonwertowane na Interval to:
     /// * u0 (punkt startowy)
     /// * v i w (sekcja Poincare)
-    /// * omega, a, x (dosłownie używajac convertObject
+    /// * omega, a, x (dosłownie, używajac convertObject z a na [a,a]
+    /// * g
 
     /// to co zostało wyliczone już w interval to:
     /// * c_series
@@ -263,13 +266,13 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const DVectorT
 
     /// to co zostało zostawione bez zmiany na interval to:
     /// * N i n
-    /// g i multiIndeces
+    /// * multiIndeces
     // zamiana na arytmetyke przedziałowa
     ChebyshevOperatorFinite<Interval> IFiniteOp(N, n,
                                                 capd::vectalg::convertObject<IVectorType, DVectorType>(u0),
-                                                g,        
-                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, ChebyshevSeries<T>>(v),
-                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, ChebyshevSeries<T>>(w),
+                                                capd::vectalg::convertObject<IMatrixType, DMatrixType>(g),
+                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, DChebyshevsVectorType>(v),
+                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, DChebyshevsVectorType>(w),
                                                 multiIndices);
 
     IFiniteOp.setOmega( Interval(finiteOp.getOmega()));
@@ -294,51 +297,84 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
     cout << "\n========== TEST: ChebyshevOperatorInfinite ==========\n";
 
     RadiiPolynomials<Interval> radii_pol(N, n, nu, IFiniteOp);
+    Norm<Interval> weighted_norm(nu, N, n);
 
     //test na odwrocenie macierzy odwrotnej - odwrócona, powinna być zbliżona do IFiniteOp.derivative_finite
     IMatrixType interval_inverse_of_inverse_of_derivative_test = matrixAlgorithms::gaussInverseMatrix(IFiniteOp.getInverseDerivativeFinite());
 //    cout << interval_inverse_of_inverse_of_derivative_test << endl;
 
-    auto diff_T_x =  IFiniteOp.NewtonLikeOperatorTx_x(IFiniteOp.getX_approx());
-    cout << "T(x*) - x* = " << diff_T_x << endl;
-    auto Pi_0_diff_T_x = radii_pol.Pi0(diff_T_x);
-    auto abs_Pi_0_diff_T_x = capd::abs(Pi_0_diff_T_x);
+//    auto diff_T_x =  IFiniteOp.NewtonLikeOperatorTx_x(IFiniteOp.getX_approx());
+//    cout << "T(x*) - x* = " << diff_T_x << endl;
+//    auto Pi_0_diff_T_x = radii_pol.Pi0(diff_T_x);
+//    auto abs_Pi_0_diff_T_x = capd::abs(Pi_0_diff_T_x);
 
-    auto Y_0 = radii_pol.computeY0();
-    cout << "|Pi_0 (T(x*) - x*)| = " << abs_Pi_0_diff_T_x << ", Y_0 = " << Y_0 << endl;
-    if (abs_Pi_0_diff_T_x == Y_0) //czemu dziala ==, ale nie dziala <= ???
-        cout << "Y_0 bound OK" << endl;
-    else
-        cout << "Y_0 bound NOT OK" << endl;
+    auto gamma = radii_pol.compute_gamma();
+    LOGGER(gamma);
 
-    /// zawsze 0 będzie na dole przedziału i trochę nie wiem jak to poprawić (bo  wspolczynniki sa przedzialami [-,+])
-    for(int i = 0; i < n; i++){
-        Norm<Interval> weighted_norm(nu, N, n);
-        auto Y_1_i = radii_pol.computeY1j(i, N_g);
-        auto Pi_1i_diff_T_x = radii_pol.Pi1_j(diff_T_x, i, N, n);
-        cout << "Pi_1i_diff_T_x = " << Pi_1i_diff_T_x << endl;
-        auto norm_Pi_1i_diff_T_x = weighted_norm.computeNorm(Pi_1i_diff_T_x);
-        cout << "||Pi_1" << i << "(T(x*) - x*)|| = " << norm_Pi_1i_diff_T_x << ", Y_1_" << i << "= " << Y_1_i << endl;
+    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
+    auto Pi_0_AN_op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
+    LOGGER(Pi_0_AN_op_norm);
+
+    for (int j = 0; j < n; j++){
+        auto AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
+        cout << "For j=" << j << " ";
+        LOGGER(AN_op_norm);
     }
 
-//    auto h = radii_pol.compute_h();
-//    cout << "h = " << h << endl;
-//
-//    auto Phi_ax_1 = radii_pol.operatorNormPsi_ak(IFiniteOp.getASeries()[0], 1);
-//    cout << "Phi_ax_1 = " << Phi_ax_1 << endl;
-//
-//    auto gamma = radii_pol.compute_gamma();
-//    cout << "gamma= " << gamma << endl;
+    auto d1 = radii_pol.compute_d1();
+    LOGGER(d1);
 
-//    auto B_1 = radii_pol.computeB_k(24);
-//    cout << "B_24= " << B_1 << endl;
+    auto h = radii_pol.compute_h();
+    LOGGER(h);
 
-//    auto Z1 = radii_pol.compute_Z1();
-//    cout << "Z1= " << Z1 << endl;
-//
-//    radii_pol.testOperatorNorm();
+    auto Z1 = radii_pol.compute_Z1();
+    auto Pi_0_Z1 = radii_pol.Pi0(Z1);
+    LOGGER(Pi_0_Z1);
+
+    for (int j = 0; j < n; j++){
+        auto Pi_1_j_Z1 = radii_pol.Pi1_j(Z1, j, N, n);
+        auto norm_Pi_1_j_Z1 = weighted_norm.computeNorm(Pi_1_j_Z1);
+        cout << "For j=" << j << " ";
+        LOGGER(norm_Pi_1_j_Z1);
+    }
+
+    auto d2 = radii_pol.compute_d2();
+    LOGGER(d2);
+
+    cout << "================ Y - bounds ================" << endl;
+
+    auto Y_0 = radii_pol.computeY0();
+    auto Y_0_bound = Y_0.rightBound();
+    LOGGER(Y_0_bound);
+
+    for(int j = 0; j < n; j++){
+        auto Y_1_j = radii_pol.computeY1j(j, N_g);
+//        auto Pi_1j_diff_T_x = radii_pol.Pi1_j(diff_T_x, j, N, n);
+//        auto norm_Pi_1j_diff_T_x = weighted_norm.computeNorm(Pi_1j_diff_T_x);
+        cout << "For j=" << j << " ";
+        auto Y_1_j_bound = Y_1_j.rightBound();
+        LOGGER(Y_1_j_bound);
+    }
+    cout << "================ Z - bounds ================" << endl;
+
+    //TODO: Jak zadawać r?
+    double r = 0.1;
+    auto Z_0 = radii_pol.compute_Z0(r);
+    auto Y_0_bound = Y_0.rightBound();
+
+    LOGGER(Z_0);
+
+    for(int j = 0; j < n; j++){
+        auto Z_1_j = radii_pol.compute_Z1j(r, j);
+        cout << "For j=" << j << " ";
+        LOGGER(Z_1_j);
+    }
 
 
+//    cout << "difference: std::pow(1.112345432 ^ 40) = " << std::pow(1.112345432, 40) << ", fast_pow(1.112345432 ^ 40) = " << radii_pol.fast_pow(1.112345432, 40) << endl;
+    // TODO: zamienilam na algorytm szybkiego potegowania, ale pewnie źle zrozumiałam: używałam std::pow() do obliczania potegu \nu^k
+    // TODO: i to wyszło mi dokładniejsze (wiem, że szybkie potegowanie miało zmniejszyć liczbę obliczeń, a co za tym idzie zwiększyć dokładność, ale czy dla double to też stosować?
+    // TODO: był też wspomniany schemat hornera, ale on jest do ewaluacji całego wielomianu potęgowego
     cout << "========== KONIEC TESTU ==========\n";
 }
 
@@ -349,21 +385,20 @@ int main() {
     constexpr int N = 25;
     constexpr int n = 3;
     constexpr int N_g = 2;
-    double nu = 1.01; ///wartosc nu jest mocno powiazana z N
-    vectalg::Vector<T, 0> u0{5., 5., 23.};
-    ChebyshevSeries<T, DIMENSION> v{0, 0, 1.};
-    ChebyshevSeries<T, DIMENSION> w{0, 0, 27.};
+    double nu = 1.1; ///wartosc nu jest mocno powiazana z N
+    DVectorType u0{5., 5., 23.};
+    DChebyshevsVectorType v{0, 0, 1.};
+    DChebyshevsVectorType w{0, 0, 27.};
     auto multiIndices = generateMultiIndices(n, N_g);
-    vectalg::Matrix<T, DIMENSION, DIMENSION> g = defineFunctionG(multiIndices, n);
+    DMatrixType g = defineFunctionG(multiIndices, n);
 
-//    printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
+    printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
 
 //    testChebyshevSeries();
 //    testNorms();
-    ChebyshevOperatorFinite<T> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
+    ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
     ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
 //    cout << IFiniteOp << endl;
-//    Interval omegaI = capd::vectalg::convertObject<Interval, double>(finiteOp.getOmega()); - czemu to nie działa?
     testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
     cout << "##########################################################################################\n";
 
@@ -403,9 +438,9 @@ int main() {
 
         auto omega_approx = finiteOp.getOmega();
         auto a_series_approx = finiteOp.getASeries();
-        T t_chebyshev = 0;
-        T t_taylor = 0;
-        T del = 1 / (omega_approx * 10);
+        double t_chebyshev = 0;
+        double t_taylor = 0;
+        double del = 1 / (omega_approx * 10);
         cout << "rt= " << rt << endl;
         while (t_chebyshev < 1){
             auto diff = checkSolution(a_series_approx, t_chebyshev) - solution(t_taylor);

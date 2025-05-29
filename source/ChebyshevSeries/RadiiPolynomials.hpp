@@ -30,7 +30,9 @@ public:
 
     /// gamma bedzie double, jesli g bedzie double - jesli g bedzie interval to gamma bedzie interval
     /// ale g chyba powinno zostac double, tak?
-    double compute_gamma();
+    T compute_gamma();
+    T compute_GammaMinus_a(const VectorType& a);
+    T compute_GammaPlus_a(const VectorType& a);
 
     /// B_k jest interval, bo operatorNormPsi_ak jest interval oraz B_k jest Vectorem
     VectorType computeB_k(int k);
@@ -40,14 +42,19 @@ public:
 
     T operatorNormPsi_ak(VectorType& a, int k);
 
+    VectorType compute_d1();
+    VectorType compute_d2();
+
 
     T computeY0();
     //N_g przekazany jako argument
     T computeY1j(int j, int N_g);
 
-    T computeZ0(T r);
+    T compute_Z1j(T r, int j);
+    T compute_Z0(T r);
 
     void testOperatorNorm();
+    double fast_pow(double number, int exp);
 
 private:
     // TODO: waga nie będzie przedziałem dla interval, prawda?
@@ -57,16 +64,15 @@ private:
     VectorType h;
     ChebyshevOperatorFinite<T> finiteOp;
 
-    DVectorType g_unit_vector(int j);
-    DVectorType g_ls(int l, int s);
+    VectorType g_unit_vector(int j);
+    VectorType g_ls(int l, int s);
 
     /// jesli g bedzie interval to to bedzie tez interval
     template <class V>
     double vector_sum(const V & v);
     template <class V>
     V vector_abs(const V & v);
+
 };
-
-
 
 #include "RadiiPolynomials.tpp"

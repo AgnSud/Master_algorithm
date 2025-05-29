@@ -12,7 +12,7 @@ template<typename T>
 ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
         const int N, const int n,
         const VectorType& u0_init,
-        const DMatrixType& g_init,
+        const MatrixType& g_init,
         const ChebyshevSeries<T, 0>& v,
         const ChebyshevSeries<T, 0>& w,
         const vector<vector<int>>& multiIndices
@@ -55,7 +55,7 @@ ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::getX_approx()
 }
 
 template <typename T>
-ChebyshevOperatorFinite<T>::DMatrixType ChebyshevOperatorFinite<T>::getG() const {
+ChebyshevOperatorFinite<T>::MatrixType ChebyshevOperatorFinite<T>::getG() const {
     return this->g;
 }
 
