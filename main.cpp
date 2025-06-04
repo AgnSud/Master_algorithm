@@ -1,4 +1,7 @@
 #include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <random>
 #include "capd/capdlib.h"
 #include "capd/map/Map.hpp"
 #include "capd/dynsys/OdeSolver.hpp"
@@ -25,7 +28,7 @@ typedef ChebyshevSeries<double, DIMENSION> DChebyshevsVectorType;
 typedef vectalg::Vector<Interval, DIMENSION> IVectorType;
 typedef vectalg::Matrix<Interval, DIMENSION, DIMENSION> IMatrixType;
 typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVectorOfChebyshevsType;
-typedef vectalg::SumNorm<DVectorType, DMatrixType> NormType;
+typedef vectalg::SumNorm<DVectorType, DMatrixType> SumNormType;
 
 
 
@@ -133,6 +136,34 @@ DVectorType checkSolution(const DVectorOfChebyshevsType& a_series_approx,
     return value;
 }
 
+IVectorType randomVectorInBallWeightedNorm(int dim, double r, const Norm<Interval>& weighted_norm) {
+    static std::mt19937 gen(std::random_device{}());
+    std::normal_distribution<> dist(0.0, 1.0);
+    std::uniform_real_distribution<> u_dist(0.0, 1.0);  // dla losowego skalowania <1
+
+    DVectorType vec(dim);
+    for (int i = 0; i < dim; ++i)
+        vec[i] = dist(gen);
+
+    // Przekształcenie na przedziałowy wektor (z dokładnymi punktami)
+    IVectorType ivec = capd::vectalg::convertObject<IVectorType, DVectorType>(vec);
+
+    // Oblicz normę ważoną
+    Interval norm_val = weighted_norm.computeNorm(ivec);
+
+    // Skaluj tak, aby ||x||_ν ≤ r
+    double u = std::pow(u_dist(gen), 1.0 / dim);
+    Interval scale = Interval(r * u) / norm_val;
+
+    // Skalowanie wektora przedziałowego
+    for (int i = 0; i < dim; ++i)
+        ivec[i] = ivec[i] * scale;
+
+    return ivec;
+}
+
+
+
 
 
 // ---------- TEST 1: ChebyshevSeries ----------
@@ -202,6 +233,73 @@ void printPreparation(int N, int n, int N_g,
     cout << "Liczba wyliczanych współczynników szeregu Czebyszewa ustawiona została na N=" << N << endl << endl;
 }
 
+// TODO: Czy r ma być double? Chyba tak
+void verify_bounds(int N, int n, double nu, double r, RadiiPolynomials<Interval> radii_pol,
+                   ChebyshevOperatorFinite<Interval>& IFiniteOp) {
+    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
+    IVectorType x_approx = IFiniteOp.getX_approx();
+    IVectorType F_x_approx = IFiniteOp.getF_x_approx();
+    IVectorType AF = A_N * F_x_approx;
+    int l = 1;
+    IVectorType Pi1j_Z1j_norm_supremum(n);
+    LOGGER(Pi1j_Z1j_norm_supremum);
+    Interval Pi0_DT_supremum(0.);
+
+//    IVectorType x1(n*N + 1), x2(n*N + 1);
+//    x1[1] = r; x2[1] = r;
+//    IVectorType x = x_approx + x1;
+//    IVectorType DT_result = IFiniteOp.applyDT(x, x2);
+//    std::cout << "size of DT(x + x1) * x2 = " << DT_result.dimension() << "\n DT(x + x1) * x2 = " << DT_result << std::endl;
+
+    Norm<Interval> weighted_norm(nu, N, n);
+
+    std::cout << "============ Verifying bounds ============\n";
+    auto Y_bounds = radii_pol.getYBounds();
+    auto Z_bounds = radii_pol.getZBounds();
+
+    // TODO: Check: ||Pi_{1,j}(T(x) - x)|| ≤ Y1_j -> Y1_j jest prawym koncem przedzialu i porównujemy z prawym końcem przedziału po lewej, tak?
+    for (int j = 0; j < n; ++j) {
+        auto Pi1j_Y1j = radii_pol.Pi1_j(AF, j, N, n);
+        auto Pi1j_Y1j_norm = weighted_norm.computeNorm(Pi1j_Y1j);
+        std::cout << "Y_bound for j=" << j << ": " << Pi1j_Y1j_norm << " ≤ " << Y_bounds[j+1]
+                  << " => " << (Pi1j_Y1j_norm.rightBound() <= Y_bounds[j+1] ? "OK" : "FAIL") << "\n";
+    }
+
+    // Check: |Pi_0(T(x) - x)| ≤ Y0
+    Interval Pi0_val = capd::abs(radii_pol.Pi0(AF));
+    std::cout << "Y0: " << Pi0_val << " ≤ " << Y_bounds[0]
+              << " => " << (Pi0_val.rightBound() <= Y_bounds[0] ? "OK" : "FAIL") << "\n";
+
+
+    for (int sample = 0; sample < l; ++sample) {
+        IVectorType x1 = randomVectorInBallWeightedNorm(n * N + 1, r, weighted_norm);
+        IVectorType x2 = randomVectorInBallWeightedNorm(n * N + 1, r, weighted_norm);
+        IVectorType x = x_approx + x1;
+        IVectorType DT_result = IFiniteOp.applyDT_decomposed(x, x2);
+
+        for (int j = 0; j < n; ++j) {
+            auto Pi1j_Z1j = radii_pol.Pi1_j(DT_result, j, N, n);
+            auto Pi1j_Z1j_norm = weighted_norm.computeNorm(Pi1j_Z1j);
+            if (Pi1j_Z1j_norm.rightBound() >= Pi1j_Z1j_norm_supremum[j].rightBound()){
+                Pi1j_Z1j_norm_supremum[j] = Pi1j_Z1j_norm;
+            }
+        }
+
+        Interval Pi0_DT = capd::abs(radii_pol.Pi0(DT_result));
+        if (Pi0_DT.rightBound() >= Pi0_DT_supremum.rightBound()) {
+            Pi0_DT_supremum = Pi0_DT;
+        }
+    }
+
+    for (int j = 0; j < n; ++j) {
+        std::cout << "sup_j ||Pi_{1," << j << "} D(T(x + x1)) x2|| = " << Pi1j_Z1j_norm_supremum[j]
+                  << " ≤ " << Z_bounds[j+1] << " => " << (Pi1j_Z1j_norm_supremum[j].rightBound() <= Z_bounds[j+1] ? "OK" : "FAIL") << "\n";
+    }
+    std::cout << "sup ||Pi_0 D(T(x + x1)) x2|| = " << Pi0_DT_supremum
+              << " ≤ " << Z_bounds[0] << " => " << (Pi0_DT_supremum.rightBound() <= Z_bounds[0] ? "OK" : "FAIL") << "\n";
+
+}
+
 
 
 
@@ -241,12 +339,6 @@ ChebyshevOperatorFinite<double> prepareChebyshevOperatorAndFindFiniteSolution(in
 }
 
 
-// USUWAM CAŁA KLASĘ ChebyshevOperatorInfinite
-void testChebyshevOperatorInfinite(int N, int n, ChebyshevOperatorFinite<double>& finiteOp) {
-    cout << "\n========== TEST: ChebyshevOperatorInfinite ==========\n";
-    cout << "========== KONIEC TESTU ==========\n";
-}
-
 ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const DVectorType& u0,
                                                     DChebyshevsVectorType & v,
                                                     DChebyshevsVectorType & w,
@@ -284,10 +376,6 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const DVectorT
     IVectorType IF_x_approx = IFiniteOp(IFiniteOp.getX_approx());
     IFiniteOp.setF_x_approx(IF_x_approx);
     IFiniteOp.computeDerivativeInverse(IFiniteOp.getX_approx());
-//    IFiniteOp.setCSeries( capd::vectalg::convertObject<IVectorOfChebyshevsType, DVectorOfChebyshevsType>(finiteOp.getCSeries()) );
-//    IFiniteOp.setF_x_approx( capd::vectalg::convertObject<IVectorType, DVectorType>(finiteOp.getF_x_approx()) );
-//    IFiniteOp.setDerivativeFinite( capd::vectalg::convertObject<IMatrixType, DMatrixType>(finiteOp.getDerivativeFinite()) );
-//    IFiniteOp.setInverseDerivativeFinite( capd::vectalg::convertObject<IMatrixType, DMatrixType>(finiteOp.getInverseDerivativeFinite()) );
 
     return IFiniteOp;
 }
@@ -342,39 +430,20 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
     LOGGER(d2);
 
     cout << "================ Y - bounds ================" << endl;
+    radii_pol.compute_YBounds(N_g);
+    auto Y_bounds = radii_pol.getYBounds();
+    LOGGER(Y_bounds);
 
-    auto Y_0 = radii_pol.computeY0();
-    auto Y_0_bound = Y_0.rightBound();
-    LOGGER(Y_0_bound);
-
-    for(int j = 0; j < n; j++){
-        auto Y_1_j = radii_pol.computeY1j(j, N_g);
-//        auto Pi_1j_diff_T_x = radii_pol.Pi1_j(diff_T_x, j, N, n);
-//        auto norm_Pi_1j_diff_T_x = weighted_norm.computeNorm(Pi_1j_diff_T_x);
-        cout << "For j=" << j << " ";
-        auto Y_1_j_bound = Y_1_j.rightBound();
-        LOGGER(Y_1_j_bound);
-    }
     cout << "================ Z - bounds ================" << endl;
 
-    //TODO: Jak zadawać r?
-    double r = 0.1;
-    auto Z_0 = radii_pol.compute_Z0(r);
-    auto Y_0_bound = Y_0.rightBound();
+    //TODO: Jak zadawać r? W pracy napisali, ze ustawiaja odgornie (podrozdzial 6.2) oraz ze uzyli r = 1e-6 (podrozdzial 5.4.1)
+    double r = 1e-6;
+    radii_pol.compute_ZBounds(r);
+    auto Z_bounds = radii_pol.getZBounds();
+    LOGGER(Z_bounds);
 
-    LOGGER(Z_0);
+    verify_bounds(N, n, nu, r, radii_pol, IFiniteOp);
 
-    for(int j = 0; j < n; j++){
-        auto Z_1_j = radii_pol.compute_Z1j(r, j);
-        cout << "For j=" << j << " ";
-        LOGGER(Z_1_j);
-    }
-
-
-//    cout << "difference: std::pow(1.112345432 ^ 40) = " << std::pow(1.112345432, 40) << ", fast_pow(1.112345432 ^ 40) = " << radii_pol.fast_pow(1.112345432, 40) << endl;
-    // TODO: zamienilam na algorytm szybkiego potegowania, ale pewnie źle zrozumiałam: używałam std::pow() do obliczania potegu \nu^k
-    // TODO: i to wyszło mi dokładniejsze (wiem, że szybkie potegowanie miało zmniejszyć liczbę obliczeń, a co za tym idzie zwiększyć dokładność, ale czy dla double to też stosować?
-    // TODO: był też wspomniany schemat hornera, ale on jest do ewaluacji całego wielomianu potęgowego
     cout << "========== KONIEC TESTU ==========\n";
 }
 
@@ -382,73 +451,92 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
 int main() {
     cout.precision(17);
 
-    constexpr int N = 25;
-    constexpr int n = 3;
-    constexpr int N_g = 2;
-    double nu = 1.1; ///wartosc nu jest mocno powiazana z N
-    DVectorType u0{5., 5., 23.};
-    DChebyshevsVectorType v{0, 0, 1.};
-    DChebyshevsVectorType w{0, 0, 27.};
-    auto multiIndices = generateMultiIndices(n, N_g);
-    DMatrixType g = defineFunctionG(multiIndices, n);
 
-    printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
+    for (int N = 25; N < 26; N++){
+        double nu = 1.1;
+        constexpr int n = 3;
+        constexpr int N_g = 2;
+        DVectorType u0{5., 5., 23.};
+        DChebyshevsVectorType v{0, 0, 1.};
+        DChebyshevsVectorType w{0, 0, 27.};
+        auto multiIndices = generateMultiIndices(n, N_g);
+        DMatrixType g = defineFunctionG(multiIndices, n);
 
-//    testChebyshevSeries();
-//    testNorms();
-    ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
-    ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
-//    cout << IFiniteOp << endl;
-    testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
-    cout << "##########################################################################################\n";
+        printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
 
-    {
-        DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
-        DOdeSolver solver(vectorField,N);
-        DCoordinateSection section(3,2,27.);
-        DPoincareMap pm(solver,section);
-        DTimeMap tm(solver);
+    //    testChebyshevSeries();
+    //    testNorms();
+        ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
+        ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
+//        cout << finiteOp << endl;
+        testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
+        cout << "##########################################################################################\n";
 
-        DVector u{5,5,23};
-        DVector u1 = u;
-        double rt=0;
-        cout << pm(u,rt) << endl;
-        cout << rt << endl;
-
-        // ze wynik powyzszego, powinien byc taki jak ponizszego po czasie 1?
-        // EDIT: NIE, czas zadany w ponizszym to czas przykladowy, aby byly te same wyniki potrzeba
-        // dac wyjscie czasu powyzszego
-        tm.stopAfterStep(true);
-        int counter = 0;
-
-        DTimeMap::SolutionCurve solution(0.);
-        do {
-            tm(rt,u1,solution);
-            counter++;
-        }while(!tm.completed());
-
-        cout << "counter= " << counter << endl;
-//        T t = 0;
-//        rt = 3.50971460024166;
-//        T del = rt/10.;
-//        while (t < rt){
-//            cout << "sol(" << t << ") = " << solution(t) << endl;
-//            t += del;
+//        {
+//            DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
+//            DOdeSolver solver(vectorField,25);
+//            DCoordinateSection section(3,2,27.);
+//            DPoincareMap pm(solver,section);
+//            DTimeMap tm(solver);
+//
+//            DVector u{5,5,23};
+//            DVector u1 = u;
+//            double rt=0;
+//            cout << "Result at t = for Taylor: "<<  pm(u,rt) << endl;
+//            cout << "Time for Taylor: " << rt << endl;
+//
+//
+//            // ze wynik powyzszego, powinien byc taki jak ponizszego po czasie 1?
+//            // EDIT: NIE, czas zadany w ponizszym to czas przykladowy, aby byly te same wyniki potrzeba
+//            // dac wyjscie czasu powyzszego
+//            tm.stopAfterStep(true);
+//            int counter = 0;
+//
+//            DTimeMap::SolutionCurve solution(0.);
+//            do {
+//                tm(rt,u1,solution);
+//                counter++;
+//            }while(!tm.completed());
+//
+//            cout << "counter= " << counter << endl;
+//    //        T t = 0;
+//    //        rt = 3.50971460024166;
+//    //        T del = rt/10.;
+//    //        while (t < rt){
+//    //            cout << "sol(" << t << ") = " << solution(t) << endl;
+//    //            t += del;
+//    //        }
+//
+//            auto omega_approx = finiteOp.getOmega();
+//            auto a_series_approx = finiteOp.getASeries();
+//            auto cheb = checkSolution(a_series_approx, 1.0);
+//            SumNormType sumNorm;
+//            cout << "Result at t = 1.0 for Chebyshev: " << cheb << endl;
+//            cout << "Scale time for Chebyshev: " << 1./omega_approx << endl;
+//            double t_chebyshev = 0;
+//            double t_taylor = 0;
+//            double del = 1 / (omega_approx * 100);
+//            string name = "trajectoryN_" + std::to_string(N) + ".csv";
+//            std::ofstream fout(name);
+//            fout << std::setprecision(17) << std::scientific;
+//            fout << "t_chebyshev,t_taylor,x_cheb,y_cheb,z_cheb,x_tay,y_tay,z_tay,diff_norm\n";
+//            while (t_chebyshev < 1){
+//                auto cheb = checkSolution(a_series_approx, t_chebyshev);
+//                auto tay = solution(t_taylor);
+//                auto diff_norm = sumNorm(cheb - tay);
+//
+//                fout << t_chebyshev << "," << t_taylor << ","
+//                     << cheb[0] << "," << cheb[1] << "," << cheb[2] << ","
+//                     << tay[0] << "," << tay[1] << "," << tay[2] << "," << diff_norm << "\n";
+//
+////                cout << "||u("<< t_chebyshev << ") - sol(" << t_taylor << ")|| = " << diff_norm << endl;
+//
+//                t_chebyshev += 0.01;
+//                t_taylor += del;
+//                t_taylor = capd::min(t_taylor, rt);
+//            }
+////            std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
 //        }
-
-        auto omega_approx = finiteOp.getOmega();
-        auto a_series_approx = finiteOp.getASeries();
-        double t_chebyshev = 0;
-        double t_taylor = 0;
-        double del = 1 / (omega_approx * 10);
-        cout << "rt= " << rt << endl;
-        while (t_chebyshev < 1){
-            auto diff = checkSolution(a_series_approx, t_chebyshev) - solution(t_taylor);
-            cout << "u("<< t_chebyshev << ") - sol(" << t_taylor << ") = " << diff << endl;
-            t_chebyshev += 0.1;
-            t_taylor += del;
-            t_taylor = capd::min(t_taylor, rt);
-        }
     }
     return 0;
 }

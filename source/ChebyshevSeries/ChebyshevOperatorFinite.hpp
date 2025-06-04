@@ -91,6 +91,8 @@ public:
             T tolerance = 1e-13);
 
     VectorType NewtonLikeOperatorTx_x(const VectorType& x);
+    VectorType applyDT(const VectorType& x, const VectorType& direction);
+    VectorType applyDT_decomposed(const VectorType& x, const VectorType& x2);
 
     // wylicza operator Czebyszewa skonczony F_N
     //ten operator() przyjmuje x i zwraca x (wewnetrzna funkcja)

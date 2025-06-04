@@ -268,19 +268,53 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
 
 template <typename T>
 typename ChebyshevOperatorFinite<T>::VectorType ChebyshevOperatorFinite<T>::NewtonLikeOperatorTx_x(const VectorType& x) {
-    /// poniżej test dosłowny ze wzorów
-//    auto F_x = (*this)(x);
-//    DVectorType mult_A_F_x = getInverseDerivativeFinite() * F_x;
-//    cout << "mult_A_F_x= " << mult_A_F_x << endl;
-//    DVectorType result = x - mult_A_F_x;
-//    cout << "T(x)= " << result << endl;
-//    return result - x;
-
     /// poniżej test wykorzystujacy wczesniejsze T(x) - x = x - AF(x) - x = -AF(x) - czyli roznica ktora tak naprawde sprawdzamy
     auto F_x = (*this)(x);
     VectorType mult_A_F_x = getInverseDerivativeFinite() * F_x;
     VectorType result = mult_A_F_x;
     return result;
+}
+
+template <typename T>
+typename ChebyshevOperatorFinite<T>::VectorType
+ChebyshevOperatorFinite<T>::applyDT(const VectorType& x, const VectorType& x2) {
+    using MatrixType = typename ChebyshevOperatorFinite<T>::MatrixType;
+
+    // DT(x) = I - A * DF(x) - np x = x^* + x1
+    MatrixType DF(this->n * this->N + 1, this->n * this->N + 1);;
+    computeDerivative(*this, x, DF);
+
+    MatrixType A = getInverseDerivativeFinite();
+
+    // DT = I - A * DF
+    MatrixType I(this->n * this->N + 1, this->n * this->N + 1);
+    I.setToIdentity();
+    MatrixType DT = I - A * DF;
+
+    return DT * x2;
+}
+
+template <typename T>
+typename ChebyshevOperatorFinite<T>::VectorType
+ChebyshevOperatorFinite<T>::applyDT_decomposed(const VectorType& x, const VectorType& x2) {
+    // DF(𝑥̂ + x₁)
+    MatrixType DF(this->n * this->N + 1, this->n * this->N + 1);
+    computeDerivative(*this, x, DF);  // DF(x̂ + x₁)
+
+    // A = [DF(x̂)]^{-1}, hatA = DF(x̂)
+    MatrixType A = getInverseDerivativeFinite();
+    MatrixType A_hat = getDerivativeFinite();
+
+    // część 1: (I - A A_hat) x2
+    MatrixType I(this->n * this->N + 1, this->n * this->N + 1);
+    I.setToIdentity();
+    VectorType first_term = (I - A * A_hat) * x2;
+
+    // część 2: A (DF(x) - A_hat) x2
+    VectorType second_term = A * ((DF - A_hat) * x2);
+
+    // końcowy wynik
+    return first_term - second_term;
 }
 
 

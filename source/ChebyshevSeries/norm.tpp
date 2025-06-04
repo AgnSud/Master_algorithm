@@ -33,10 +33,8 @@ template <typename T, int DIM>
 template<class V>
 T Norm<T, DIM>::computeDualNorm(const V& a) const {
     T maxTerm = capd::abs(a[0]);
-//    cout << "term for " << a[0] << "= " << maxTerm << endl;
     for (int k = 1; k < a.dimension(); ++k) {
         T term = capd::abs(a[k]) / (2 * std::pow(nu, k));
-//        cout << "term for " << a[k] << "= " << term << endl;
         maxTerm = capd::max(maxTerm, term); // zastepuje sup -> max, poniewaz i tak numerycznie jest max?
     }
     return maxTerm;
@@ -58,18 +56,22 @@ T Norm<T, DIM>::computeNorm_n(const capd::vectalg::Vector<V, DIM>& vec) const {
 template <typename T, int DIM>
 T Norm<T, DIM>::computeOperatorNorm_Pi0(const MatrixType& C) {
     T result_norm = capd::abs(C[0][0]);
+//    LOGGER(result_norm);
     for(int j_tilde = 0; j_tilde < n; j_tilde++){
         result_norm += mu_j(C, j_tilde);
     }
+//    LOGGER(result_norm);
     return result_norm;
 }
 
 template <typename T, int DIM>
 T Norm<T, DIM>::computeOperatorNorm_Pi1j(const MatrixType& C, int j) {
     T result_norm = eta_j(C, j);
+//    LOGGER(result_norm);
     for(int j_tilde = 0; j_tilde < n; j_tilde++){
         result_norm += ksi_j_j(C, j, j_tilde);
     }
+//    LOGGER(result_norm);
     return result_norm;
 }
 
@@ -77,11 +79,9 @@ T Norm<T, DIM>::computeOperatorNorm_Pi1j(const MatrixType& C, int j) {
 template <typename T, int DIM>
 T Norm<T, DIM>::computeOperatorNorm(const MatrixType& C) {
     auto Pi0_C = computeOperatorNorm_Pi0(C);
-    cout << "||Pi0_C|| = " << Pi0_C << endl;
 
     for(int j = 0; j < n; j++){
         auto Pi1j_C = computeOperatorNorm_Pi1j(C, j);
-        cout << "||Pi1" << j << "_C|| = " << Pi1j_C << endl;
     }
     return C[0][0];
 }
@@ -98,6 +98,7 @@ T Norm<T, DIM>::eta_j(const MatrixType &C, int j) {
     return result;
 }
 
+//ok
 template <typename T, int DIM>
 T Norm<T, DIM>::mu_j(const MatrixType &C, int j_tilde) {
     VectorType C_0_a(N);

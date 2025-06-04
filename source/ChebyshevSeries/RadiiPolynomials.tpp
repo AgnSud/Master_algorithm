@@ -5,7 +5,17 @@
 
 template<typename T>
 RadiiPolynomials<T>::RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_)
-        : N(N_), n(n_), nu(nu_), h(1+n), finiteOp(finiteOp_) {}
+        : N(N_), n(n_), nu(nu_), finiteOp(finiteOp_), Y_bounds(n_+1), Z_bounds(n_+1) {}
+
+template <typename T>
+typename RadiiPolynomials<T>::DVectorType RadiiPolynomials<T>::getYBounds() {
+    return Y_bounds;
+}
+
+template <typename T>
+typename RadiiPolynomials<T>::DVectorType RadiiPolynomials<T>::getZBounds() {
+    return Z_bounds;
+}
 
 template <typename T>
 typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::g_unit_vector(int j) {
@@ -14,7 +24,7 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::g_unit_vector(int 
     auto m_idx = finiteOp.getMultiIndices();
     for (int i = 0; i < m_idx.size(); i++){
         if (e_j == m_idx[i]){
-           return finiteOp.getG()[i];
+            return finiteOp.getG()[i];
         }
     }
     throw std::runtime_error("g_unit_vector: unit vector not found in multiIndices");
@@ -31,7 +41,7 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::g_ls(int l, int s)
             return finiteOp.getG()[i];
         }
     }
-    throw std::runtime_error("g_unit_vector: unit vector not found in multiIndices");
+    throw std::runtime_error("g_ls: unit vector not found in multiIndices");
 }
 
 template <typename T>
@@ -70,10 +80,8 @@ double RadiiPolynomials<T>::fast_pow(double number, int exp) {
 
 template <typename T>
 T RadiiPolynomials<T>::operatorNormPsi_ak(VectorType& a, int k) {
-    T max_result = capd::max(capd::abs(a[N-1]) / std::pow
-            (nu, k+N),
-                             capd::abs(a[capd::abs(N-2)]) / std::pow
-                             (nu, k+N-1));
+    T max_result = capd::max(capd::abs(a[N-1]) / std::pow(nu, k+N),
+                             capd::abs(a[capd::abs(N-2)]) / std::pow(nu, k+N-1));
 //    cout << "a_{N-2}/nu = " << capd::abs(a[N-1]) / std::pow
 //    (nu, k+N) << endl;
 //    cout << "a_{N-1}/nu = " << capd::abs(a[capd::abs(N-2)]) / std::pow
@@ -81,8 +89,7 @@ T RadiiPolynomials<T>::operatorNormPsi_ak(VectorType& a, int k) {
     for (int l = N; l <= k+N-2; l++){
         auto diff = capd::abs(a[capd::abs(k-l-1)] - a[capd::abs(k-l+1)]);
 //        cout << "diff for l = " << l << " = " << diff << "BEFORE DIV" << endl;
-        diff = diff / std::pow
-                (nu, l);
+        diff = diff / std::pow(nu, l);
 //        cout << "diff for l = " << l << " = " << diff << "AFTER DIV" << endl;
         max_result = capd::max(max_result, diff);
     }
@@ -169,7 +176,7 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_h() {
         result_h[j+1] = weighted_norm.computeOperatorNorm_Pi1j(diff, j);
     }
 
-    this->h = result_h;
+//    this->h = result_h;
     return result_h;
 }
 
@@ -453,6 +460,7 @@ T RadiiPolynomials<T>::compute_Z1j(T r, int j) {
     VectorType d1_vec = compute_d1();
     VectorType d2_vec = compute_d2();
     VectorType Z1 = compute_Z1();
+    VectorType h = compute_h();
 
     // gamma * ||Pi_{1,j} A_N||_B
     MatrixType A_N = finiteOp.getInverseDerivativeFinite();
@@ -472,15 +480,33 @@ T RadiiPolynomials<T>::compute_Z1j(T r, int j) {
 template <typename T>
 T RadiiPolynomials<T>::compute_Z0(T r) {
     T gamma = compute_gamma();
+    VectorType h = compute_h();
 
     MatrixType A_N = finiteOp.getInverseDerivativeFinite();
     Norm<T> weighted_norm(nu, N, n);
+    // TODO: tutaj wywolanie tego zwraca duze |C_0^0|, bo takie jest A_N
     T op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
 
     VectorType Z1 = compute_Z1();
     T Pi0_Z1 = Pi0(Z1);
 
     return gamma * op_norm * r * r + (h[0] + Pi0_Z1) * r;
+}
+
+template <typename T>
+void RadiiPolynomials<T>::compute_YBounds(int N_g) {
+    Y_bounds[0] = computeY0().rightBound();
+    for (int j = 0; j < n; ++j) {
+        Y_bounds[j+1] = computeY1j(j, N_g).rightBound();
+    }
+}
+
+template <typename T>
+void RadiiPolynomials<T>::compute_ZBounds(T r) {
+    Z_bounds[0] = compute_Z0(r).rightBound();
+    for (int j = 0; j < n; ++j) {
+        Z_bounds[j+1] = compute_Z1j(r, j).rightBound();
+    }
 }
 
 

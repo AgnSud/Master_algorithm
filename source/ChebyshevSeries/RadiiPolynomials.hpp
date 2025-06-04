@@ -17,6 +17,9 @@ public:
 
     RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_);
 
+    DVectorType getYBounds();
+    DVectorType getZBounds();
+
     T Pi0(const VectorType& x);
     VectorType Pi1(const VectorType& x);
     VectorType PiN(const VectorType& a, int N_, int n_);
@@ -53,6 +56,10 @@ public:
     T compute_Z1j(T r, int j);
     T compute_Z0(T r);
 
+    void compute_YBounds(int N_g);
+    void compute_ZBounds(T r);
+
+
     void testOperatorNorm();
     double fast_pow(double number, int exp);
 
@@ -61,8 +68,10 @@ private:
     int N;
     int n;
     double nu;
-    VectorType h;
+//    VectorType h;
     ChebyshevOperatorFinite<T> finiteOp;
+    DVectorType Y_bounds;  // length n + 1, [Y_0, Y_11, Y_12, Y_13] - wektor juz samych bound <double>
+    DVectorType Z_bounds;  // length n + 1, [Z_0, Z_11, Z_12, Z_13] - wektor już samych bound <double>
 
     VectorType g_unit_vector(int j);
     VectorType g_ls(int l, int s);
