@@ -233,7 +233,7 @@ void printPreparation(int N, int n, int N_g,
     cout << "Liczba wyliczanych współczynników szeregu Czebyszewa ustawiona została na N=" << N << endl << endl;
 }
 
-// TODO: Czy r ma być double? Chyba tak
+// TODO: r zadawany dla Z też ma być double? Bo to Z i Y to finalnie prawe konce przedziałow
 void verify_bounds(int N, int n, double nu, double r, RadiiPolynomials<Interval> radii_pol,
                    ChebyshevOperatorFinite<Interval>& IFiniteOp) {
     IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
@@ -242,7 +242,6 @@ void verify_bounds(int N, int n, double nu, double r, RadiiPolynomials<Interval>
     IVectorType AF = A_N * F_x_approx;
     int l = 1;
     IVectorType Pi1j_Z1j_norm_supremum(n);
-    LOGGER(Pi1j_Z1j_norm_supremum);
     Interval Pi0_DT_supremum(0.);
 
 //    IVectorType x1(n*N + 1), x2(n*N + 1);
@@ -300,6 +299,10 @@ void verify_bounds(int N, int n, double nu, double r, RadiiPolynomials<Interval>
 
 }
 
+// TODO: czy tutaj eksperymentować z różnymi wartościami r? Np zadać jakiś sensowny, ale duży i później zmniejszać?
+// zrobie tak, ze rozdziele verivy_bounds (i of 3.10) oraz verify radii (poniekad ii of 3.10) - poniewaz funkcja verify_bounds
+// i tak nie weryfikuje tego co jest dokładnie w 3.10 (bo tylko wylicza numeryczne), więc zakładam, obliczeniowo to będzie spełnione
+// dla r - tj szukamy juz spelnienia nierownosci dla wielomianow (Z też jest zmiennej r)
 
 
 
@@ -391,10 +394,6 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
     IMatrixType interval_inverse_of_inverse_of_derivative_test = matrixAlgorithms::gaussInverseMatrix(IFiniteOp.getInverseDerivativeFinite());
 //    cout << interval_inverse_of_inverse_of_derivative_test << endl;
 
-//    auto diff_T_x =  IFiniteOp.NewtonLikeOperatorTx_x(IFiniteOp.getX_approx());
-//    cout << "T(x*) - x* = " << diff_T_x << endl;
-//    auto Pi_0_diff_T_x = radii_pol.Pi0(diff_T_x);
-//    auto abs_Pi_0_diff_T_x = capd::abs(Pi_0_diff_T_x);
 
     auto gamma = radii_pol.compute_gamma();
     LOGGER(gamma);
@@ -431,18 +430,26 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
 
     cout << "================ Y - bounds ================" << endl;
     radii_pol.compute_YBounds(N_g);
+    cout << "tutaj" << endl;
     auto Y_bounds = radii_pol.getYBounds();
     LOGGER(Y_bounds);
 
     cout << "================ Z - bounds ================" << endl;
 
     //TODO: Jak zadawać r? W pracy napisali, ze ustawiaja odgornie (podrozdzial 6.2) oraz ze uzyli r = 1e-6 (podrozdzial 5.4.1)
-    double r = 1e-6;
-    radii_pol.compute_ZBounds(r);
+    double r_scalar = 1e-6;
+    DVectorType r_vec(1+n);
+    for (int j = 0; j < 1+n; j++)
+        r_vec[j] = r_scalar;
+    LOGGER(r_vec);
+    radii_pol.compute_ZBounds(r_vec);
     auto Z_bounds = radii_pol.getZBounds();
     LOGGER(Z_bounds);
 
-    verify_bounds(N, n, nu, r, radii_pol, IFiniteOp);
+    verify_bounds(N, n, nu, r_scalar, radii_pol, IFiniteOp);
+//    radii_pol.findRIntervalForRadiiPolynomials();
+    auto polynomials = radii_pol(r_vec);
+    LOGGER(polynomials);
 
     cout << "========== KONIEC TESTU ==========\n";
 }
@@ -535,7 +542,7 @@ int main() {
 //                t_taylor += del;
 //                t_taylor = capd::min(t_taylor, rt);
 //            }
-////            std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
+//            std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
 //        }
     }
     return 0;
