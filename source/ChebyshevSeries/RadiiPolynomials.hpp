@@ -18,10 +18,8 @@ public:
 
     RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_);
 
-    DVectorType getYBounds();
-    DVectorType getZBounds();
-//    VectorType getYBounds();
-//    VectorType getZBounds();
+    VectorType getYBounds();
+    VectorType getZBounds();
 
     T Pi0(const VectorType& x);
     VectorType Pi1(const VectorType& x);
@@ -35,16 +33,9 @@ public:
     //N_g przekazany jako argument
     T computeY1j(int j, int N_g);
 
-//    Czy V moze byc inne dla kazdej funkcji?
-//    VectorType compute_ZBounds(VectorType& r);
-//    template <class V>
-//    V compute_Z0(V r);
-//    template <class V>
-//    V compute_Z1j(V r, int j);
-
-    void compute_ZBounds(DVectorType& r);
-    T compute_Z0(double r);
-    T compute_Z1j(double r, int j);
+    void compute_ZBounds(T r);
+    std::pair<T, T> compute_Z0_terms();
+    std::pair<T, T> compute_Z1j_terms(int j);
 
 
     /// obliczy wszystkie h = [h0, h1x, h1y, hjz]
@@ -67,9 +58,9 @@ public:
 
 
     T findRIntervalForRadiiPolynomials();
-    T findRootNewtonForRadiiPolynomials(T r_start);
-    template <class V>
-    V operator()(V& r);
+    T findRIntervalForRadiiPolynomials_0();
+    T findRIntervalForRadiiPolynomials_1j(int j);
+    VectorType operator()(T r); // [p_0, p_{1,1}, ..., p_{1,n}]
 
     void testOperatorNorm();
 
@@ -81,14 +72,20 @@ private:
     int n;
     double nu;
     ChebyshevOperatorFinite<T> finiteOp;
-    DVectorType Y_bounds;  // length n + 1, [Y_0, Y_11, Y_12, Y_13] - wektor juz samych bound <double>
-    DVectorType Z_bounds;  // length n + 1, [Z_0, Z_11, Z_12, Z_13] - wektor już samych bound <double>
+    VectorType Y_bounds;  // length n + 1, [Y_0, Y_11, Y_12, Y_13] - wektor juz samych bound <double> (ale reprezentowanych w interval)
+    VectorType Z_bounds;  // length n + 1, [Z_0, Z_11, Z_12, Z_13] - wektor już samych bound <double> (ale reprezentowanych w interval)
 
     VectorType g_unit_vector(int j);
     VectorType g_ls(int l, int s);
 
     template <class V>
-    V vector_abs(const V & v);
+    V vector_abs(const V& v);
+
+    bool is_nonzero(const VectorType& v) {
+        for (int i = 0; i < v.dimension(); ++i)
+            if (v[i] != 0) return true;
+        return false;
+    }
 
 };
 

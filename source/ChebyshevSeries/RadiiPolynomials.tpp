@@ -40,6 +40,7 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::g_ls(int l, int s)
         }
     }
     throw std::runtime_error("g_ls: unit vector not found in multiIndices");
+//    return g_unit_vector(l) + g_unit_vector(s);
 }
 
 template <typename T>
@@ -54,12 +55,12 @@ V RadiiPolynomials<T>::vector_abs(const V& v) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-typename RadiiPolynomials<T>::DVectorType RadiiPolynomials<T>::getYBounds() {
+typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::getYBounds() {
     return Y_bounds;
 }
 
 template <typename T>
-typename RadiiPolynomials<T>::DVectorType RadiiPolynomials<T>::getZBounds() {
+typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::getZBounds() {
     return Z_bounds;
 }
 
@@ -117,9 +118,9 @@ V RadiiPolynomials<T>::Pi1_j(const V &x, int j, int N_, int n_) {
 
 template <typename T>
 void RadiiPolynomials<T>::compute_YBounds(int N_g) {
-    Y_bounds[0] = computeY0().rightBound();
+    Y_bounds[0] = computeY0().right();
     for (int j = 0; j < n; ++j) {
-        Y_bounds[j+1] = computeY1j(j, N_g).rightBound();
+        Y_bounds[j+1] = computeY1j(j, N_g).right();
     }
 //    VectorType Y_bounds(1+n);
 //    Y_bounds[0] = computeY0();
@@ -174,10 +175,13 @@ T RadiiPolynomials<T>::computeY1j(int j, int N_g) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-void RadiiPolynomials<T>::compute_ZBounds(DVectorType& r) {
-    Z_bounds[0] = compute_Z0(r[0]).rightBound();
+void RadiiPolynomials<T>::compute_ZBounds(T r) {
+    auto [Z0_r2, Z0_r1] = compute_Z0_terms();
+    Z_bounds[0] = Z0_r2 * r * r + Z0_r1 * r;
+
     for (int j = 0; j < n; ++j) {
-        Z_bounds[j+1] = compute_Z1j(r[j + 1], j).rightBound();
+        auto [Z1j_r2, Z1j_r1] = compute_Z1j_terms(j);
+        Z_bounds[j + 1] = Z1j_r2 * r * r + Z1j_r1 * r;
     }
 //    VectorType Z_bounds(1+n);
 //    Z_bounds[0] = compute_Z0(r[0]);
@@ -187,24 +191,67 @@ void RadiiPolynomials<T>::compute_ZBounds(DVectorType& r) {
 //    return Z_bounds;
 }
 
+//template <typename T>
+//T RadiiPolynomials<T>::compute_Z0(T r) {
+//    T gamma = compute_gamma();
+//    VectorType h = compute_h();
+//
+//    MatrixType A_N = finiteOp.getInverseDerivativeFinite();
+//    Norm<T> weighted_norm(nu, N, n);
+//    // TODO: tutaj wywolanie tego zwraca duze |C_0^0|, bo takie jest A_N
+//    T op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
+//
+//    VectorType Z1 = compute_Z1();
+//    T Pi0_Z1 = Pi0(Z1);
+//
+//    return gamma * op_norm * r * r + (h[0] + Pi0_Z1) * r;
+//}
+//
+//template <typename T>
+//T RadiiPolynomials<T>::compute_Z1j(T r, int j) {
+//    T gamma = compute_gamma();
+//    T omega = finiteOp.getOmega();
+//
+//    VectorType d1_vec = compute_d1();
+//    VectorType d2_vec = compute_d2();
+//    VectorType Z1 = compute_Z1();
+//    VectorType h = compute_h();
+//
+//    // gamma * ||Pi_{1,j} A_N||_B
+//    MatrixType A_N = finiteOp.getInverseDerivativeFinite();
+//    Norm<T> weighted_norm(nu, N, n);
+//    T AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
+//
+//    // Pi_{1,j}(Z1)
+//    T Z1_norm = weighted_norm.computeNorm(Pi1_j(Z1, j, N, n));
+//    T r2_term = (gamma * AN_op_norm + d2_vec[j] / (omega * 4.0) + 2 / omega ) * r * r;
+//    T r_term = (h[j + 1] + Z1_norm + d1_vec[j] / (4.0 * omega) ) * r;
+//
+//    return r2_term + r_term;
+//}
+
 template <typename T>
-T RadiiPolynomials<T>::compute_Z0(double r) {
+std::pair<T, T> RadiiPolynomials<T>::compute_Z0_terms() {
     T gamma = compute_gamma();
     VectorType h = compute_h();
 
     MatrixType A_N = finiteOp.getInverseDerivativeFinite();
     Norm<T> weighted_norm(nu, N, n);
-    // TODO: tutaj wywolanie tego zwraca duze |C_0^0|, bo takie jest A_N
     T op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
 
     VectorType Z1 = compute_Z1();
     T Pi0_Z1 = Pi0(Z1);
 
-    return gamma * op_norm * r * r + (h[0] + Pi0_Z1) * r;
+    T r2_coeff = gamma * op_norm;
+    T r_coeff = h[0] + Pi0_Z1;
+    LOGGER(h[0]);
+    LOGGER(Pi0_Z1);
+
+    return std::make_pair(r2_coeff, r_coeff);
 }
 
 template <typename T>
-T RadiiPolynomials<T>::compute_Z1j(double r, int j) {
+std::pair<T, T> RadiiPolynomials<T>::compute_Z1j_terms(int j) {
     T gamma = compute_gamma();
     T omega = finiteOp.getOmega();
 
@@ -213,17 +260,21 @@ T RadiiPolynomials<T>::compute_Z1j(double r, int j) {
     VectorType Z1 = compute_Z1();
     VectorType h = compute_h();
 
-    // gamma * ||Pi_{1,j} A_N||_B
     MatrixType A_N = finiteOp.getInverseDerivativeFinite();
     Norm<T> weighted_norm(nu, N, n);
     T AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
 
-    // Pi_{1,j}(Z1)
     T Z1_norm = weighted_norm.computeNorm(Pi1_j(Z1, j, N, n));
-    T r2_term = (gamma * AN_op_norm + d2_vec[j] / (omega * 4.0) + 2 / omega ) * r * r;
-    T r_term = (h[j + 1] + Z1_norm + d1_vec[j] / (4.0 * omega) ) * r ;
 
-    return r2_term + r_term;
+    T r2_coeff = gamma * AN_op_norm + d2_vec[j] / (omega * 4.0) + 2 / omega;
+    T r_coeff = h[j + 1] + Z1_norm + d1_vec[j] / (4.0 * omega);
+    cout << endl;
+    LOGGER(h[j + 1]);
+    LOGGER(Z1_norm);
+    LOGGER(d1_vec[j] / (4.0 * omega));
+    cout << endl;
+
+    return std::make_pair(r2_coeff, r_coeff);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -246,7 +297,6 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_h() {
         result_h[j+1] = weighted_norm.computeOperatorNorm_Pi1j(diff, j);
     }
 
-//    this->h = result_h;
     return result_h;
 }
 
@@ -262,7 +312,8 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_Z1() {
             AN[i][j] = capd::abs(AN[i][j]);
         }
     }
-    return AN * Z1_tilde;
+    auto Z1 = AN * Z1_tilde;
+    return Z1;
 }
 
 template <typename T>
@@ -270,13 +321,16 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_Z1_tilde()
     int totalDim = 1 + n * N;
     VectorType Z1_tilde(totalDim);
     Z1_tilde[0] = T(0);
+    for (int j = 0; j < n; j++){
+        Z1_tilde[j + 1] = 1 / std::pow(nu, N);
+    }
 
     int index = 1 + n; //od tego momentu zaczynamy
     for (int k = 1; k < N; ++k) {
         auto B_k = computeB_k(k);
-//        LOGGER(B_k);
         for (int j = 0; j < n; ++j) {
-            Z1_tilde[index++] = B_k[j] / 4.0;
+            Z1_tilde[index] = B_k[j] * 0.25;
+            index++;
         }
     }
     /// to ze dla dalszych k, B_k jest wieksze to kwestia, ze bierzemy mniejsze roznice wtedy
@@ -286,35 +340,40 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_Z1_tilde()
 template <typename T>
 typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::computeB_k(int k){
     VectorType first_sum(n);
-    vectalg::Vector<ChebyshevSeries<T, DIMENSION>, DIMENSION> a_series = finiteOp.getASeries();
-    if (k == N-1){
+    auto a_series = finiteOp.getASeries();
+    if (k == N - 1){
         for (int j = 0; j < n; j++){
-//            first_sum = vector_sum(g_unit_vector(j));
-            first_sum = vector_abs(g_unit_vector(j));
-            first_sum = first_sum / (std::pow
-                                             (nu, N) * 2);
+            first_sum += vector_abs(g_unit_vector(j));
         }
+        first_sum = first_sum / (std::pow(nu, N) * 2);
     }
-
     VectorType result = first_sum;
-//    cout << "first_sum = " << first_sum << endl;
     for (int l = 0; l < n; l++){
-        auto operatorNormPsi_al_k = operatorNormPsi_ak(a_series[l], k);
         for (int s = l; s < n; s++){
-            auto operatorNormPsi_as_k = operatorNormPsi_ak(a_series[s], k);
             auto abs_g_ls = vector_abs(g_ls(l, s));
-            result += abs_g_ls * (operatorNormPsi_al_k + operatorNormPsi_as_k);
+            if (is_nonzero(abs_g_ls)){
+                auto operatorNormPsi_al_k = operatorNormPsi_ak(a_series[l], k);
+                auto operatorNormPsi_as_k = operatorNormPsi_ak(a_series[s], k);
+//            cout << "for k= " << k << ", for l, s = " << l << ", " << s << ":    ";
+//            LOGGER(abs_g_ls);
+//                LOGGER(operatorNormPsi_al_k + operatorNormPsi_as_k);
+//                LOGGER(abs_g_ls * (operatorNormPsi_al_k + operatorNormPsi_as_k));
+//                cout << endl;
+                result = result + abs_g_ls * (operatorNormPsi_al_k + operatorNormPsi_as_k);
+            }
         }
     }
-//    cout << "B_k for k = " << k << " = " << result << endl;
-//    cout << "===========================" << endl;
     return result;
 }
 
 template <typename T>
 T RadiiPolynomials<T>::operatorNormPsi_ak(VectorType& a, int k) {
+//    LOGGER(capd::abs(a[N-1]) / std::pow(nu, k+N));
+//    LOGGER(capd::abs(a[capd::abs(N-2)]) / std::pow(nu, k+N-1));
+
     T max_result = capd::max(capd::abs(a[N-1]) / std::pow(nu, k+N),
                              capd::abs(a[capd::abs(N-2)]) / std::pow(nu, k+N-1));
+//    LOGGER(max_result);
     for (int l = N; l <= k+N-2; l++){
         auto diff = capd::abs(a[capd::abs(k-l-1)] - a[capd::abs(k-l+1)]);
         diff = diff / std::pow(nu, l);
@@ -447,55 +506,67 @@ T RadiiPolynomials<T>::compute_GammaPlus_a(const VectorType& a) {
 
 template <typename T>
 T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials(){
-    auto root_right = findRootNewtonForRadiiPolynomials(Interval(1e-6));
-    LOGGER(root_right);
+    VectorType intervals(1 + n);
+    intervals[0] = findRIntervalForRadiiPolynomials_0();
+    for (int j = 0; j < n; j++){
+        intervals[1 + j] = findRIntervalForRadiiPolynomials_1j(j);
+    }
+    LOGGER(intervals);
     return Interval(0);
 }
 
-//var odpowiadda za zmienna - gdy 0 to dla p_0, gdy 1, 2, 3 to kolejno dla x, y, z
 template <typename T>
-T RadiiPolynomials<T>::findRootNewtonForRadiiPolynomials(T r_start){
-    int max_iterations = 1;
-    int iteration = 0;
-    double tolerance = 1e-13;
-    VectorType r(1 + n);
-    for (int j = 0; j < 1+n; j++)
-        r[j] = r_start;
-    MatrixType jacobian(1+n, 1+n);
-    VectorType p_r(1+n);
-    NormType myNorm;
-    T norm_tolerance = myNorm(r);
+T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
+    auto [A_coeff, B_coeff] = compute_Z0_terms();
+//    LOGGER(B_coeff);
+    B_coeff -= 1;
+    auto C_coeff = Y_bounds[0];
+    LOGGER(A_coeff);
+    LOGGER(B_coeff);
+    LOGGER(C_coeff);
 
+    auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;
+    if (delta < 0)
+        throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
+    LOGGER(delta);
 
-    while (iteration < max_iterations && norm_tolerance > tolerance) {
-        p_r = (*this)(r);
-        computeDerivative(*this, r, jacobian);
-        LOGGER(p_r);
-//        r = r - matrixAlgorithms::gauss(jacobian, p_value_for_root);
-//        norm_tolerance = myNorm(p_value_for_root);
-        LOGGER(r);
-        LOGGER(norm_tolerance);
-        iteration++;
-    }
-    return 0;
+    auto p = -1 * B_coeff / (2 * A_coeff);
+    auto q = -1 * delta / (4 * A_coeff);
+//    LOGGER(p);
+//    LOGGER(q);
+
+    auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
+    auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
+//    LOGGER(x1);
+//    LOGGER(x2);
+    return Interval(x1.rightBound(), x2.leftBound());
+}
+
+template <typename T>
+T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
+    auto [A_coeff, B_coeff] = compute_Z1j_terms(j);
+    B_coeff -= 1;
+    auto C_coeff = Y_bounds[j + 1];
+    auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;
+    if (delta < 0)
+        throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
+
+    auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
+    auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
+//    LOGGER(x1);
+//    LOGGER(x2);
+    return Interval(x1.rightBound(), x2.leftBound());
 }
 
 
-
-
-
-
-// TODO: wielomiany radii maja nie byc przedziałowe, tak?
 template <typename T>
-template <class V>
-V RadiiPolynomials<T>::operator()(V& r) {
-    int N_g = 2;
+RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::operator()(T r) {
     compute_ZBounds(r);
-    V result(n + 1); // [p_0, p_{1,1}, ..., p_{1,n}]
+    VectorType result(n + 1); // [p_0, p_{1,1}, ..., p_{1,n}]
 
-    result[0] = Z_bounds[0] + Y_bounds[0] - r[0];
+    result[0] = Z_bounds[0] + Y_bounds[0] - r;
     for (int j = 0; j < n; ++j) {
-        result[j + 1] = Z_bounds[j+1] + Y_bounds[j + 1] - r[j + 1];
+        result[j + 1] = Z_bounds[j+1] + Y_bounds[j + 1] - r;
     }
     return result;
 }

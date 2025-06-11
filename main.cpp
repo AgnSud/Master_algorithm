@@ -136,7 +136,7 @@ DVectorType checkSolution(const DVectorOfChebyshevsType& a_series_approx,
     return value;
 }
 
-IVectorType randomVectorInBallWeightedNorm(int dim, double r, const Norm<Interval>& weighted_norm) {
+IVectorType randomVectorInBallWeightedNorm(int dim, Interval r, const Norm<Interval>& weighted_norm) {
     static std::mt19937 gen(std::random_device{}());
     std::normal_distribution<> dist(0.0, 1.0);
     std::uniform_real_distribution<> u_dist(0.0, 1.0);  // dla losowego skalowania <1
@@ -234,7 +234,7 @@ void printPreparation(int N, int n, int N_g,
 }
 
 // TODO: r zadawany dla Z też ma być double? Bo to Z i Y to finalnie prawe konce przedziałow
-void verify_bounds(int N, int n, double nu, double r, RadiiPolynomials<Interval> radii_pol,
+void verify_bounds(int N, int n, double nu, Interval r, RadiiPolynomials<Interval> radii_pol,
                    ChebyshevOperatorFinite<Interval>& IFiniteOp) {
     IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
     IVectorType x_approx = IFiniteOp.getX_approx();
@@ -260,14 +260,14 @@ void verify_bounds(int N, int n, double nu, double r, RadiiPolynomials<Interval>
     for (int j = 0; j < n; ++j) {
         auto Pi1j_Y1j = radii_pol.Pi1_j(AF, j, N, n);
         auto Pi1j_Y1j_norm = weighted_norm.computeNorm(Pi1j_Y1j);
-        std::cout << "Y_bound for j=" << j << ": " << Pi1j_Y1j_norm << " ≤ " << Y_bounds[j+1]
-                  << " => " << (Pi1j_Y1j_norm.rightBound() <= Y_bounds[j+1] ? "OK" : "FAIL") << "\n";
+        std::cout << "Y_bound for j=" << j << ": " << Pi1j_Y1j_norm << " ≤ " << Y_bounds[j+1].rightBound()
+                  << " => " << (Pi1j_Y1j_norm.rightBound() <= Y_bounds[j+1].rightBound() ? "OK" : "FAIL") << "\n";
     }
 
     // Check: |Pi_0(T(x) - x)| ≤ Y0
     Interval Pi0_val = capd::abs(radii_pol.Pi0(AF));
-    std::cout << "Y0: " << Pi0_val << " ≤ " << Y_bounds[0]
-              << " => " << (Pi0_val.rightBound() <= Y_bounds[0] ? "OK" : "FAIL") << "\n";
+    std::cout << "Y0: " << Pi0_val << " ≤ " << Y_bounds[0].rightBound()
+              << " => " << (Pi0_val.rightBound() <= Y_bounds[0].rightBound() ? "OK" : "FAIL") << "\n";
 
 
     for (int sample = 0; sample < l; ++sample) {
@@ -292,10 +292,10 @@ void verify_bounds(int N, int n, double nu, double r, RadiiPolynomials<Interval>
 
     for (int j = 0; j < n; ++j) {
         std::cout << "sup_j ||Pi_{1," << j << "} D(T(x + x1)) x2|| = " << Pi1j_Z1j_norm_supremum[j]
-                  << " ≤ " << Z_bounds[j+1] << " => " << (Pi1j_Z1j_norm_supremum[j].rightBound() <= Z_bounds[j+1] ? "OK" : "FAIL") << "\n";
+                  << " ≤ " << Z_bounds[j+1] << " => " << (Pi1j_Z1j_norm_supremum[j].rightBound() <= Z_bounds[j+1].rightBound() ? "OK" : "FAIL") << "\n";
     }
     std::cout << "sup ||Pi_0 D(T(x + x1)) x2|| = " << Pi0_DT_supremum
-              << " ≤ " << Z_bounds[0] << " => " << (Pi0_DT_supremum.rightBound() <= Z_bounds[0] ? "OK" : "FAIL") << "\n";
+              << " ≤ " << Z_bounds[0] << " => " << (Pi0_DT_supremum.rightBound() <= Z_bounds[0].rightBound() ? "OK" : "FAIL") << "\n";
 
 }
 
@@ -364,8 +364,8 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const DVectorT
     /// * multiIndeces
     // zamiana na arytmetyke przedziałowa
     ChebyshevOperatorFinite<Interval> IFiniteOp(N, n,
-                                                capd::vectalg::convertObject<IVectorType, DVectorType>(u0),
-                                                capd::vectalg::convertObject<IMatrixType, DMatrixType>(g),
+                                                capd::vectalg::convertObject<IVectorType, DVectorType>(u0), g,
+//                                                capd::vectalg::convertObject<IMatrixType, DMatrixType>(g),
                                                 capd::vectalg::convertObject<ChebyshevSeries<Interval>, DChebyshevsVectorType>(v),
                                                 capd::vectalg::convertObject<ChebyshevSeries<Interval>, DChebyshevsVectorType>(w),
                                                 multiIndices);
@@ -395,18 +395,18 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
 //    cout << interval_inverse_of_inverse_of_derivative_test << endl;
 
 
-    auto gamma = radii_pol.compute_gamma();
-    LOGGER(gamma);
-
-    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
-    auto Pi_0_AN_op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
-    LOGGER(Pi_0_AN_op_norm);
-
-    for (int j = 0; j < n; j++){
-        auto AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
-        cout << "For j=" << j << " ";
-        LOGGER(AN_op_norm);
-    }
+//    auto gamma = radii_pol.compute_gamma();
+//    LOGGER(gamma);
+//
+//    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
+//    auto Pi_0_AN_op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
+//    LOGGER(Pi_0_AN_op_norm);
+//
+//    for (int j = 0; j < n; j++){
+//        auto AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
+//        cout << "For j=" << j << " ";
+//        LOGGER(AN_op_norm);
+//    }
 
     auto d1 = radii_pol.compute_d1();
     LOGGER(d1);
@@ -415,6 +415,7 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
     LOGGER(h);
 
     auto Z1 = radii_pol.compute_Z1();
+    LOGGER(Z1);
     auto Pi_0_Z1 = radii_pol.Pi0(Z1);
     LOGGER(Pi_0_Z1);
 
@@ -425,31 +426,31 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
         LOGGER(norm_Pi_1_j_Z1);
     }
 
-    auto d2 = radii_pol.compute_d2();
-    LOGGER(d2);
+//    auto Z0 = radii_pol.compute_Z0_terms();
+//    LOGGER(Z0);
+
+//    auto d2 = radii_pol.compute_d2();
+//    LOGGER(d2);
 
     cout << "================ Y - bounds ================" << endl;
     radii_pol.compute_YBounds(N_g);
-    cout << "tutaj" << endl;
-    auto Y_bounds = radii_pol.getYBounds();
-    LOGGER(Y_bounds);
+//    cout << "tutaj" << endl;
+//    auto Y_bounds = radii_pol.getYBounds();
+//    LOGGER(Y_bounds);
 
     cout << "================ Z - bounds ================" << endl;
 
     //TODO: Jak zadawać r? W pracy napisali, ze ustawiaja odgornie (podrozdzial 6.2) oraz ze uzyli r = 1e-6 (podrozdzial 5.4.1)
-    double r_scalar = 1e-6;
-    DVectorType r_vec(1+n);
-    for (int j = 0; j < 1+n; j++)
-        r_vec[j] = r_scalar;
-    LOGGER(r_vec);
-    radii_pol.compute_ZBounds(r_vec);
-    auto Z_bounds = radii_pol.getZBounds();
-    LOGGER(Z_bounds);
+//    Interval r_scalar = Interval(1e-6);
+//    LOGGER(r_scalar);
+//    radii_pol.compute_ZBounds(r_scalar);
+//    auto Z_bounds = radii_pol.getZBounds();
+//    LOGGER(Z_bounds);
 
-    verify_bounds(N, n, nu, r_scalar, radii_pol, IFiniteOp);
-//    radii_pol.findRIntervalForRadiiPolynomials();
-    auto polynomials = radii_pol(r_vec);
-    LOGGER(polynomials);
+//    verify_bounds(N, n, nu, r_scalar, radii_pol, IFiniteOp);
+    radii_pol.findRIntervalForRadiiPolynomials();
+//    auto polynomials = radii_pol(r_scalar);
+//    LOGGER(polynomials);
 
     cout << "========== KONIEC TESTU ==========\n";
 }
@@ -459,7 +460,7 @@ int main() {
     cout.precision(17);
 
 
-    for (int N = 25; N < 26; N++){
+    for (int N = 60; N < 61; N++){
         double nu = 1.1;
         constexpr int n = 3;
         constexpr int N_g = 2;
@@ -476,6 +477,8 @@ int main() {
         ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
         ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
 //        cout << finiteOp << endl;
+//        cout << endl << endl << "================================" << endl << endl;
+//        cout << IFiniteOp << endl;
         testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
         cout << "##########################################################################################\n";
 
@@ -536,7 +539,7 @@ int main() {
 //                     << cheb[0] << "," << cheb[1] << "," << cheb[2] << ","
 //                     << tay[0] << "," << tay[1] << "," << tay[2] << "," << diff_norm << "\n";
 //
-////                cout << "||u("<< t_chebyshev << ") - sol(" << t_taylor << ")|| = " << diff_norm << endl;
+//                cout << "||u("<< t_chebyshev << ") - sol(" << t_taylor << ")|| = " << diff_norm << endl;
 //
 //                t_chebyshev += 0.01;
 //                t_taylor += del;
