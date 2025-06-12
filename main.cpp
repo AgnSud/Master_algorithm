@@ -28,6 +28,7 @@ typedef ChebyshevSeries<double, DIMENSION> DChebyshevsVectorType;
 typedef vectalg::Vector<Interval, DIMENSION> IVectorType;
 typedef vectalg::Matrix<Interval, DIMENSION, DIMENSION> IMatrixType;
 typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVectorOfChebyshevsType;
+typedef ChebyshevSeries<Interval, DIMENSION> IChebyshevsVectorType;
 typedef vectalg::SumNorm<DVectorType, DMatrixType> SumNormType;
 
 
@@ -161,6 +162,29 @@ IVectorType randomVectorInBallWeightedNorm(int dim, Interval r, const Norm<Inter
 
     return ivec;
 }
+void checkRadiiPolynomialsCoeffs(int n, double nu, RadiiPolynomials<Interval> radii_pol){
+    string name = "radii_polynomials_coeffs_nu_" + std::to_string(nu) + ".csv";
+    std::ofstream coeff_out(name);
+    coeff_out << std::setprecision(17) << std::scientific;
+    coeff_out << "name,nu,A_coeff,B_coeff,C_coeff\n";
+    auto Y_bounds = radii_pol.getYBounds();
+
+    {
+        auto [A, B] = radii_pol.compute_Z0_terms();
+        B -= 1;
+        auto C = Y_bounds[0];
+        coeff_out << "p_0," << nu << "," << A.mid().leftBound() << "," << B.mid().leftBound() << "," << C.mid().leftBound() << "\n";
+    }
+
+    for (int j = 0; j < n; ++j) {
+        auto [A, B] = radii_pol.compute_Z1j_terms(j);
+        B -= 1;
+        auto C = Y_bounds[j + 1];
+        coeff_out << "p_1" << j << "," << nu << "," << A.mid().leftBound() << "," << B.mid().leftBound() << "," << C.mid().leftBound() << "\n";
+    }
+
+    coeff_out.close();
+}
 
 
 
@@ -216,8 +240,8 @@ void testNorms() {
 
 void printPreparation(int N, int n, int N_g,
                       DVectorType & u0,
-                      DChebyshevsVectorType & v,
-                      DChebyshevsVectorType & w,
+                      DVectorType & v,
+                      DVectorType & w,
                       DMatrixType& g,
                       vector<vector<int>>& multiIndices){
     cout << "=============PRZYGOTOWANIE=============" << endl;
@@ -299,13 +323,6 @@ void verify_bounds(int N, int n, double nu, Interval r, RadiiPolynomials<Interva
 
 }
 
-// TODO: czy tutaj eksperymentować z różnymi wartościami r? Np zadać jakiś sensowny, ale duży i później zmniejszać?
-// zrobie tak, ze rozdziele verivy_bounds (i of 3.10) oraz verify radii (poniekad ii of 3.10) - poniewaz funkcja verify_bounds
-// i tak nie weryfikuje tego co jest dokładnie w 3.10 (bo tylko wylicza numeryczne), więc zakładam, obliczeniowo to będzie spełnione
-// dla r - tj szukamy juz spelnienia nierownosci dla wielomianow (Z też jest zmiennej r)
-
-
-
 // Przyjeta jest konwencja, ktora tez jest zgodna z tym co jest w pracy, ze N oznacza
 // liczbe wspolczynnikow niezerowych, startujac od a_0, czyli od k=N mamy a_k=0
 // ALE w tym celu, do wyliczenia operatora Czebyszewa F_N potrzebujemy wyznaczyc c_{k+1}
@@ -314,8 +331,8 @@ void verify_bounds(int N, int n, double nu, Interval r, RadiiPolynomials<Interva
 // bedziemy wyznaczac F_{N-1}
 ChebyshevOperatorFinite<double> prepareChebyshevOperatorAndFindFiniteSolution(int N, int n,
                                                                               DVectorType u0,
-                                                                              DChebyshevsVectorType & v,
-                                                                              DChebyshevsVectorType & w,
+                                                                              DVectorType & v,
+                                                                              DVectorType & w,
                                                                               DMatrixType& g,
                                                                               vector<vector<int>>& multiIndices) {
     cout << "============= WYLICZANIE PRZYBLIŻONEGO ROZWIĄZANIA =============" << endl;
@@ -324,7 +341,7 @@ ChebyshevOperatorFinite<double> prepareChebyshevOperatorAndFindFiniteSolution(in
     constexpr double omega_start = 1.; //omega jest czescia rownania
     DVectorOfChebyshevsType a_series_start(n);
     for (int i = 0; i < n; i++){
-        a_series_start[i] = DChebyshevsVectorType (N);
+        a_series_start[i] = DChebyshevsVectorType(N);
         a_series_start[i][0] = u0[i];
     }
     a_series_start[0][1] = 1e-8; //zadanie, aby macierz pochodnej byla odwracalna (pierwsza kolumna byla niezerowa)
@@ -343,8 +360,8 @@ ChebyshevOperatorFinite<double> prepareChebyshevOperatorAndFindFiniteSolution(in
 
 
 ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const DVectorType& u0,
-                                                    DChebyshevsVectorType & v,
-                                                    DChebyshevsVectorType & w,
+                                                    DVectorType & v,
+                                                    DVectorType & w,
                                                     DMatrixType& g,
                                                     vector<vector<int>>& multiIndices,
                                                     const ChebyshevOperatorFinite<double>& finiteOp){
@@ -364,10 +381,10 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const DVectorT
     /// * multiIndeces
     // zamiana na arytmetyke przedziałowa
     ChebyshevOperatorFinite<Interval> IFiniteOp(N, n,
-                                                capd::vectalg::convertObject<IVectorType, DVectorType>(u0), g,
-//                                                capd::vectalg::convertObject<IMatrixType, DMatrixType>(g),
-                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, DChebyshevsVectorType>(v),
-                                                capd::vectalg::convertObject<ChebyshevSeries<Interval>, DChebyshevsVectorType>(w),
+                                                capd::vectalg::convertObject<IVectorType, DVectorType>(u0),
+                                                capd::vectalg::convertObject<IMatrixType, DMatrixType>(g),
+                                                capd::vectalg::convertObject<IVectorType, DVectorType>(v),
+                                                capd::vectalg::convertObject<IVectorType, DVectorType>(w),
                                                 multiIndices);
 
     IFiniteOp.setOmega( Interval(finiteOp.getOmega()));
@@ -395,18 +412,18 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
 //    cout << interval_inverse_of_inverse_of_derivative_test << endl;
 
 
-//    auto gamma = radii_pol.compute_gamma();
-//    LOGGER(gamma);
-//
-//    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
-//    auto Pi_0_AN_op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
-//    LOGGER(Pi_0_AN_op_norm);
-//
-//    for (int j = 0; j < n; j++){
-//        auto AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
-//        cout << "For j=" << j << " ";
-//        LOGGER(AN_op_norm);
-//    }
+    auto gamma = radii_pol.compute_gamma();
+    LOGGER(gamma);
+
+    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
+    auto Pi_0_AN_op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
+    LOGGER(Pi_0_AN_op_norm);
+
+    for (int j = 0; j < n; j++){
+        auto AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
+        cout << "For j=" << j << " ";
+        LOGGER(AN_op_norm);
+    }
 
     auto d1 = radii_pol.compute_d1();
     LOGGER(d1);
@@ -426,29 +443,20 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
         LOGGER(norm_Pi_1_j_Z1);
     }
 
-//    auto Z0 = radii_pol.compute_Z0_terms();
-//    LOGGER(Z0);
-
-//    auto d2 = radii_pol.compute_d2();
-//    LOGGER(d2);
+    auto d2 = radii_pol.compute_d2();
+    LOGGER(d2);
 
     cout << "================ Y - bounds ================" << endl;
     radii_pol.compute_YBounds(N_g);
-//    cout << "tutaj" << endl;
-//    auto Y_bounds = radii_pol.getYBounds();
-//    LOGGER(Y_bounds);
+    auto Y_bounds = radii_pol.getYBounds();
+    LOGGER(Y_bounds);
 
     cout << "================ Z - bounds ================" << endl;
 
-    //TODO: Jak zadawać r? W pracy napisali, ze ustawiaja odgornie (podrozdzial 6.2) oraz ze uzyli r = 1e-6 (podrozdzial 5.4.1)
-//    Interval r_scalar = Interval(1e-6);
-//    LOGGER(r_scalar);
-//    radii_pol.compute_ZBounds(r_scalar);
-//    auto Z_bounds = radii_pol.getZBounds();
-//    LOGGER(Z_bounds);
 
-//    verify_bounds(N, n, nu, r_scalar, radii_pol, IFiniteOp);
     radii_pol.findRIntervalForRadiiPolynomials();
+    checkRadiiPolynomialsCoeffs(n, nu, radii_pol);
+//    Interval r_scalar = Interval(9.9197764446251516e-13);
 //    auto polynomials = radii_pol(r_scalar);
 //    LOGGER(polynomials);
 
@@ -459,28 +467,144 @@ void testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFin
 int main() {
     cout.precision(17);
 
+    int N = 25;
+    double nu = 1.1564;
+    constexpr int n = 3;
+    constexpr int N_g = 2;
+    auto multiIndices = generateMultiIndices(n, N_g);
+    DMatrixType g = defineFunctionG(multiIndices, n);
+    int steps = 2;
 
-    for (int N = 60; N < 61; N++){
-        double nu = 1.1;
-        constexpr int n = 3;
-        constexpr int N_g = 2;
-        DVectorType u0{5., 5., 23.};
-        DChebyshevsVectorType v{0, 0, 1.};
-        DChebyshevsVectorType w{0, 0, 27.};
-        auto multiIndices = generateMultiIndices(n, N_g);
-        DMatrixType g = defineFunctionG(multiIndices, n);
+    DVectorType v{0, 0, 1.};
+    std::vector<DVectorType> ws = {
+            {0, 0, 27.},
+            {0, 0, 25.}
+    };
+    DVectorType u0{5.,5.,23.};
+    printPreparation(N, n, N_g, u0, v, ws[0], g, multiIndices);
 
-        printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
-
-    //    testChebyshevSeries();
-    //    testNorms();
+    for (int step = 0; step < steps; step++){
+        auto w = ws[step];
         ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
         ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
-//        cout << finiteOp << endl;
-//        cout << endl << endl << "================================" << endl << endl;
-//        cout << IFiniteOp << endl;
         testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
-        cout << "##########################################################################################\n";
+
+        // aby tu robic na interval musialabym najpierw wyliczac przyblizenie dvector,a pozniej to a wrzucac
+
+        DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
+        DOdeSolver solver(vectorField,25);
+        DCoordinateSection section(3,2,w[2]);
+        DPoincareMap pm(solver,section);
+        DTimeMap tm(solver);
+
+        DVector u1 = u0;
+        double rt=0;
+        cout << "Result at t = for Taylor: "<<  pm(u0,rt) << endl;
+        cout << "Time for Taylor: " << rt << endl;
+
+        tm.stopAfterStep(true);
+        int counter = 0;
+
+        DTimeMap::SolutionCurve solution(0.);
+        do {
+            tm(rt,u1,solution);
+            counter++;
+        }while(!tm.completed());
+
+        cout << "counter= " << counter << endl;
+
+        auto omega_approx = finiteOp.getOmega();
+        auto a_series_approx = finiteOp.getASeries();
+        auto cheb = checkSolution(a_series_approx, 1.0);
+        SumNormType sumNorm;
+        cout << "Result at t = 1.0 for Chebyshev: " << cheb << endl;
+        cout << "Scale time for Chebyshev: " << 1./omega_approx << endl;
+        double t_chebyshev = 0;
+        double t_taylor = 0;
+        double del = 1 / (omega_approx * 100);
+        string name = "trajectoryN_" + std::to_string(N) + "_step_" + std::to_string(step) + ".csv";
+        std::ofstream fout(name);
+        fout << std::setprecision(17) << std::scientific;
+        fout << "t_chebyshev,t_taylor,x_cheb,y_cheb,z_cheb,x_tay,y_tay,z_tay,diff_norm\n";
+        while (t_chebyshev < 1){
+            auto cheb = checkSolution(a_series_approx, t_chebyshev);
+            auto tay = solution(t_taylor);
+            auto diff_norm = sumNorm(cheb - tay);
+
+            fout << t_chebyshev << "," << t_taylor << ","
+                 << cheb[0] << "," << cheb[1] << "," << cheb[2] << ","
+                 << tay[0] << "," << tay[1] << "," << tay[2] << "," << diff_norm << "\n";
+
+            cout << "||u("<< t_chebyshev << ") - sol(" << t_taylor << ")|| = " << diff_norm << endl;
+
+            t_chebyshev += 0.01;
+            t_taylor += del;
+            t_taylor = capd::min(t_taylor, rt);
+        }
+        std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
+
+        u0 = checkSolution(finiteOp.getASeries(), 1.0);
+    }
+
+
+
+//    for (int N = 25; N < 26; N++){
+//        double nu = 1.1564;
+//        constexpr int n = 3;
+//        constexpr int N_g = 2;
+//        DVectorType u0{5.,5.,23.};
+//        DVectorType v{0, 0, 1.};
+//        DVectorType w{0, 0, 27.};
+//        auto multiIndices = generateMultiIndices(n, N_g);
+//        DMatrixType g = defineFunctionG(multiIndices, n);
+//
+//        printPreparation(N, n, N_g, u0, v, w, g, multiIndices);
+//
+//        ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
+//        ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
+//        testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
+//        cout << "##########################################################################################\n";
+//
+//
+//        // TODO: tutaj chce zrobic kolejny krok
+//        /*
+//         * Potrzeba stworzyc nowy ChebyshevOperatorFinite<Interval> i tam zadać
+//         * N i n bez zmian (int)
+//         * u0 - poprzednio wyliczone u1, convert na Interval
+//         * g - convert na Interval
+//         * v i w - Interval, v = (0,0,1), w wyliczyc (może (0,0,31)?
+//         * multiIndices (bez zmian)
+//         *
+//         * do findFiniteSolution potrzeba wyciagac z finiteOp (omega, a_series), stworzyc z nich Interval +/- r
+//         * (r narazie zadać)? Bo już nie pamietam czy ewaluowac przedziałowo czy nie przedziałowo przyblizone rozwiazanie w kolejnych krokach
+//         */
+//
+//        double r_d = 8.6971046095951505e-13;
+//        Interval r = Interval(r_d);
+//        auto u1 = capd::vectalg::convertObject<IVectorType, DVectorType>(u0);
+//        auto g_interval = capd::vectalg::convertObject<IMatrixType, DMatrixType>(g);
+//        auto v_nextStep = capd::vectalg::convertObject<IVectorType, DVectorType>(v);
+//        IChebyshevsVectorType w_nextStep({Interval(0), Interval(0), Interval(28)});
+//        ChebyshevOperatorFinite<Interval> finiteOp_nextStep(N, n, u1, g_interval, v_nextStep, w_nextStep, multiIndices);
+//        int max_iterations = 100;
+//
+//        auto omega_approx = finiteOp.getOmega();
+//        auto a_series_approx = finiteOp.getASeries();
+//        Interval omega_start_next_step(omega_approx - r_d, omega_approx + r_d);
+//        IVectorOfChebyshevsType a_series_start_next_step(n);
+//        for (int j = 0; j < n; j++){
+//            a_series_start_next_step[j] = IChebyshevsVectorType(N);
+//            for (int k = 0; k < N; k++){
+//                a_series_start_next_step[j][k] = Interval(a_series_approx[j][k] - r_d, a_series_approx[j][k] + r_d);
+//            }
+//        }
+////        LOGGER(a_series_start_next_step);
+//        auto solution_approx = finiteOp_nextStep.findFiniteSolution(omega_start_next_step, a_series_start_next_step, max_iterations);
+//
+//        cout << "Found approximate finite solution (omega, a) =" << endl;
+//        cout << "omega = " << solution_approx.first << endl;
+//        cout << "a_series_approx = " << solution_approx.second << endl;
+//        cout << "with value F(omega, a) = " << finiteOp_nextStep.getF_x_approx() << endl << endl;
 
 //        {
 //            DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
@@ -547,6 +671,6 @@ int main() {
 //            }
 //            std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
 //        }
-    }
+//    }
     return 0;
 }

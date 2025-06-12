@@ -244,8 +244,8 @@ std::pair<T, T> RadiiPolynomials<T>::compute_Z0_terms() {
 
     T r2_coeff = gamma * op_norm;
     T r_coeff = h[0] + Pi0_Z1;
-    LOGGER(h[0]);
-    LOGGER(Pi0_Z1);
+//    LOGGER(h[0]);
+//    LOGGER(Pi0_Z1);
 
     return std::make_pair(r2_coeff, r_coeff);
 }
@@ -268,11 +268,9 @@ std::pair<T, T> RadiiPolynomials<T>::compute_Z1j_terms(int j) {
 
     T r2_coeff = gamma * AN_op_norm + d2_vec[j] / (omega * 4.0) + 2 / omega;
     T r_coeff = h[j + 1] + Z1_norm + d1_vec[j] / (4.0 * omega);
-    cout << endl;
-    LOGGER(h[j + 1]);
-    LOGGER(Z1_norm);
-    LOGGER(d1_vec[j] / (4.0 * omega));
-    cout << endl;
+//    LOGGER(h[j + 1]);
+//    LOGGER(Z1_norm);
+//    LOGGER(d1_vec[j] / (4.0 * omega));
 
     return std::make_pair(r2_coeff, r_coeff);
 }
@@ -473,13 +471,13 @@ T RadiiPolynomials<T>::compute_GammaMinus_a(const VectorType& a) {
     T max_val = 2 * capd::abs(a[N - 1]) * std::pow(nu, N - 1) / N;
 
     for (int l = 1; l <= 2 * (N - 1); ++l) {
-        T horner_sum = 0;
-        for (int k = N - 1; k >= N - 1 - l; --k) {
-            T coeff = capd::abs(a[capd::abs(k)]) / (k + l + 1);
-            horner_sum = horner_sum * nu + coeff;
+        T sum = 0;
+        for (int k = N - 1 - l; k <= N - 1; ++k) {
+            T term = capd::abs( a[capd::abs(k)] ) * std::pow(nu, k) / (k + l - 1);
+            sum += term;
         }
-        horner_sum *= std::pow(nu, N - 1 - l);
-        max_val = capd::max(max_val, horner_sum);
+        // TODO: rezygnacja z hornera, bo sa ujemne potegi
+        max_val = capd::max(max_val, sum);
     }
 
     return max_val;
@@ -517,8 +515,8 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials(){
 
 template <typename T>
 T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
+    cout << "\n\nradii polynomial p_0" << endl;
     auto [A_coeff, B_coeff] = compute_Z0_terms();
-//    LOGGER(B_coeff);
     B_coeff -= 1;
     auto C_coeff = Y_bounds[0];
     LOGGER(A_coeff);
@@ -537,13 +535,12 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
 
     auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
     auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
-//    LOGGER(x1);
-//    LOGGER(x2);
     return Interval(x1.rightBound(), x2.leftBound());
 }
 
 template <typename T>
 T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
+    cout << "\n\nradii polynomial p_1" << j << endl;
     auto [A_coeff, B_coeff] = compute_Z1j_terms(j);
     B_coeff -= 1;
     auto C_coeff = Y_bounds[j + 1];
@@ -553,8 +550,10 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
 
     auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
     auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
-//    LOGGER(x1);
-//    LOGGER(x2);
+    LOGGER(A_coeff);
+    LOGGER(B_coeff);
+    LOGGER(C_coeff);
+    LOGGER(delta);
     return Interval(x1.rightBound(), x2.leftBound());
 }
 

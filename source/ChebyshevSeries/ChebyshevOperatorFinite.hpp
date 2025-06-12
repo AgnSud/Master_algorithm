@@ -49,8 +49,8 @@ public:
             int N, int n,
             const VectorType& u0_init,
             const MatrixType& g_init,
-            const ChebyshevSeries<T, 0>& v,
-            const ChebyshevSeries<T, 0>& w,
+            const VectorType& v,
+            const VectorType& w,
             const vector<vector<int>>& multiIndices
     );
 
@@ -151,8 +151,8 @@ private:
     int n;
     VectorType u0;
     MatrixType g;
-    ChebyshevSeries<T, 0> v;
-    ChebyshevSeries<T, 0> w;
+    VectorType v;
+    VectorType w;
     vector<vector<int>> multiIndices;
     MatrixType derivative_finite;
     MatrixType inverse_derivative_finite;

@@ -13,8 +13,8 @@ ChebyshevOperatorFinite<T>::ChebyshevOperatorFinite(
         const int N, const int n,
         const VectorType& u0_init,
         const MatrixType& g_init,
-        const ChebyshevSeries<T, 0>& v,
-        const ChebyshevSeries<T, 0>& w,
+        const VectorType& v,
+        const VectorType& w,
         const vector<vector<int>>& multiIndices
 ) : N(N), n(n), omega(0), u0(u0_init), g(g_init), a_series(n), c_series(n), v(v), w(w), multiIndices(multiIndices), F_x_approx(N*n+1), x_approx(N*n+1) {}
 
@@ -216,6 +216,7 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
         int max_iterations, T tolerance) {
     // Ustaw a i omega
     setOmega(omega_start);
+    LOGGER(omega_start);
     setASeries(a_series_start);
     int iteration = 0;
 //    T norm_tolerance = 1.0;
@@ -241,6 +242,7 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
 //        cout << "F(x_k) = " << F_x_k << '\n';
         computeDerivative(*this, x, jacobian);
 //        cout << "Jacobian: " << jacobian << "\n";
+        cout << "tutaj, iteracja nr " << iteration << endl;
         x = x - matrixAlgorithms::gauss(jacobian, F_x_k);
 //        cout << "x_next: " << x << "\n";
         norm_tolerance = myNorm(F_x_k);
@@ -261,6 +263,7 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
     this->setX_approx(x);
 
     //obliczenie odwrotnosci jacobianu
+//    cout << "tutaj" << endl;
     computeDerivativeInverse(x);
 
     return std::make_pair(omega_final, a_series_final);
@@ -356,15 +359,31 @@ typename V::ScalarType ChebyshevOperatorFinite<T>::compute_f_0(const V& x){
     for (int i = 0; i < this->n; i++){
         // <v, w>
         result += v[i] * w[i];
+//        if constexpr (std::is_same_v<typename V::ScalarType, double> ||
+//                      std::is_same_v<typename V::ScalarType, capd::intervals::Interval<double>>){
+//            std::cout << "f_0 result: " << result << ", v: " << v[i] << ", w: " << w[i] << std::endl;
+//        }
 
         // <v, a_0>
         result -= v[i] * this->getCoeff(x, i, 0, this->n);
+//        if constexpr (std::is_same_v<typename V::ScalarType, double> ||
+//                      std::is_same_v<typename V::ScalarType, capd::intervals::Interval<double>>){
+//            std::cout << "f_0 result: " << result << ", v: " << v[i] << ", a_0: " << this->getCoeff(x, i, 0, this->n) << std::endl;
+//        }
 
         // sum_{k=1}^{N-1} 2<v, a_k>
         for (int k = 1; k < this->N; ++k) {
             result -= 2 * v[i] * this->getCoeff(x, i, k, this->n);
+//            if constexpr (std::is_same_v<typename V::ScalarType, double> ||
+//                          std::is_same_v<typename V::ScalarType, capd::intervals::Interval<double>>){
+//                std::cout << "f_0 result: " << result << ", v: " << v[i] << ", a_k: " << this->getCoeff(x, i, k, this->n) << std::endl;
+//            }
         }
     }
+//    if constexpr (std::is_same_v<typename V::ScalarType, double> ||
+//                  std::is_same_v<typename V::ScalarType, capd::intervals::Interval<double>>){
+//        std::cout << "f_0 result: " << result << std::endl;
+//    }
     return result;
 }
 
