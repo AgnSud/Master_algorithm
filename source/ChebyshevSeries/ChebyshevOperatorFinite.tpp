@@ -28,6 +28,11 @@ ChebyshevOperatorFinite<T>::VectorOfChebyshevsType ChebyshevOperatorFinite<T>::g
 }
 
 template<typename T>
+void ChebyshevOperatorFinite<T>::setACoeff(T coeff, int j, int k) {
+    this->a_series[j][k] = coeff;
+}
+
+template<typename T>
 void ChebyshevOperatorFinite<T>::setOmega(const T& omega_su) {
     this->omega = omega_su;
 }
@@ -216,7 +221,6 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
         int max_iterations, T tolerance) {
     // Ustaw a i omega
     setOmega(omega_start);
-    LOGGER(omega_start);
     setASeries(a_series_start);
     int iteration = 0;
 //    T norm_tolerance = 1.0;
@@ -242,7 +246,6 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
 //        cout << "F(x_k) = " << F_x_k << '\n';
         computeDerivative(*this, x, jacobian);
 //        cout << "Jacobian: " << jacobian << "\n";
-        cout << "tutaj, iteracja nr " << iteration << endl;
         x = x - matrixAlgorithms::gauss(jacobian, F_x_k);
 //        cout << "x_next: " << x << "\n";
         norm_tolerance = myNorm(F_x_k);
@@ -261,7 +264,8 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
     this->setOmega(omega_final);
     this->setF_x_approx((*this)(x));
     this->setX_approx(x);
-
+    cout << "Liczba iteracji Newtona dla Czebyszewa: " << iteration << endl;
+    cout << "Czas przejścia: " << 1./omega_final << endl;
     //obliczenie odwrotnosci jacobianu
 //    cout << "tutaj" << endl;
     computeDerivativeInverse(x);

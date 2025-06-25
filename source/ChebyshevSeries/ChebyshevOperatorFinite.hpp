@@ -56,6 +56,10 @@ public:
 
     void setASeries(const VectorOfChebyshevsType& a_input);
     VectorOfChebyshevsType getASeries() const;
+
+    void setACoeff(T coeff, int j, int k);
+//    VectorOfChebyshevsType getASeries() const;
+
     void setOmega(const T& omega);
     T getOmega() const;
     void setF_x_approx(const VectorType& F_x_approx);

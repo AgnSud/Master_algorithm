@@ -57,7 +57,7 @@ public:
     T compute_GammaPlus_a(const VectorType& a);
 
 
-    T findRIntervalForRadiiPolynomials();
+    double findRForRadiiPolynomials();
     T findRIntervalForRadiiPolynomials_0();
     T findRIntervalForRadiiPolynomials_1j(int j);
     VectorType operator()(T r); // [p_0, p_{1,1}, ..., p_{1,n}]

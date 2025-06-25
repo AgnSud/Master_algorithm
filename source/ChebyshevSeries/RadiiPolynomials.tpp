@@ -503,30 +503,36 @@ T RadiiPolynomials<T>::compute_GammaPlus_a(const VectorType& a) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials(){
+double RadiiPolynomials<T>::findRForRadiiPolynomials(){
     VectorType intervals(1 + n);
     intervals[0] = findRIntervalForRadiiPolynomials_0();
     for (int j = 0; j < n; j++){
         intervals[1 + j] = findRIntervalForRadiiPolynomials_1j(j);
     }
     LOGGER(intervals);
-    return Interval(0);
+    double r = intervals[0].leftBound();
+    for (int j = 0; j < n; j++){
+        auto left_r = intervals[j + 1].leftBound();
+        if (left_r > r)
+            r = left_r;
+    }
+    return r;
 }
 
 template <typename T>
 T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
-    cout << "\n\nradii polynomial p_0" << endl;
+//    cout << "\n\nradii polynomial p_0" << endl;
     auto [A_coeff, B_coeff] = compute_Z0_terms();
     B_coeff -= 1;
     auto C_coeff = Y_bounds[0];
-    LOGGER(A_coeff);
-    LOGGER(B_coeff);
-    LOGGER(C_coeff);
+//    LOGGER(A_coeff);
+//    LOGGER(B_coeff);
+//    LOGGER(C_coeff);
 
     auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;
     if (delta < 0)
         throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
-    LOGGER(delta);
+//    LOGGER(delta);
 
     auto p = -1 * B_coeff / (2 * A_coeff);
     auto q = -1 * delta / (4 * A_coeff);
@@ -540,7 +546,7 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
 
 template <typename T>
 T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
-    cout << "\n\nradii polynomial p_1" << j << endl;
+//    cout << "\n\nradii polynomial p_1" << j << endl;
     auto [A_coeff, B_coeff] = compute_Z1j_terms(j);
     B_coeff -= 1;
     auto C_coeff = Y_bounds[j + 1];
@@ -550,10 +556,10 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
 
     auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
     auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
-    LOGGER(A_coeff);
-    LOGGER(B_coeff);
-    LOGGER(C_coeff);
-    LOGGER(delta);
+//    LOGGER(A_coeff);
+//    LOGGER(B_coeff);
+//    LOGGER(C_coeff);
+//    LOGGER(delta);
     return Interval(x1.rightBound(), x2.leftBound());
 }
 
