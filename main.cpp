@@ -544,14 +544,13 @@ int main() {
     constexpr int N_g = 2;
     auto multiIndices = generateMultiIndices(n, N_g);
     DMatrixType g = defineFunctionG(multiIndices, n);
-    int steps = 5;
+    int steps = 4;
 
     DVectorType v{0, 0, 1.};
 
     std::vector<DVectorType> ws = {
             {0, 0, 25.},
             {0, 0, 27.},
-            {0, 0, 29.},
             {0, 0, 31.},
             {0, 0, 33.}
     };
