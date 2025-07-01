@@ -139,6 +139,56 @@ IVectorType checkSolution(const IVectorOfChebyshevsType& a_series_approx,
     return value;
 }
 
+DChebyshevsVectorType interpolateToChebyshevSeries(
+        const std::vector<double>& t_vals,   // oryginalne czasy t_i ∈ [0, 0.5]
+        const std::vector<double>& x_vals,   // wartości np. x_i = x(t_i)
+        int N                                // liczba współczynników
+) {
+    DChebyshevsVectorType result(N);
+
+    // Skalowanie czasu t ∈ [0, 0.5] → τ ∈ [-1, 1]
+    std::vector<double> tau_vals(t_vals.size());
+    LOGGER(t_vals);
+    for (size_t i = 0; i < t_vals.size(); ++i){
+//        tau_vals[i] = 4.0 * t_vals[i] - 1.0;
+//        tau_vals[i] = 2.0 * (t_vals[i] - t_vals[0]) - 1.0;
+        tau_vals[i] = 2.0 * t_vals[i] - 1.0;
+    }
+    LOGGER(tau_vals);
+
+    // Węzły Czebyszewa
+    std::vector<double> tau_cheb(N);
+    for (int k = 0; k < N; ++k)
+        tau_cheb[k] = cos(M_PI * (2*k + 1) / (2.0 * N));
+
+    // Interpolacja: najbliższy punkt (można poprawić np. interpolacją Newtona)
+    std::vector<double> f_cheb(N);
+    for (int i = 0; i < N; ++i) {
+        double min_dist = 1e9;
+        double val = 0.0;
+        for (size_t j = 0; j < tau_vals.size(); ++j) {
+            double dist = fabs(tau_vals[j] - tau_cheb[i]);
+            if (dist < min_dist) {
+                min_dist = dist;
+                val = x_vals[j];
+            }
+        }
+        f_cheb[i] = val;
+    }
+
+    // Dyskretna transformata Czebyszewa (DCT) typu I – ręcznie lub za pomocą CAPD (jeśli masz wsparcie)
+    for (int k = 0; k < N; ++k) {
+        double a_k = 0.0;
+        for (int j = 0; j < N; ++j)
+            a_k += f_cheb[j] * cos(M_PI * k * (2*j + 1) / (2.0 * N));
+        a_k *= (2.0 / N);
+        result[k] = a_k;
+    }
+
+    return result;
+}
+
+
 IVectorType randomVectorInBallWeightedNorm(int dim, Interval r, const Norm<Interval>& weighted_norm) {
     static std::mt19937 gen(std::random_device{}());
     std::normal_distribution<> dist(0.0, 1.0);
@@ -336,19 +386,64 @@ ChebyshevOperatorFinite<double> prepareChebyshevOperatorAndFindFiniteSolution(in
                                                                               DVectorType & v,
                                                                               DVectorType & w,
                                                                               DMatrixType& g,
-                                                                              vector<vector<int>>& multiIndices) {
+                                                                              vector<vector<int>>& multiIndices,
+                                                                              const DVectorType& target_point,
+                                                                              int step) {
     cout << "Wyliczam przybliżone rozwiązanie..." << endl;
+    // Wydziel t_i i x_i
+    std::vector<double> t_vals, x_vals, y_vals, z_vals;
+    std::ifstream fin("trajectory_for_Taylor_only_to_time_" + std::to_string(5.0) + "_N_" + std::to_string(N) + "_start_point1" + ".csv");
+    std::string line;
+    std::getline(fin, line); // nagłówek
+    while (std::getline(fin, line)) {
+        std::stringstream ss(line);
+        std::string s;
+        double t, x, y, z;
+        std::getline(ss, s, ','); t = std::stod(s);
+        std::getline(ss, s, ','); x = std::stod(s);
+        std::getline(ss, s, ','); y = std::stod(s);
+        std::getline(ss, s, ','); z = std::stod(s);
+        if (step * 0.5 <= t){
+            t_vals.push_back(t); x_vals.push_back(x);
+            y_vals.push_back(y); z_vals.push_back(z);
+        }
+        if (z == w[2]){
+            break;
+        } //będzie iteracja przez te punkty, które wczesniej zostały wyliczone w równych odstępach czasowych (co 0.5)
+    }
+//    LOGGER(t_vals);
+//    LOGGER(x_vals);
+
+//// Teraz interpoluj
+    auto x_series = interpolateToChebyshevSeries(t_vals, x_vals, N);
+    auto y_series = interpolateToChebyshevSeries(t_vals, y_vals, N);
+    auto z_series = interpolateToChebyshevSeries(t_vals, z_vals, N);
+//
+//// Składanie wektora serii
+    DVectorOfChebyshevsType a_series_start(n);
+    a_series_start[0] = x_series;
+    a_series_start[1] = y_series;
+    a_series_start[2] = z_series;
+    LOGGER(a_series_start);
+
     auto u0 = capd::vectalg::convertObject<DVectorType>(_u0);
     LOGGER(u0);
     //Ponizej startowe parametry
     constexpr double omega_start = 1.; //omega jest czescia rownania
-    DVectorOfChebyshevsType a_series_start(n);
-    for (int i = 0; i < n; i++){
-        a_series_start[i] = DChebyshevsVectorType(N);
-        a_series_start[i][0] = u0[i];
-    }
-    a_series_start[0][1] = 1e-13; //zadane, aby macierz pochodnej byla odwracalna (pierwsza kolumna byla niezerowa)
-    a_series_start[n-1][0] = w[n-1];
+//    DVectorOfChebyshevsType a_series_start(n);
+//    for (int i = 0; i < n; i++){
+//        a_series_start[i] = DChebyshevsVectorType(N);
+//        a_series_start[i][0] = target_point[i];
+//
+//        // [5, 00000 ] u0
+//        // [5, 0,0 ...]
+//        // [27, 0,0....]
+//        // z=27
+//        // [11, 13, 27]
+//        // interpolacja chebysheva na podstawie wyliczonego z solution curve wyniku (aby nie było przypadkowych punktow startowych)
+//    }
+//    a_series_start[0][1] = 1e-13; //zadane, aby macierz pochodnej byla odwracalna (pierwsza kolumna byla niezerowa)
+//    a_series_start[n-1][0] = w[n-1];
 //    LOGGER(a_series_start);
 
 
@@ -409,6 +504,16 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const IVectorT
 //    LOGGER(IFiniteOp.getASeries());
     IFiniteOp.setX_approx(converted_X_approx);
 
+    //test na odwrocenie macierzy odwrotnej - odwrócona, powinna być zbliżona do IFiniteOp.derivative_finite
+    try{
+        auto I_inverse_of_derivative_test = capd::vectalg::convertObject<IMatrixType>(finiteOp.getInverseDerivativeFinite());
+        IMatrixType interval_inverse_of_inverse_of_derivative_test = matrixAlgorithms::gaussInverseMatrix(I_inverse_of_derivative_test);
+        cout << "Test na odwrócenie macierzy odwrotnej... - ZDANY" << endl;
+    }catch(const std::runtime_error& e){
+        std::cerr << "Błąd: " << e.what() << "\n";
+        cout << "Test na odwrócenie macierzy odwrotnej... - NIEZDANY" << endl;
+    }
+
     IVectorOfChebyshevsType IC_series = IFiniteOp.convertToSeriesFromXForm(IFiniteOp.compute_c(IFiniteOp.getX_approx()), 2*N-1);
     IFiniteOp.setCSeries(IC_series);
     IVectorType IF_x_approx = IFiniteOp(IFiniteOp.getX_approx());
@@ -425,51 +530,7 @@ double testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorF
     RadiiPolynomials<Interval> radii_pol(N, n, nu, IFiniteOp);
     Norm<Interval> weighted_norm(nu, N, n);
 
-    //test na odwrocenie macierzy odwrotnej - odwrócona, powinna być zbliżona do IFiniteOp.derivative_finite
-    IMatrixType interval_inverse_of_inverse_of_derivative_test = matrixAlgorithms::gaussInverseMatrix(IFiniteOp.getInverseDerivativeFinite());
-//    cout << interval_inverse_of_inverse_of_derivative_test << endl;
 
-
-//    auto gamma = radii_pol.compute_gamma();
-//    LOGGER(gamma);
-//
-//    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
-//    auto Pi_0_AN_op_norm = weighted_norm.computeOperatorNorm_Pi0(A_N);
-//    LOGGER(Pi_0_AN_op_norm);
-//
-//    for (int j = 0; j < n; j++){
-//        auto AN_op_norm = weighted_norm.computeOperatorNorm_Pi1j(A_N, j);
-//        cout << "For j=" << j << " ";
-//        LOGGER(AN_op_norm);
-//    }
-//
-//    auto d1 = radii_pol.compute_d1();
-//    LOGGER(d1);
-//
-//    auto h = radii_pol.compute_h();
-//    LOGGER(h);
-//
-//    auto Z1 = radii_pol.compute_Z1();
-//    LOGGER(Z1);
-//    auto Pi_0_Z1 = radii_pol.Pi0(Z1);
-//    LOGGER(Pi_0_Z1);
-//
-//    for (int j = 0; j < n; j++){
-//        auto Pi_1_j_Z1 = radii_pol.Pi1_j(Z1, j, N, n);
-//        auto norm_Pi_1_j_Z1 = weighted_norm.computeNorm(Pi_1_j_Z1);
-//        cout << "For j=" << j << " ";
-//        LOGGER(norm_Pi_1_j_Z1);
-//    }
-//
-//    auto d2 = radii_pol.compute_d2();
-//    LOGGER(d2);
-//
-//    cout << "================ Y - bounds ================" << endl;
-//    radii_pol.compute_YBounds(N_g);
-//    auto Y_bounds = radii_pol.getYBounds();
-//    LOGGER(Y_bounds);
-//
-//    cout << "================ Z - bounds ================" << endl;
 
 
     double r = radii_pol.findRForRadiiPolynomials();
@@ -495,7 +556,7 @@ void compareWithTaylorAndSaveResults(int N, double z, int step, const string& po
     double rt = 0;
     auto u0_mid = capd::vectalg::convertObject<DVectorType>(u0);
     cout << "Result for Taylor: " << pm(u0_mid, rt) << endl;
-    cout << "Time for Taylor: " << rt << endl;
+    cout << "Time for Taylor: " << rt << endl; //rt to czas koncowy
 
     tm.stopAfterStep(true);
     int counter = 0;
@@ -504,6 +565,8 @@ void compareWithTaylorAndSaveResults(int N, double z, int step, const string& po
         tm(rt,u0_mid,solution);
         counter++;
     }while(!tm.completed());
+    //todo: wygenerowac kilka punktow, i nalozyc czebyshewa i to podac jako a, (skakac o czas - koncowy, na koncu mamy punkt,
+    // dobierac punkty co x <- poincare (z-owe wspolrzedne co czas t)
 
     double t_chebyshev = 0;
     double t_taylor = 0;
@@ -516,6 +579,7 @@ void compareWithTaylorAndSaveResults(int N, double z, int step, const string& po
 
     DSumNormType sumNorm;
     IVectorType cheb;
+    //C0HORect2Set
     while (true) {
         cheb = checkSolution(a_series_approx, t_chebyshev);
         auto cheb_d = capd::vectalg::convertObject<DVectorType>(cheb);
@@ -534,6 +598,60 @@ void compareWithTaylorAndSaveResults(int N, double z, int step, const string& po
     std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
 }
 
+std::vector<DVectorType> findStartApproximation(int N, const IVectorType& u0, double rt){
+    DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
+    DOdeSolver solver(vectorField, N);
+//    DCoordinateSection section(3, 2, 33);
+//    DPoincareMap pm(solver, section);
+    DTimeMap tm(solver);
+
+    auto u0_mid = capd::vectalg::convertObject<DVectorType>(u0);
+//    cout << "Result for Taylor: " << pm(u0_mid, rt) << endl;
+//    cout << "Time for Taylor: " << rt << endl; //rt to czas koncowy
+
+//    pm(u0_mid, rt);
+    cout << "Startin computing to time " << rt << endl;
+    tm.stopAfterStep(true);
+    int counter = 0;
+    DTimeMap::SolutionCurve solution(0.);
+    do {
+        tm(rt,u0_mid,solution);
+        counter++;
+        if (counter % 50 == 0)
+            cout << "check, counter=" << counter << endl;
+    }while(!tm.completed());
+    string name = "trajectory_for_Taylor_only_to_time_" + std::to_string(rt) + "_N_" + std::to_string(N) + "_start_point1" + ".csv";
+    std::vector<DVectorType> targetPoints;
+
+    std::ofstream fout(name);
+    fout << std::setprecision(17) << std::scientific;
+    fout << "t_taylor,x_tay,y_tay,z_tay\n";
+
+    double t_taylor = 0.;
+    DSumNormType sumNorm;
+    double check_time_point = 0.5; //punkty po czasie check_time_point (który będzie się zmieniał) są zadawane jako kolejne sekcje
+    double length_of_time_period = 0.5; //jaka będzie różnica między kolejnymi czasami
+    double del = rt/1000;
+    while (true) {
+        auto tay = solution(t_taylor);
+
+        fout << t_taylor << "," << tay[0] << "," << tay[1] << "," << tay[2] << "\n";
+        if (check_time_point - 1e-13 <= t_taylor and t_taylor <= check_time_point + 1e-13){
+            LOGGER(check_time_point);
+            LOGGER(t_taylor);
+            LOGGER(tay);
+            targetPoints.push_back(capd::vectalg::convertObject<DVectorType>(tay));
+            check_time_point += length_of_time_period;
+        }
+
+        if (t_taylor == rt) break;
+        t_taylor = capd::min(t_taylor + del, rt);
+    }
+
+    std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
+    return targetPoints;
+}
+
 // ---------- MAIN ----------
 int main() {
     cout.precision(17);
@@ -544,28 +662,46 @@ int main() {
     constexpr int N_g = 2;
     auto multiIndices = generateMultiIndices(n, N_g);
     DMatrixType g = defineFunctionG(multiIndices, n);
-    int steps = 4;
-
-    DVectorType v{0, 0, 1.};
-
-    std::vector<DVectorType> ws = {
-            {0, 0, 25.},
-            {0, 0, 27.},
-            {0, 0, 31.},
-            {0, 0, 33.}
-    };
+    int steps = 2;
+    DVectorType list_of_rs(steps);
     IVectorType u0{5.,5.,23.};
     auto u0_mid = capd::vectalg::convertObject<DVector>(u0);
-//    printPreparation(N, n, N_g, u0, v, ws[0], g, multiIndices);
+    double rt = 5.; //czas koncowy dla trajektorii
+    auto target_points = findStartApproximation(N, u0, rt);
+    cout << "Punkty, wyliczone metodą Taylora, które będą zadawały kolejne sekcje: " << target_points << endl;
 
-    for (int step = 0; step < steps; step++){
+    // Sekcje Poincare
+    DVectorType v{0, 0, 1.};
+    std::vector<DVectorType> ws(target_points.size());
+    for (int p_nr = 0; p_nr < target_points.size(); p_nr++){
+        ws[p_nr] = {0., 0., target_points[p_nr][2]};
+    }
+    LOGGER(ws);
+//    std::vector<DVectorType> ws = {
+//        {0, 0, 25.},
+//        {0, 0, 27.},
+//        {0, 0, 29.},
+//        {0, 0, 22.}
+//    };
+
+
+//    printPreparation(N, n, N_g, u0, v, ws[0], g, multiIndices);
+    string points;
+    for (int j = 0; j < steps; j++){
+        points += "_" + std::to_string(int(ws[j][n-1]));
+    }
+
+    for (int step = 1; step < steps; step++){
         cout << "======================== Iteracja " << step << "========================" << endl;
         auto w = ws[step];
-        ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices);
-        LOGGER(u0);
+        auto target_point = target_points[step];
+        LOGGER(target_point);
+        ChebyshevOperatorFinite<double> finiteOp = prepareChebyshevOperatorAndFindFiniteSolution(N, n, u0, v, w, g, multiIndices, target_point, step);
+        LOGGER(finiteOp.getASeries());
         ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
         auto r = testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
         LOGGER(r);
+        list_of_rs[step] = r;
 
         auto omega_approx = IFiniteOp.getOmega();
         auto a_series_approx = IFiniteOp.getASeries();
@@ -577,10 +713,7 @@ int main() {
         cout << "Result at t = 1.0 for Chebyshev: " << cheb << endl;
         cout << "Scale time for Chebyshev: " << 1./omega_approx << endl;
 
-        string points;
-        for (int j = 0; j < steps; j++){
-            points += "_" + std::to_string(int(ws[j][2]));
-        }
+
         compareWithTaylorAndSaveResults(N, w[n-1], step, points, u0, a_series_approx, omega_approx_mid);
 
         u0 = checkSolution(a_series_approx, 1.0);
@@ -590,10 +723,27 @@ int main() {
         }
         u0[n-1] = Interval(w[n-1]);
         u0_mid = capd::vectalg::convertObject<DVector>(u0);
-        cout << "Punkt na sekcji Poincare o z=" << w[2] << ", punkt znaleziony to u0= " << u0 << endl;
+        cout << "Punkt na sekcji Poincare o z=" << w[n-1] << ", punkt znaleziony to u0= " << u0 << endl;
         cout << "Środek u0= " << u0_mid << endl;
     }
+    string filename = "radii_polynomial_resultsN_" + std::to_string(N) + "_nr_steps_" + std::to_string(steps) + points + "_start_point1" + ".csv";;
+    std::ofstream outFile(filename);
 
+    if (outFile.is_open()) {
+        outFile << "r\n";
+        for (int i = 0; i < steps; ++i) {
+            outFile << list_of_rs[i] << "\n";
+//            if (i != steps - 1) {
+//                outFile << "";
+//            }
+        }
+        outFile << std::endl;
+
+        outFile.close();
+        std::cout << "Zapisano dane do pliku: " << filename << std::endl;
+    } else {
+        std::cerr << "Nie udało się otworzyć pliku do zapisu." << std::endl;
+    }
     return 0;
 }
 
