@@ -46,12 +46,6 @@ int ChebyshevSeries<T, DIM>::getN() const {
 
 template <typename T, int DIM>
 T ChebyshevSeries<T, DIM>::operator()(T t) const {
-//    T sum = (*this)[0];  // a_0
-//    for (int k = 1; k < this->N; ++k) {
-//        T T_k = evaluateFirstKind(k, t);
-//        auto a_k = (*this)[k];
-//        sum += 2 * a_k * T_k;  // 2 * a_k * T_k(x)
-//    }
     T sum = (*this)[0];  // a_0
     for (int k = 1; k < this->N; ++k) {
         T T_k = evaluateFirstKind(k, t);
