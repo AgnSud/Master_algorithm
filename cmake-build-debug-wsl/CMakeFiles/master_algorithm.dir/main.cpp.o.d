@@ -154,11 +154,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/c++/13/bits/locale_facets.tcc \
  /usr/include/c++/13/bits/basic_ios.tcc \
  /usr/include/c++/13/bits/ostream.tcc /usr/include/c++/13/istream \
- /usr/include/c++/13/bits/istream.tcc /usr/include/c++/13/fstream \
- /usr/include/c++/13/bits/codecvt.h \
- /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
- /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
- /usr/include/c++/13/bits/fstream.tcc /usr/include/c++/13/filesystem \
+ /usr/include/c++/13/bits/istream.tcc /usr/include/c++/13/filesystem \
  /usr/include/c++/13/bits/fs_fwd.h /usr/include/c++/13/cstdint \
  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
  /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
@@ -170,7 +166,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /usr/include/c++/13/bits/locale_facets_nonio.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/time_members.h \
  /usr/include/x86_64-linux-gnu/c++/13/bits/messages_members.h \
- /usr/include/libintl.h /usr/include/c++/13/bits/locale_facets_nonio.tcc \
+ /usr/include/libintl.h /usr/include/c++/13/bits/codecvt.h \
+ /usr/include/c++/13/bits/locale_facets_nonio.tcc \
  /usr/include/c++/13/bits/locale_conv.h /usr/include/c++/13/iomanip \
  /usr/include/c++/13/bits/quoted_string.h /usr/include/c++/13/sstream \
  /usr/include/c++/13/bits/sstream.tcc /usr/include/c++/13/codecvt \
@@ -414,6 +411,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynset/QRPolicy.h \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/lib.h \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/SolverException.h \
+ /usr/include/c++/13/fstream \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
+ /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
+ /usr/include/c++/13/bits/fstream.tcc \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/OdeSolver.h \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/BasicOdeSolver.h \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/StepControl.h \
@@ -480,13 +481,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffIncl/DiffInclusionLN.h \
  /home/agnieszka/CAPD/capdDynSys/include/capd/diffIncl/InclRect2Set.h \
  /home/agnieszka/CAPD/capdAlg/include/capd/matrixAlgorithms/lib.h \
- /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map.hpp \
- /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/DagIndexer.hpp \
- /home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.hpp \
- /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.hpp \
- /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Jet.hpp \
- /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_codeTranslation.hpp \
- /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_headerTemplate.h \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/OdeSolver.hpp \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/DynSys.hpp \
  /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/BasicOdeSolver.hpp \
@@ -508,4 +502,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp \
  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp \
- /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp \
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/helpers.hpp \
+ /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/testing.hpp

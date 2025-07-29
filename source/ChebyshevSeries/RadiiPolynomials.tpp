@@ -530,6 +530,8 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
 //    LOGGER(C_coeff);
 
     auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;
+    LOGGER(delta);
+    //TODO: ZMIANA ABY DELTA BYŁA JUŻ DOUBLE
     if (delta < 0)
         throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
 //    LOGGER(delta);

@@ -1,9 +1,7 @@
 #include <iostream>
-#include <fstream>
 #include <filesystem>
 #include <random>
 #include "capd/capdlib.h"
-#include "capd/map/Map.hpp"
 #include "capd/dynsys/OdeSolver.hpp"
 #include "capd/poincare/AbstractSection.hpp"
 #include "capd/dynset/C0DoubletonSet.hpp"
@@ -14,6 +12,9 @@
 #include "source/ChebyshevSeries/Norm.hpp"
 #include "source/ChebyshevSeries/ChebyshevOperatorFinite.hpp"
 #include "source/ChebyshevSeries/RadiiPolynomials.hpp"
+
+#include "helpers.hpp"
+#include "testing.hpp"
 
 
 using namespace capd;
@@ -33,274 +34,6 @@ typedef ChebyshevSeries<Interval, DIMENSION> IChebyshevsVectorType;
 typedef vectalg::SumNorm<IVectorType, IMatrixType> ISumNormType;
 
 
-
-// ---------- Pomocnicze ----------
-void generateMultiIndicesRecursive(int order, int maxDegree, int pos, int remainingSum,
-                                   vector<int>& current, vector<vector<int>>& result) {
-    if (pos == order) {
-        if (remainingSum == 0)
-            result.push_back(current);
-        return;
-    }
-    for (int i = 0; i <= remainingSum; ++i) {
-        current[pos] = i;
-        generateMultiIndicesRecursive(order, maxDegree, pos + 1, remainingSum - i, current, result);
-    }
-}
-
-vector<vector<int>> generateMultiIndices(int order, int maxDegree) {
-    vector<vector<int>> result;
-    vector<int> current(order, 0);
-    for (int d = 0; d <= maxDegree; ++d)
-        generateMultiIndicesRecursive(order, d, 0, d, current, result);
-    return result;
-}
-
-DMatrixType defineFunctionG(vector<vector<int>> multiIndices, int n){
-    int A = multiIndices.size();
-    double rho = 28;
-    double beta = 8/3.;
-    double sigma = 10;
-    DMatrixType g(A, n);
-
-    //definiuje poprzez wielowskazniki
-    //Lorenz
-    for (int j = 0; j < A; ++j) {
-        const auto& alpha = multiIndices[j];
-        if (alpha[0] == 0 && alpha[1] == 0 && alpha[2] == 1) {
-            g[j][0] = 0;
-            g[j][1] = 0;
-            g[j][2] = -beta;
-        }
-        else if (alpha[0] == 0 && alpha[2] == 0 && alpha[1] == 1) {
-            g[j][0] = sigma;
-            g[j][1] = -1;
-            g[j][2] = 0;
-        }
-        else if (alpha[1] == 0 && alpha[2] == 0 && alpha[0] == 1) {
-            g[j][0] = -sigma;
-            g[j][1] = rho;
-            g[j][2] = 0;
-        }
-        else if (alpha[0] == 1 && alpha[2] == 1 && alpha[1] == 0) {
-            g[j][0] = 0;
-            g[j][1] = -1;
-            g[j][2] = 0;
-        }
-        else if (alpha[0] == 1 && alpha[1] == 1 && alpha[2] == 0) {
-            g[j][0] = 0;
-            g[j][1] = 0;
-            g[j][2] = 1;
-        }
-        else{
-            g[j][0] = g[j][1] = g[j][2] = 0;
-        }
-    }
-
-    return g;
-}
-
-IVectorType checkSolution(const IVectorOfChebyshevsType& a_series_approx,
-                   double argument){
-    IVectorType value(a_series_approx.dimension());
-    for(int i = 0; i < a_series_approx.dimension(); i++){
-        value[i] = a_series_approx[i](argument * 2 - 1);
-//        value[i] = a_series_approx[i](argument);
-    }
-    return value;
-}
-
-double chebyshev_polynomial(int k, double x) {
-    if (k == 0) return 1.0;
-    if (k == 1) return x;
-    return 2.0 * x * chebyshev_polynomial(k - 1, x) - chebyshev_polynomial(k - 2, x);
-}
-
-
-IVectorType randomVectorInBallWeightedNorm(int dim, Interval r, const Norm<Interval>& weighted_norm) {
-    static std::mt19937 gen(std::random_device{}());
-    std::normal_distribution<> dist(0.0, 1.0);
-    std::uniform_real_distribution<> u_dist(0.0, 1.0);  // dla losowego skalowania <1
-
-    DVectorType vec(dim);
-    for (int i = 0; i < dim; ++i)
-        vec[i] = dist(gen);
-
-    // Przekształcenie na przedziałowy wektor (z dokładnymi punktami)
-    IVectorType ivec = capd::vectalg::convertObject<IVectorType, DVectorType>(vec);
-
-    // Oblicz normę ważoną
-    Interval norm_val = weighted_norm.computeNorm(ivec);
-
-    // Skaluj tak, aby ||x||_ν ≤ r
-    double u = std::pow(u_dist(gen), 1.0 / dim);
-    Interval scale = Interval(r * u) / norm_val;
-
-    // Skalowanie wektora przedziałowego
-    for (int i = 0; i < dim; ++i)
-        ivec[i] = ivec[i] * scale;
-
-    return ivec;
-}
-void checkRadiiPolynomialsCoeffs(int n, double nu, RadiiPolynomials<Interval> radii_pol){
-    string name = "radii_polynomials_coeffs_nu_" + std::to_string(nu) + ".csv";
-    std::ofstream coeff_out(name);
-    coeff_out << std::setprecision(17) << std::scientific;
-    coeff_out << "name,nu,A_coeff,B_coeff,C_coeff\n";
-    auto Y_bounds = radii_pol.getYBounds();
-
-    {
-        auto [A, B] = radii_pol.compute_Z0_terms();
-        B -= 1;
-        auto C = Y_bounds[0];
-        coeff_out << "p_0," << nu << "," << A.mid().leftBound() << "," << B.mid().leftBound() << "," << C.mid().leftBound() << "\n";
-    }
-
-    for (int j = 0; j < n; ++j) {
-        auto [A, B] = radii_pol.compute_Z1j_terms(j);
-        B -= 1;
-        auto C = Y_bounds[j + 1];
-        coeff_out << "p_1" << j << "," << nu << "," << A.mid().leftBound() << "," << B.mid().leftBound() << "," << C.mid().leftBound() << "\n";
-    }
-
-    coeff_out.close();
-}
-
-
-
-
-
-// ---------- TEST 1: ChebyshevSeries ----------
-void testChebyshevSeries() {
-    cout << "\n========== TEST: ChebyshevSeries ==========\n";
-
-    DChebyshevsVectorType poly1(2);  // a_0 + a_1 T_1 + a_2 T_2
-    DChebyshevsVectorType poly2(2);
-    DVectorType tmp = {5.481443923147439, 0.2407219615737195};
-    poly1.setCoefficients(tmp);
-    tmp = {12.339608554714449, 3.6698042773572244};
-    poly2.setCoefficients(tmp);
-
-    cout << "poly1: "; poly1.prettyPrint(); cout << "\n";
-    cout << "poly2: "; poly2.prettyPrint(); cout << "\n";
-    cout << "convolve: " << ChebyshevSeries<double>::convolve(poly1, poly2) << endl;
-
-    cout << "poly1 + poly2: " << poly1 + poly2;
-    cout << "poly1 * poly2: " << poly1 * poly2;
-    cout << "4.0 * poly2: " << 4.0 * poly2;
-    cout << "poly2 * 2.0: " << poly2 * 2.0;
-
-    double x = 0.5;
-    cout << "\nEvaluations at x = " << x << ":\n";
-    cout << "poly1(x) = " << poly1(x) << "\n";
-    cout << "poly2(x) = " << poly2(x) << "\n";
-    cout << "sum(x)   = " << (poly1 + poly2)(x) << "\n";
-    cout << "prod(x)  = " << (poly1 * poly2)(x) << "\n";
-}
-
-// ---------- TEST 2: Norm ----------
-void testNorms() {
-    cout << "\n========== TEST: Norm ==========\n";
-
-    DChebyshevsVectorType poly1(3);
-    poly1[0] = 1.0; poly1[1] = 1.0; poly1[2] = 1.0;
-
-    DChebyshevsVectorType poly2(3);
-    poly2[0] = 2.0; poly2[1] = 2.0; poly2[2] = 2.0;
-
-    vectalg::Vector<DChebyshevsVectorType, DIMENSION> vec(2);
-    vec[0] = poly1;
-    vec[1] = poly2;
-
-    Norm<double> myNorm(2.0, 3, 2);
-
-    cout << "Norm of poly1: " << myNorm.computeNorm(poly2) << "\n";
-//    cout << "Norm of vector: " << myNorm.computeNorm(vec) << "\n";
-}
-
-void printPreparation(int N, int n, int N_g,
-                      DVectorType & u0,
-                      DVectorType & v,
-                      DVectorType & w,
-                      DMatrixType& g,
-                      vector<vector<int>>& multiIndices){
-    cout << "=============PRZYGOTOWANIE=============" << endl;
-    cout << "Znalezienie rozwiązania dla układu Lorenza przy użyciu wielomianów Czebyszewa." << endl;
-    cout << "Układ Lorenza jest układem " << n << " zmiennych, stopnia " << N_g << endl;
-    cout << "Zadany problem brzegowy ma postać:" << endl;
-    cout << "\t du/dt = 1/omega (10(y-x), 28x - xz - y, xy - 8/3z) \n\t u(0) = "<< u0 << "\n\t <" << v << ", " << w << " - u(1)> = 0" << endl;
-    cout << "Reprezentowany jest za pomocą wielowskaźników -> g(u) = ";
-    for (int i = 0; i < multiIndices.size(); i++){
-        cout << g[i] << "*u^" << multiIndices[i] << (i < multiIndices.size() - 1 ? " + " : "");
-    }
-    cout << endl;
-    cout << "Liczba wyliczanych współczynników szeregu Czebyszewa ustawiona została na N=" << N << endl << endl;
-}
-
-void verify_bounds(int N, int n, double nu, Interval r, RadiiPolynomials<Interval> radii_pol,
-                   ChebyshevOperatorFinite<Interval>& IFiniteOp) {
-    IMatrixType A_N = IFiniteOp.getInverseDerivativeFinite();
-    IVectorType x_approx = IFiniteOp.getX_approx();
-    IVectorType F_x_approx = IFiniteOp.getF_x_approx();
-    IVectorType AF = A_N * F_x_approx;
-    int l = 1;
-    IVectorType Pi1j_Z1j_norm_supremum(n);
-    Interval Pi0_DT_supremum(0.);
-
-//    IVectorType x1(n*N + 1), x2(n*N + 1);
-//    x1[1] = r; x2[1] = r;
-//    IVectorType x = x_approx + x1;
-//    IVectorType DT_result = IFiniteOp.applyDT(x, x2);
-//    std::cout << "size of DT(x + x1) * x2 = " << DT_result.dimension() << "\n DT(x + x1) * x2 = " << DT_result << std::endl;
-
-    Norm<Interval> weighted_norm(nu, N, n);
-
-    std::cout << "============ Verifying bounds ============\n";
-    auto Y_bounds = radii_pol.getYBounds();
-    auto Z_bounds = radii_pol.getZBounds();
-
-    // TODO: Check: ||Pi_{1,j}(T(x) - x)|| ≤ Y1_j -> Y1_j jest prawym koncem przedzialu i porównujemy z prawym końcem przedziału po lewej, tak?
-    for (int j = 0; j < n; ++j) {
-        auto Pi1j_Y1j = radii_pol.Pi1_j(AF, j, N, n);
-        auto Pi1j_Y1j_norm = weighted_norm.computeNorm(Pi1j_Y1j);
-        std::cout << "Y_bound for j=" << j << ": " << Pi1j_Y1j_norm << " ≤ " << Y_bounds[j+1].rightBound()
-                  << " => " << (Pi1j_Y1j_norm.rightBound() <= Y_bounds[j+1].rightBound() ? "OK" : "FAIL") << "\n";
-    }
-
-    // Check: |Pi_0(T(x) - x)| ≤ Y0
-    Interval Pi0_val = capd::abs(radii_pol.Pi0(AF));
-    std::cout << "Y0: " << Pi0_val << " ≤ " << Y_bounds[0].rightBound()
-              << " => " << (Pi0_val.rightBound() <= Y_bounds[0].rightBound() ? "OK" : "FAIL") << "\n";
-
-
-    for (int sample = 0; sample < l; ++sample) {
-        IVectorType x1 = randomVectorInBallWeightedNorm(n * N + 1, r, weighted_norm);
-        IVectorType x2 = randomVectorInBallWeightedNorm(n * N + 1, r, weighted_norm);
-        IVectorType x = x_approx + x1;
-        IVectorType DT_result = IFiniteOp.applyDT_decomposed(x, x2);
-
-        for (int j = 0; j < n; ++j) {
-            auto Pi1j_Z1j = radii_pol.Pi1_j(DT_result, j, N, n);
-            auto Pi1j_Z1j_norm = weighted_norm.computeNorm(Pi1j_Z1j);
-            if (Pi1j_Z1j_norm.rightBound() >= Pi1j_Z1j_norm_supremum[j].rightBound()){
-                Pi1j_Z1j_norm_supremum[j] = Pi1j_Z1j_norm;
-            }
-        }
-
-        Interval Pi0_DT = capd::abs(radii_pol.Pi0(DT_result));
-        if (Pi0_DT.rightBound() >= Pi0_DT_supremum.rightBound()) {
-            Pi0_DT_supremum = Pi0_DT;
-        }
-    }
-
-    for (int j = 0; j < n; ++j) {
-        std::cout << "sup_j ||Pi_{1," << j << "} D(T(x + x1)) x2|| = " << Pi1j_Z1j_norm_supremum[j]
-                  << " ≤ " << Z_bounds[j+1] << " => " << (Pi1j_Z1j_norm_supremum[j].rightBound() <= Z_bounds[j+1].rightBound() ? "OK" : "FAIL") << "\n";
-    }
-    std::cout << "sup ||Pi_0 D(T(x + x1)) x2|| = " << Pi0_DT_supremum
-              << " ≤ " << Z_bounds[0] << " => " << (Pi0_DT_supremum.rightBound() <= Z_bounds[0].rightBound() ? "OK" : "FAIL") << "\n";
-
-}
 
 
 ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const IVectorType& u0,
@@ -323,7 +56,6 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const IVectorT
     /// to co zostało zostawione bez zmiany na interval to:
     /// * N i n
     /// * multiIndeces
-    cout << "Konwersja na arytmetykę przedziałową..." << endl;
     ChebyshevOperatorFinite<Interval> IFiniteOp(N, n, u0,
                                                 capd::vectalg::convertObject<IMatrixType, DMatrixType>(g),
                                                 capd::vectalg::convertObject<IVectorType, DVectorType>(v),
@@ -364,13 +96,10 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const IVectorT
 }
 
 
-double testRadiiPolynomials(int N, int n, int N_g, double nu, ChebyshevOperatorFinite<Interval>& IFiniteOp) {
-    cout << "Wyliczam Y i Z bounds i znajduję promień r..." << endl;
+double computeBoundsAndFindRadius(int N, int n, int N_g, double nu, ChebyshevOperatorFinite<Interval>& IFiniteOp) {
 
     RadiiPolynomials<Interval> radii_pol(N, n, nu, IFiniteOp);
     Norm<Interval> weighted_norm(nu, N, n);
-
-
     double r = radii_pol.findRForRadiiPolynomials();
     checkRadiiPolynomialsCoeffs(n, nu, radii_pol);
 
@@ -411,49 +140,9 @@ void compareWithTaylorAndSaveResults(int N, double z, int step, int steps, doubl
         t_taylor = capd::min(t_taylor + del, b);
     }
 
-    std::cout << "Zapisano plik: " << std::filesystem::absolute(name) << std::endl;
+    std::cout << "Zapisano plik z porównaniem Czebyszewa i Taylora dla kroku " << step << ": "  << name << std::endl;
 }
 
-
-// f_vals zawiera wartości funkcji f(x_j) w węzłach Czebyszewa na przedziale [a, b]
-DChebyshevsVectorType czebyszew_coefficients_from_ab_values(const std::vector<double>& f_vals) {
-    int N = f_vals.size();
-    DChebyshevsVectorType a_k(N);
-
-    std::vector<double> theta(N);
-    for (int j = 0; j < N; ++j) {
-        theta[j] = M_PI * (j + 0.5) / N;
-    }
-
-    for (int k = 0; k < N; ++k) {
-        double sum = 0.0;
-        for (int j = 0; j < N; ++j) {
-            sum += f_vals[j] * std::cos(k * theta[j]);
-        }
-        a_k[k] = sum / N;
-    }
-
-    return a_k;
-}
-
-DTimeMap::SolutionCurve findStartTaylorApproximation(int N, double rt, const IVectorType& _u0){
-    DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
-    DOdeSolver solver(vectorField, N);
-    DTimeMap tm(solver);
-
-    auto u0_mid = capd::vectalg::convertObject<DVectorType>(_u0);
-    cout << "Startin computing to time " << rt << endl;
-    tm.stopAfterStep(true);
-    int counter = 0;
-    DTimeMap::SolutionCurve solution(0.);
-    do {
-        tm(rt,u0_mid,solution);
-        counter++;
-        if (counter % 50 == 0)
-            cout << "check, counter=" << counter << endl;
-    }while(!tm.completed());
-    return solution;
-}
 
 ChebyshevOperatorFinite<double> findStartApproximation_PrepareChebyshevOperator_FindFiniteSolution(int N, int n, double rt,
                                                 double a, double b,
@@ -473,16 +162,16 @@ ChebyshevOperatorFinite<double> findStartApproximation_PrepareChebyshevOperator_
     LOGGER(b);
     for (int j = 0; j < N; ++j) {
         double theta = M_PI * (j + 0.5) / N;
-        double xj = 0.5 * (a + b) + 0.5 * (b - a) * std::cos(theta);  // węzły na [0, 0.25]
+        double xj = 0.5 * (a + b) + 0.5 * (b - a) * std::cos(theta);
         f_vals[j] = solution(xj);
         f_vals_x[j] = f_vals[j][0];
         f_vals_y[j] = f_vals[j][1];
         f_vals_z[j] = f_vals[j][2];
     }
 
-    DChebyshevsVectorType coeffs_x = czebyszew_coefficients_from_ab_values(f_vals_x);
-    DChebyshevsVectorType coeffs_y = czebyszew_coefficients_from_ab_values(f_vals_y);
-    DChebyshevsVectorType coeffs_z = czebyszew_coefficients_from_ab_values(f_vals_z);
+    DChebyshevsVectorType coeffs_x = czebyszewCoefficientsFromAbValues(f_vals_x);
+    DChebyshevsVectorType coeffs_y = czebyszewCoefficientsFromAbValues(f_vals_y);
+    DChebyshevsVectorType coeffs_z = czebyszewCoefficientsFromAbValues(f_vals_z);
     double x = a;
     for (int i = 0; i < N; i++) {
         double t = (2 * x - (a + b)) / (b - a);
@@ -499,8 +188,18 @@ ChebyshevOperatorFinite<double> findStartApproximation_PrepareChebyshevOperator_
     a_series_start[1] = coeffs_y;
     a_series_start[2] = coeffs_z;
 
+    // TODO: to zostawić do podrozdziału o wpływie a_series_start (wtedy dać tutaj rózne wartości i wytłumaczyć dlaczego postanowiliśmy poczatkowo wyliczać
+//    DVectorOfChebyshevsType a_series_start(n);
+//    for (int i = 0; i < n; i++){
+//        a_series_start[i] = DChebyshevsVectorType(N);
+//        a_series_start[i][0] = _u0[i];
+//    }
+//    a_series_start[0][1] = 1e-8; //zadanie, aby macierz pochodnej byla odwracalna (pierwsza kolumna byla niezerowa)
+//    a_series_start[0][1] = 1e-13; //zadane, aby macierz pochodnej byla odwracalna (pierwsza kolumna byla niezerowa)
+//    a_series_start[n-1][0] = w[n-1];
+
     auto u0 = capd::vectalg::convertObject<DVectorType>(_u0);
-    constexpr double omega_start = 1.; //omega jest czescia rownania
+    constexpr double omega_start = 1.;
 
     w[n-1] = solution(b)[n-1]; // zadanie sekcji (po wyliczeniu po czasie)
     ChebyshevOperatorFinite<double> op(N, n, u0, g, v, w, multiIndices);
@@ -520,83 +219,120 @@ ChebyshevOperatorFinite<double> findStartApproximation_PrepareChebyshevOperator_
 // ---------- MAIN ----------
 int main() {
     cout.precision(17);
-
-    int N = 28;
-    double nu = 1.1;
+    //parametry niezmienne
     constexpr int n = 3;
     constexpr int N_g = 2;
     auto multiIndices = generateMultiIndices(n, N_g);
     DMatrixType g = defineFunctionG(multiIndices, n);
-
-    IVectorType u0{5.,5.,23.};
-    auto u0_mid = capd::vectalg::convertObject<DVector>(u0);
-    double rt = 5.;
-    double length_of_time_period = 0.5; //jaka będzie różnica między kolejnymi czasami
-    int steps = rt/length_of_time_period;
-    steps = 1; //TEMPORARY
-    DVectorType poincare_section_target_points(steps);
-    DVectorType list_of_rs(steps);
     DVectorType v{0, 0, 1.};
     DVectorType w{0, 0, 0};
-    double a, b;
-    auto solution = findStartTaylorApproximation(N, rt, u0);
 
+    //parametry zmienne
+    int N = 28;
+    double nu = 1.1;
+    IVectorType u0{5.,5.,23.};
+    double rt = 5.;
+    double length_of_time_period = 0.25;
+    int steps = rt/length_of_time_period;
+    steps = 7; //TEMPORARY
+
+    //wartosci wyliczane
+    std::vector<IVectorType> poincare_section_target_points(steps);      //punkty po kazdym kroku
+    IVectorType list_of_omegas(steps);                      //czasy po kazdym kroku
+    DVectorType list_of_rs(steps);                          //promienie po kazdym kroku
+
+    double a, b;
+    auto u0_mid = capd::vectalg::convertObject<DVector>(u0);
+    auto solution = findStartTaylorApproximation(N, rt, u0);
 
     for (int step = 0; step < steps; step++){
         cout << "======================== Iteracja " << step << "========================" << endl;
         a = step * length_of_time_period;
         b = (step + 1) * length_of_time_period;
+        cout << "Interpoluję szereg Czebyszewa... \nWyznaczam operator Czebyszewa... \nWyliczam przybliżone rozwiązanie F(x)=0..." << endl;
         ChebyshevOperatorFinite<double> finiteOp =
                 findStartApproximation_PrepareChebyshevOperator_FindFiniteSolution(N, n, rt, a, b, u0, v, w, g, multiIndices, solution);
-        poincare_section_target_points[step] = w[n-1];
+        auto omega_approx = finiteOp.getOmega();
+        auto a_series_approx = finiteOp.getASeries();
+        cout << "\tPrzybliżony punkt po czasie " << 1./omega_approx << ": "
+             << checkSolution(capd::vectalg::convertObject<IVectorOfChebyshevsType>(a_series_approx), 1.0) << endl;
 
+
+        cout << "Konwersja na arytmetykę przedziałową..." << endl;
         ChebyshevOperatorFinite<Interval> IFiniteOp = convertToInterval(N, n, u0, v, w, g, multiIndices, finiteOp);
-        auto r = testRadiiPolynomials(N, n, N_g, nu, IFiniteOp);
-        LOGGER(r);
+
+        cout << "Wyliczam Y i Z bounds i znajduję promień r..." << endl;
+        auto r = computeBoundsAndFindRadius(N, n, N_g, nu, IFiniteOp);
         list_of_rs[step] = r;
 
-        auto omega_approx = IFiniteOp.getOmega();
-        auto a_series_approx = IFiniteOp.getASeries();
+        auto omega_interval = IFiniteOp.getOmega();
+        auto a_series_interval = IFiniteOp.getASeries();
         Interval r_omega;
-        double omega_approx_mid;
-        omega_approx.split(omega_approx_mid, r_omega);
-
-        auto cheb = checkSolution(a_series_approx, 1.0);
-        cout << "Result at t = 1.0 for Chebyshev: " << cheb << endl;
-        cout << "Scale time for Chebyshev: " << 1./omega_approx << endl;
-
-
-        compareWithTaylorAndSaveResults(N, w[n-1], step, steps, length_of_time_period, a, b, u0, a_series_approx, omega_approx_mid, solution);
-
-        u0 = checkSolution(a_series_approx, 1.0);
-        LOGGER(u0);
+        double omega_interval_mid;
+        omega_interval.split(omega_interval_mid, r_omega);
+        
+        u0 = checkSolution(a_series_interval, 1.0);
         for (int j = 0; j < n-1; j++){
             u0[j] = Interval(u0[j].leftBound() - r, u0[j].rightBound() + r);
         }
         u0[n-1] = Interval(w[n-1]);
         u0_mid = capd::vectalg::convertObject<DVector>(u0);
-        cout << "Punkt na sekcji Poincare o z=" << w[n-1] << ", punkt znaleziony to u0= " << u0 << endl;
-        cout << "Środek u0= " << u0_mid << endl;
+
+        compareWithTaylorAndSaveResults(N, w[n-1], step, steps, length_of_time_period, a, b, u0, a_series_interval, omega_interval_mid, solution);
+        poincare_section_target_points[step] = u0;
+        list_of_omegas[step] = 1./omega_approx;
+        cout << "\tRozwiązanie dokładne znajduje się w kuli o promieniu: " << r << endl;
+        cout << "\tPrzedział zawierajacy rozwiązanie dokładnie: " << u0 << endl;
+        cout << "\tŚrodek przedziału: " << u0_mid << endl;
+
+
+
+        std::string filename_intervals = "interval_and_midpoint_resultsN_" + std::to_string(N) +
+                                         "_NRsteps_" + std::to_string(steps) + "_delta_" + std::to_string(length_of_time_period) + "_start_point1.csv";
+
+        std::ofstream intervalOut(filename_intervals);
+        if (intervalOut.is_open()) {
+            intervalOut << std::setprecision(17) << std::scientific;
+            intervalOut << "step,"
+                        << "x_interval_left,x_interval_right,"
+                        << "y_interval_left,y_interval_right,"
+                        << "z_interval_left,z_interval_right,"
+                        << "x_mid,y_mid,z_mid\n";
+
+            for (int i = 0; i < steps; ++i) {
+                intervalOut << i << ","
+                            << u0[0].leftBound() << "," << u0[0].rightBound() << ","
+                            << u0[1].leftBound() << "," << u0[1].rightBound() << ","
+                            << u0[2].leftBound() << "," << u0[2].rightBound() << ","
+                            << u0_mid[0] << "," << u0_mid[1] << "," << u0_mid[2] << "\n";
+            }
+
+            intervalOut.close();
+            std::cout << "Zapisano dane przedziałów i środków do pliku: " << filename_intervals << std::endl;
+        } else {
+            std::cerr << "Nie udało się otworzyć pliku do zapisu przedziałów." << std::endl;
+        }
     }
 
 // =====================================================================================================================
-//    string filename = "radii_polynomial_resultsN_" + std::to_string(N) + "_nr_steps_" + std::to_string(steps) + points + "_start_point1" + ".csv";;
-//    std::ofstream outFile(filename);
-//
-//    if (outFile.is_open()) {
-//        outFile << "r\n";
-//        for (int i = 0; i < steps; ++i) {
-//            outFile << list_of_rs[i] << "\n";
-////            if (i != steps - 1) {
-////                outFile << "";
-////            }
-//        }
-//        outFile << std::endl;
-//
-//        outFile.close();
-//        std::cout << "Zapisano dane do pliku: " << filename << std::endl;
-//    } else {
-//        std::cerr << "Nie udało się otworzyć pliku do zapisu." << std::endl;
-//    }
+    string filename = "radii_polynomial_resultsN_" + std::to_string(N) + "_NRsteps_" + std::to_string(steps) + "_delta_" + std::to_string(length_of_time_period) + "_start_point1" + ".csv";;
+    std::ofstream outFile(filename);
+
+    if (outFile.is_open()) {
+        outFile << std::setprecision(17) << std::scientific;
+        outFile << "r\n";
+        for (int i = 0; i < steps; ++i) {
+            outFile << list_of_rs[i] << "\n";
+//            if (i != steps - 1) {
+//                outFile << "";
+//            }
+        }
+        outFile << std::endl;
+
+        outFile.close();
+        std::cout << "Zapisano dane do pliku: " << filename << std::endl;
+    } else {
+        std::cerr << "Nie udało się otworzyć pliku do zapisu." << std::endl;
+    }
     return 0;
 }

@@ -22,7 +22,7 @@ add_executable(master_algorithm main.cpp
         source/ChebyshevSeries/Norm.hpp
         source/ChebyshevSeries/norm.tpp
         source/ChebyshevSeries/ChebyshevOperatorFinite.hpp
-        source/ChebyshevSeries/ChebyshevOperatorFinite.tpp source/ChebyshevSeries/RadiiPolynomials.hpp source/ChebyshevSeries/RadiiPolynomials.tpp)
+        source/ChebyshevSeries/ChebyshevOperatorFinite.tpp source/ChebyshevSeries/RadiiPolynomials.hpp source/ChebyshevSeries/RadiiPolynomials.tpp helpers.hpp testing.hpp)
 
 target_link_libraries(master_algorithm
         /home/agnieszka/CAPD/build/libcapd.a

@@ -219,42 +219,24 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
         T omega_start,
         const VectorOfChebyshevsType& a_series_start,
         int max_iterations, T tolerance) {
-    // Ustaw a i omega
     setOmega(omega_start);
     setASeries(a_series_start);
     int iteration = 0;
-//    T norm_tolerance = 1.0;
 
-    // Utwórz wynik jako Vector<T, DIMENSION>
     VectorType F_x_k(this->n * this->N + 1);
     MatrixType jacobian(this->n * this->N + 1, this->n * this->N + 1);
-
-    //x_k_1 = x_k - F_x_k/DF_x_k
-    //co oznacza x_{k+1} = x_k - F(x_k) / DF(x_k)
     auto x = convertToXVector();
 
-//    Norm<double> myNorm(1.5);
-//    T norm_tolerance = myNorm.computeNorm(x);
     NormType myNorm;
     T norm_tolerance = myNorm(x);
 
-
     while (iteration < max_iterations && norm_tolerance > tolerance) {
-//        cout << "x = (omega, a) =" << x << '\n';
-
         F_x_k = (*this)(x);
-//        cout << "F(x_k) = " << F_x_k << '\n';
         computeDerivative(*this, x, jacobian);
-//        cout << "Jacobian: " << jacobian << "\n";
         x = x - matrixAlgorithms::gauss(jacobian, F_x_k);
-//        cout << "x_next: " << x << "\n";
         norm_tolerance = myNorm(F_x_k);
-//        cout << "norm_tolerance: " << setprecision(17) << norm_tolerance << '\n';
-//        cout << "----------------------------------------------------------------" << '\n';
-
         iteration++;
     }
-    //odkodowanie a_series i omega i c_series
     VectorOfChebyshevsType a_series_final = convertToSeriesFromXForm(x, this->N);
     VectorOfChebyshevsType c_series_final = convertToSeriesFromXForm(compute_c(x), 2 * this->N - 1);
     T omega_final = getCoeff(x, 0, 0, this->n, true);

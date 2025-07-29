@@ -98,6 +98,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/helpers.hpp">
+			<Option target="master_algorithm"/>
+		</Unit>
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/main.cpp">
 			<Option target="master_algorithm"/>
 		</Unit>
@@ -123,6 +126,9 @@
 			<Option target="master_algorithm"/>
 		</Unit>
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp">
+			<Option target="master_algorithm"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/testing.hpp">
 			<Option target="master_algorithm"/>
 		</Unit>
 		<Unit filename="/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/CMakeLists.txt">

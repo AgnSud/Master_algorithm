@@ -72,7 +72,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /home/agnieszka/CAPD/capdAux/include/capd/settings/archSetting.h \
   /home/agnieszka/CAPD/capdAux/include/capd/settings/compilerSetting.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/DagIndexer.h \
-  /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/DagIndexer.hpp \
   /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalAcos.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalAdd.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalAsin.h \
@@ -112,9 +111,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Curve.hpp \
   /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/CurveInterface.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.h \
-  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.hpp \
   /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Jet.h \
-  /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Jet.hpp \
   /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/ParametricCurve.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/SolutionCurve.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/TimeRange.h \
@@ -192,12 +189,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixAffineSet.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/geomset/MatrixDoubletonSet.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.h \
-  /home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.hpp \
   /home/agnieszka/CAPD/capdDynSys/include/capd/map/Function.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map.h \
-  /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map.hpp \
-  /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_codeTranslation.hpp \
-  /home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_headerTemplate.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/map/Parser.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/map/lib.h \
   /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/AbstractSection.h \
@@ -233,6 +226,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /home/agnieszka/CAPD/capdExt/include/capd/fadbad/differentiate.h \
   /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadbad.h \
   /home/agnieszka/CAPD/capdExt/include/capd/fadbad/fadiff.h \
+  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/helpers.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevOperatorFinite.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.hpp \
@@ -241,6 +235,7 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.tpp \
   /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/norm.tpp \
+  /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/testing.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
   /usr/include/asm-generic/errno.h \
@@ -611,13 +606,13 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/x86_64-linux-gnu/bits/wordsize.h:
 
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:
+/usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h:
 
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
+/usr/include/c++/13/bits/charconv.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+/usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
+/usr/include/c++/13/bits/char_traits.h:
 
 /usr/include/c++/13/bits/basic_ios.h:
 
@@ -632,6 +627,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/bits/align.h:
 
 /usr/include/c++/13/bits/stl_iterator_base_funcs.h:
+
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/testing.hpp:
 
 /home/agnieszka/CAPD/capdExt/include/capd/alglib/reflections.h:
 
@@ -655,6 +652,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/algorithm:
 
+/usr/include/c++/13/list:
+
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/BasicPoincareMap.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/PoincareMap_templateOperator.h:
@@ -667,21 +666,13 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/cwchar:
 
-/home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_headerTemplate.h:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredDoubletonSet.h:
-
-/usr/include/c++/13/bits/exception.h:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/map/Map.hpp:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.h:
-
 /home/agnieszka/CAPD/capdDynSys/include/capd/map/Function.h:
 
 /usr/include/c++/13/bits/stl_pair.h:
 
 /usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.h:
 
 /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/ChebyshevSeries.tpp:
 
@@ -736,6 +727,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/x86_64-linux-gnu/bits/time.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/AffineSection.h:
+
+/usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/FirstOrderEnclosure.hpp:
 
@@ -811,14 +804,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/numbers:
 
-/usr/include/asm-generic/errno-base.h:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/OdeSolver.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
-
-/usr/include/c++/13/bits/fstream.tcc:
-
 /home/agnieszka/CAPD/capdExt/include/capd/alglib/blas.h:
 
 /usr/include/c++/13/bits/concept_check.h:
@@ -843,17 +828,13 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h:
 
-/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/dynset/AbstractSet.h:
-
-/home/agnieszka/CAPD/capdAlg/include/capd/vectalg/Norm.hpp:
-
 /usr/include/c++/13/bits/algorithmfwd.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/RowVector.hpp:
 
 /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/main.cpp:
+
+/usr/include/c++/13/bits/basic_ios.tcc:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/TimeMap_inline.h:
 
@@ -905,6 +886,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/bits/stl_list.h:
 
+/home/agnieszka/CAPD/capdDynSys/include/capd/geomset/CenteredDoubletonSet.h:
+
+/usr/include/c++/13/bits/exception.h:
+
 /home/agnieszka/CAPD/capdAlg/include/capd/intervals/Interval_Base.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/capdlib.h:
@@ -922,10 +907,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalPow.h:
 
 /usr/include/c++/13/bits/streambuf_iterator.h:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0DoubletonSet.h:
-
-/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/intervals/IntervalTraits.h:
 
@@ -961,11 +942,13 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /home/agnieszka/CAPD/capdAlg/include/capd/matrixAlgorithms/SmithForm.h:
 
+/usr/include/asm-generic/errno-base.h:
+
+/home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/OdeSolver.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:
+
 /home/agnieszka/CAPD/capdAlg/include/capd/matrixAlgorithms/lib.h:
-
-/usr/include/c++/13/list:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/map/BasicFunction.hpp:
 
 /usr/include/c++/13/bits/fs_path.h:
 
@@ -1039,6 +1022,8 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/bits/postypes.h:
 
+/usr/include/c++/13/bits/basic_string.h:
+
 /home/agnieszka/CAPD/capdDynSys/include/capd/poincare/SectionDerivativesEnclosure.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/dynsys/DynSys.hpp:
@@ -1075,25 +1060,19 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /home/agnieszka/CAPD/capdExt/include/capd/fadbad/differentiate.h:
 
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
-/usr/include/c++/13/bits/exception_ptr.h:
-
 /home/agnieszka/CAPD/capdAlg/include/capd/matrixAlgorithms/SolveLinearEquation.h:
 
 /home/agnieszka/CAPD/capdAux/include/capd/auxil/Logger.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
 
 /home/agnieszka/CAPD/capdAux/include/capd/auxil/RemoveConst.h:
 
 /mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/source/ChebyshevSeries/RadiiPolynomials.hpp:
 
-/home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/DagIndexer.hpp:
-
-/usr/include/features.h:
-
-/usr/include/c++/13/string:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
+/mnt/c/Users/agsud_z3nlru4/CLionProjects/master_algorithm/helpers.hpp:
 
 /home/agnieszka/CAPD/capdAux/include/capd/auxil/debuger.h:
 
@@ -1120,8 +1099,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdAlg/include/capd/vectalg/iobject.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalNaturalPow.h:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/map/Map_codeTranslation.hpp:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffIncl/DiffInclusionLN.h:
 
@@ -1156,6 +1133,12 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/autodiff/EvalMul.h:
 
 /usr/include/c++/13/bits/fs_fwd.h:
+
+/usr/include/x86_64-linux-gnu/bits/flt-eval-method.h:
+
+/home/agnieszka/CAPD/capdDynSys/include/capd/dynset/C0DoubletonSet.h:
+
+/usr/include/c++/13/bits/fstream.tcc:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffIncl/DiffInclusionCW.h:
 
@@ -1196,6 +1179,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/BasicCurve.hpp:
 
 /usr/include/c++/13/bits/exception_defines.h:
+
+/usr/include/c++/13/bits/exception_ptr.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/C0TimeJet.h:
 
@@ -1255,24 +1242,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/iosfwd:
 
-/home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Hessian.hpp:
-
-/usr/include/c++/13/bits/basic_ios.tcc:
-
-/usr/include/c++/13/bits/basic_string.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
-
-/usr/include/c++/13/bits/basic_string.tcc:
-
-/usr/include/c++/13/bits/char_traits.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h:
-
-/usr/include/c++/13/bits/charconv.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
-
 /usr/include/c++/13/bits/chrono.h:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
@@ -1292,8 +1261,6 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /usr/include/c++/13/bits/deque.tcc:
 
 /usr/include/c++/13/bits/fs_dir.h:
-
-/home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/Jet.hpp:
 
 /usr/include/c++/13/bits/functional_hash.h:
 
@@ -1563,6 +1530,12 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/c++/13/stdlib.h:
 
+/usr/include/features.h:
+
+/usr/include/c++/13/string:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
+
 /usr/include/c++/13/tr1/beta_function.tcc:
 
 /home/agnieszka/CAPD/capdAlg/include/capd/matrixAlgorithms/CAPDIntMatrixAlgorithms.h:
@@ -1703,6 +1676,10 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 
 /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
 
+/usr/include/c++/13/bits/basic_string.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
@@ -1730,3 +1707,11 @@ CMakeFiles/master_algorithm.dir/main.cpp.o: /mnt/c/Users/agsud_z3nlru4/CLionProj
 /home/agnieszka/CAPD/capdDynSys/include/capd/diffAlgebra/lib.h:
 
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/home/agnieszka/CAPD/capdDynSys/include/capd/dynset/AbstractSet.h:
+
+/home/agnieszka/CAPD/capdAlg/include/capd/vectalg/Norm.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/wctype-wchar.h:
