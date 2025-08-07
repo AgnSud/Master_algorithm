@@ -40,7 +40,6 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::g_ls(int l, int s)
         }
     }
     throw std::runtime_error("g_ls: unit vector not found in multiIndices");
-//    return g_unit_vector(l) + g_unit_vector(s);
 }
 
 template <typename T>
@@ -267,10 +266,11 @@ std::pair<T, T> RadiiPolynomials<T>::compute_Z1j_terms(int j) {
     T Z1_norm = weighted_norm.computeNorm(Pi1_j(Z1, j, N, n));
 
     T r2_coeff = gamma * AN_op_norm + d2_vec[j] / (omega * 4.0) + 2 / omega;
-    T r_coeff = h[j + 1] + Z1_norm + d1_vec[j] / (4.0 * omega);
+    T r_coeff = h[j + 1] + Z1_norm + (d1_vec[j] / (4.0 * omega));
 //    LOGGER(h[j + 1]);
 //    LOGGER(Z1_norm);
 //    LOGGER(d1_vec[j] / (4.0 * omega));
+//    LOGGER(r_coeff);
 
     return std::make_pair(r2_coeff, r_coeff);
 }
@@ -349,6 +349,7 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::computeB_k(int k){
     for (int l = 0; l < n; l++){
         for (int s = l; s < n; s++){
             auto abs_g_ls = vector_abs(g_ls(l, s));
+//            cout << "l = " << l << ", s=" << s << ", g_ls=" << abs_g_ls << endl;
             if (is_nonzero(abs_g_ls)){
                 auto operatorNormPsi_al_k = operatorNormPsi_ak(a_series[l], k);
                 auto operatorNormPsi_as_k = operatorNormPsi_ak(a_series[s], k);
@@ -421,6 +422,7 @@ RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_d1() {
     VectorType sum_g_ej(n);
     for (int j = 0; j < n; ++j) {
         sum_g_ej += vector_abs(g_unit_vector(j));
+//        LOGGER(g_unit_vector(j));
     }
 
     VectorType part1 = coeff * sum_g_ej;
@@ -510,11 +512,25 @@ double RadiiPolynomials<T>::findRForRadiiPolynomials(){
         intervals[1 + j] = findRIntervalForRadiiPolynomials_1j(j);
     }
     LOGGER(intervals);
+    // Wyznacz część wspólną przedziałów
+//    T intersection = intervals[0];
+//    for (int j = 1; j <= n; j++) {
+//        intersection = Interval(capd::max(intersection.leftBound(), intervals[j].leftBound()),
+//                                capd::min(intersection.rightBound(), intervals[j].rightBound()));
+//        if (intersection.leftBound() > intersection.rightBound()) {
+//            throw std::runtime_error("RadiiPolynomials::findRForRadiiPolynomials: "
+//                                     "przedziały nie mają części wspólnej – metoda zawiodła.");
+//        }
+//    }
     double r = intervals[0].leftBound();
     for (int j = 0; j < n; j++){
         auto left_r = intervals[j + 1].leftBound();
         if (left_r > r)
             r = left_r;
+    }
+    if (r < 0){
+        throw std::runtime_error("RadiiPolynomials::findRForRadiiPolynomials: "
+                                     "promien jest ujemny.");
     }
     return r;
 }
@@ -522,24 +538,26 @@ double RadiiPolynomials<T>::findRForRadiiPolynomials(){
 template <typename T>
 T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
 //    cout << "\n\nradii polynomial p_0" << endl;
+    compute_YBounds(2);
     auto [A_coeff, B_coeff] = compute_Z0_terms();
-    B_coeff -= 1;
     auto C_coeff = Y_bounds[0];
+//        zamiana A_coeff, B_coeff, C_coeff na lewe końce przedziałów tych Z_bounds i Y_bounds
+    A_coeff = A_coeff.right();
+    B_coeff = B_coeff.right();
+    C_coeff = C_coeff.right();
+    LOGGER(Y_bounds[0]);
+
+    B_coeff -= 1;
 //    LOGGER(A_coeff);
 //    LOGGER(B_coeff);
 //    LOGGER(C_coeff);
-
-    auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;
-    LOGGER(delta);
+    auto delta = B_coeff * B_coeff - (4 * A_coeff * C_coeff);
     //TODO: ZMIANA ABY DELTA BYŁA JUŻ DOUBLE
     if (delta < 0)
         throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
-//    LOGGER(delta);
 
-    auto p = -1 * B_coeff / (2 * A_coeff);
-    auto q = -1 * delta / (4 * A_coeff);
-//    LOGGER(p);
-//    LOGGER(q);
+
+//    LOGGER(delta);
 
     auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
     auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
@@ -549,19 +567,28 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
 template <typename T>
 T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
 //    cout << "\n\nradii polynomial p_1" << j << endl;
+    compute_YBounds(2);
+//    cout << "================ Zmienna " << j << "========================" << endl;
     auto [A_coeff, B_coeff] = compute_Z1j_terms(j);
-    B_coeff -= 1;
     auto C_coeff = Y_bounds[j + 1];
+    //    zamiana A_coeff, B_coeff, C_coeff na lewe końce przedziałów tych Z_bounds i Y_bounds
+    A_coeff = A_coeff.right();
+    B_coeff = B_coeff.right();
+    C_coeff = C_coeff.right();
+    LOGGER(Y_bounds[j+1]);
+
+
+    B_coeff -= 1;
+//    LOGGER(A_coeff);
+//    LOGGER(B_coeff);
+//    LOGGER(C_coeff);
     auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;
     if (delta < 0)
         throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
 
+//    LOGGER(delta);
     auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
     auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
-//    LOGGER(A_coeff);
-//    LOGGER(B_coeff);
-//    LOGGER(C_coeff);
-//    LOGGER(delta);
     return Interval(x1.rightBound(), x2.leftBound());
 }
 

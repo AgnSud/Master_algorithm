@@ -146,16 +146,38 @@ DTimeMap::SolutionCurve findStartTaylorApproximation(int N, double rt, const IVe
     DTimeMap tm(solver);
 
     auto u0_mid = capd::vectalg::convertObject<DVectorType>(_u0);
-    cout << "Startin computing to time " << rt << endl;
+    cout << "Starting computing to time " << rt << endl;
     tm.stopAfterStep(true);
     int counter = 0;
     DTimeMap::SolutionCurve solution(0.);
     do {
-        tm(rt,u0_mid,solution);
+        tm(rt, u0_mid, solution);
         counter++;
         if (counter % 50 == 0)
             cout << "check, counter=" << counter << endl;
-    }while(!tm.completed());
+    } while (!tm.completed());
+    int nr_of_points = 250;
+    double acc_t = 0;
+
+    // === ZAPIS DO PLIKU ===
+    std::ofstream outFile("solution_output.csv");
+    if (outFile.is_open()) {
+        outFile << "x_tay,y_tay,z_tay\n";  // Nagłówki kolumn
+        for (int i = 0; i < nr_of_points; i++) {
+            for (int j = 0; j < 3; ++j) {
+                outFile << solution(acc_t)[j];
+                if (j < 2)
+                    outFile << ",";
+            }
+            acc_t = std::min(rt, acc_t + (rt/nr_of_points));
+            outFile << "\n";
+        }
+        outFile.close();
+        std::cout << "Solution saved to solution_output.txt" << std::endl;
+    } else {
+        std::cerr << "Error opening file for writing." << std::endl;
+    }
+
     return solution;
 }
 

@@ -28,7 +28,6 @@ T Norm<T, DIM>::computeNorm(const V& a) const {
 }
 
 
-// TODO: Czy to jest dobrze? Czy dobrze zrozumiałam wzór?
 template <typename T, int DIM>
 template<class V>
 T Norm<T, DIM>::computeDualNorm(const V& a) const {
