@@ -41,14 +41,11 @@ public:
     /// obliczy wszystkie h = [h0, h1x, h1y, hjz]
     VectorType compute_h();
 
-    /// B_k jest interval, bo operatorNormPsi_ak jest interval oraz B_k jest Vectorem
     VectorType compute_Z1();
     VectorType compute_Z1_tilde();
     VectorType computeB_k(int k);
     T operatorNormPsi_ak(VectorType& a, int k);
 
-    /// gamma bedzie double, jesli g bedzie double - jesli g bedzie interval to gamma bedzie interval
-    /// ale g chyba powinno zostac double, tak?
     T compute_gamma();
 
     VectorType compute_d1();
@@ -63,8 +60,6 @@ public:
     VectorType operator()(T r); // [p_0, p_{1,1}, ..., p_{1,n}]
 
     void testOperatorNorm();
-
-
 
 private:
     // TODO: waga nie będzie przedziałem dla interval, prawda?

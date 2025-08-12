@@ -119,7 +119,6 @@ void printPreparation(int N, int n, int N_g,
     cout << "Liczba wyliczanych współczynników szeregu Czebyszewa ustawiona została na N=" << N << endl << endl;
 }
 
-// f_vals zawiera wartości funkcji f(x_j) w węzłach Czebyszewa na przedziale [a, b]
 DChebyshevsVectorType czebyszewCoefficientsFromAbValues(const std::vector<double>& f_vals) {
     int N = f_vals.size();
     DChebyshevsVectorType a_k(N);
@@ -162,7 +161,7 @@ DTimeMap::SolutionCurve findStartTaylorApproximation(int N, double rt, const IVe
     // === ZAPIS DO PLIKU ===
     std::ofstream outFile("solution_output.csv");
     if (outFile.is_open()) {
-        outFile << "x_tay,y_tay,z_tay\n";  // Nagłówki kolumn
+        outFile << "x_tay,y_tay,z_tay\n";
         for (int i = 0; i < nr_of_points; i++) {
             for (int j = 0; j < 3; ++j) {
                 outFile << solution(acc_t)[j];

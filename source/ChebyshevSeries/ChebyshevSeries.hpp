@@ -26,7 +26,7 @@ class ChebyshevSeries : public vectalg::Vector<T, DIM>{
 public:
     //docelowo Vector<ChebyshevSeries, DIM>
     using VectorType = vectalg::Vector<T, DIM>;
-    using vectalg::Vector<T, DIM>::operator=;  // Używamy operatora przypisania z klasy bazowej
+    using vectalg::Vector<T, DIM>::operator=;
     using vectalg::Vector<T, DIM>::operator[];
 
     ChebyshevSeries() : N(1), VectorType(1) {}
@@ -38,11 +38,10 @@ public:
     ChebyshevSeries(const ChebyshevSeries<U, DIM>& other)
             : N(other.getN()), vectalg::Vector<T, DIM>(other.getN()) {
         for (int i = 0; i < N; ++i) {
-            (*this)[i] = static_cast<T>(other[i]);  // np. double → Interval
+            (*this)[i] = static_cast<T>(other[i]);
         }
     }
 
-    // Zwraca wartosc wielomianu T_k(x)
     static T evaluateFirstKind(int k, T t);
 
     VectorType getCoefficients() const;
@@ -51,7 +50,6 @@ public:
     void prettyPrint() const;
 
 
-    // wylicza wartosc w punkcie - czasie t (do zmiany, narazie doslowny wzor zadany)
     T operator()(T t) const;
 
     ChebyshevSeries<T, DIM> operator+(const ChebyshevSeries<T, DIM>& other) const;
@@ -60,7 +58,6 @@ public:
     template<class V>
     V operator*(const V& other) const;
 
-    // Splot - szablonowy, bo używany tez przy wyliczaniu derivative
     template<class V>
     static V convolve(const V& a, const V& b);
 
@@ -95,13 +92,8 @@ public:
         return result;
     }
 
-/*
-* TODO:
- * efektywniejsze wyliczanie wartosci w punkcie
- * */
-
 private:
-    int N;  // Stopień wielomianu + 1 (liczba wspolczynnikow)
+    int N;
 };
 
 
@@ -114,7 +106,6 @@ namespace capd {
         struct TypeTraits<ChebyshevSeries<T, DIM>> {
             using Real = typename TypeTraits<T>::Real;
 
-            // Jeżeli współczynniki są przedziałowe, to cała seria traktowana jako "interval-like"
             static const bool isInterval = TypeTraits<T>::isInterval;
 
             static ChebyshevSeries<T, DIM> zero() {
@@ -163,4 +154,4 @@ namespace capd {
             }
         };
 
-} // namespace capd
+}

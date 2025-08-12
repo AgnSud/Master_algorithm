@@ -4,18 +4,10 @@
 
 
 template <typename T, int DIM>
-//T Norm<T, DIM>::computeNorm(const ChebyshevSeries<T, DIM>& a) const {
 template<class V>
 T Norm<T, DIM>::computeNorm(const V& a) const {
-//    T sum = capd::abs(a[0]); // Zaczynamy od |a_0|
-//    for (int k = 1; k < a.dimension(); ++k) {
-//        sum += 2 * capd::abs(a[k]) * std::pow(nu, k); // 2 * |a_k| * nu^k
-////        cout << sum << endl;
-//    }
-
     T horner_sum = (N > 1) ? capd::abs(a[N - 1]) : 0;
 
-    // Schemat Hornera: od końca w stronę k = 1
     for (int k = N - 2; k >= 1; k--) {
         horner_sum = (horner_sum * nu) + capd::abs(a[k]);
     }
@@ -34,7 +26,7 @@ T Norm<T, DIM>::computeDualNorm(const V& a) const {
     T maxTerm = capd::abs(a[0]);
     for (int k = 1; k < a.dimension(); ++k) {
         T term = capd::abs(a[k]) / (2 * std::pow(nu, k));
-        maxTerm = capd::max(maxTerm, term); // zastepuje sup -> max, poniewaz i tak numerycznie jest max?
+        maxTerm = capd::max(maxTerm, term);
     }
     return maxTerm;
 }
@@ -44,10 +36,9 @@ template<class V>
 T Norm<T, DIM>::computeNorm_n(const capd::vectalg::Vector<V, DIM>& vec) const {
     T result = 0;
 
-    // Maksymalizujemy po każdej składowej ChebyshevSeries
     for (int j = 0; j < n; ++j) {
         T sum = computeNorm(vec[j]);
-        result = capd::max<T>(result, sum); // Maksymalizujemy dla każdego szeregu
+        result = capd::max<T>(result, sum);
     }
     return result;
 }
@@ -55,22 +46,18 @@ T Norm<T, DIM>::computeNorm_n(const capd::vectalg::Vector<V, DIM>& vec) const {
 template <typename T, int DIM>
 T Norm<T, DIM>::computeOperatorNorm_Pi0(const MatrixType& C) {
     T result_norm = capd::abs(C[0][0]);
-//    LOGGER(result_norm);
     for(int j_tilde = 0; j_tilde < n; j_tilde++){
         result_norm += mu_j(C, j_tilde);
     }
-//    LOGGER(result_norm);
     return result_norm;
 }
 
 template <typename T, int DIM>
 T Norm<T, DIM>::computeOperatorNorm_Pi1j(const MatrixType& C, int j) {
     T result_norm = eta_j(C, j);
-//    LOGGER(result_norm);
     for(int j_tilde = 0; j_tilde < n; j_tilde++){
         result_norm += ksi_j_j(C, j, j_tilde);
     }
-//    LOGGER(result_norm);
     return result_norm;
 }
 
@@ -93,11 +80,9 @@ T Norm<T, DIM>::eta_j(const MatrixType &C, int j) {
         C_a_0[k] = C[1 + n * k + j][0];
     }
     T result = computeNorm(C_a_0);
-//    cout << "(C_a^0)_j. = " << C_a_0 << endl;
     return result;
 }
 
-//ok
 template <typename T, int DIM>
 T Norm<T, DIM>::mu_j(const MatrixType &C, int j_tilde) {
     VectorType C_0_a(N);
@@ -105,7 +90,6 @@ T Norm<T, DIM>::mu_j(const MatrixType &C, int j_tilde) {
         C_0_a[k_tilde] = C[0][1 + n * k_tilde + j_tilde];
     }
     T result = computeDualNorm(C_0_a);
-//    cout << "(C_0^a)^j. = " << C_0_a << endl;
     return result;
 }
 
@@ -116,7 +100,6 @@ T Norm<T, DIM>::ksi_tilde_j_jk(const MatrixType &C, int j, int j_tilde, int k_ti
         C_a_a[k] = C[1 + n * k + j][1 + n * k_tilde + j_tilde];
     }
     T result = computeNorm(C_a_a);
-//    cout << "(C_a^a)_" << j << ".^" << j_tilde << k_tilde << " RESULT = " << result << endl;
     return result;
 }
 
@@ -127,6 +110,5 @@ T Norm<T, DIM>::ksi_j_j(const MatrixType &C, int j, int j_tilde) {
         ksi_tilde[k_tilde] = ksi_tilde_j_jk(C, j, j_tilde, k_tilde);
     }
     T result = computeDualNorm(ksi_tilde);
-//    cout << "ksi_tilde_" << j << "^" << j_tilde << ". RESULT = " << result << endl;
     return result;
 }

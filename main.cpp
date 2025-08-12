@@ -126,8 +126,6 @@ void compareWithTaylorAndSaveResults(int N, double z, double nu, int step, doubl
     fout << "t_chebyshev,t_taylor,x_cheb,y_cheb,z_cheb,x_tay,y_tay,z_tay,diff_norm\n";
 
     DSumNormType sumNorm;
-//    IVectorType cheb;
-    //C0HORect2Set
     while (true) {
         auto cheb_d_X_tmp = capd::vectalg::convertObject<DVectorType>(a_series_approx[0]);
         ChebyshevSeries<double> cheb_d_X(N);
@@ -141,7 +139,6 @@ void compareWithTaylorAndSaveResults(int N, double z, double nu, int step, doubl
         ChebyshevSeries<double> cheb_d_Z(N);
         cheb_d_Z.setCoefficients(cheb_d_Z_tmp);
 
-//        auto cheb = checkSolution(a_series_approx, t_chebyshev);
         double time_cheb_scaled = 2 * t_chebyshev - 1;
         auto cheb_x = cheb_d_X(time_cheb_scaled);
         auto cheb_y = cheb_d_Y(time_cheb_scaled);
@@ -174,13 +171,10 @@ ChebyshevOperatorFinite<double> findStartApproximation_PrepareChebyshevOperator_
                                                 const DTimeMap::SolutionCurve& solution){
     double length_of_time_period = b - a;
     double del = (b-a)/(N);
-    //del = 5.0 / (28 * 20)
 
     std::vector<DVectorType> f_vals(N);
     std::vector<double> f_vals_x(N), f_vals_y(N), f_vals_z(N);
 
-//    LOGGER(a);
-//    LOGGER(b);
     for (int j = 0; j < N; ++j) {
         double theta = M_PI * (j + 0.5) / N;
         double xj = 0.5 * (a + b) + 0.5 * (b - a) * std::cos(theta);
@@ -201,7 +195,6 @@ ChebyshevOperatorFinite<double> findStartApproximation_PrepareChebyshevOperator_
         double approx_y = coeffs_y(t);
         double approx_z = coeffs_z(t);
         std::vector<double> approx_interpolation = {approx_x, approx_y, approx_z};
-//        std::cout << "t=" << t << ", approx_inteprolation=" << approx_interpolation << ", solution" << solution(x) << "\n";
         x = capd::min(x + del, rt);
     }
 
@@ -213,28 +206,14 @@ ChebyshevOperatorFinite<double> findStartApproximation_PrepareChebyshevOperator_
     auto u0 = capd::vectalg::convertObject<DVectorType>(_u0);
     constexpr double omega_start = 1.;
 
-    // TODO: to zostawić do podrozdziału o wpływie a_series_start (wtedy dać tutaj rózne wartości i wytłumaczyć dlaczego postanowiliśmy poczatkowo wyliczać
-//    DVectorOfChebyshevsType a_series_start(n);
-//    for (int i = 0; i < n; i++){
-//        a_series_start[i] = DChebyshevsVectorType(N);
-//        a_series_start[i][0] = u0[i];
-//    }
-//    a_series_start[0][1] = 1e-8; //zadanie, aby macierz pochodnej byla odwracalna (pierwsza kolumna byla niezerowa)
-//    a_series_start[n-1][0] = w[n-1];
-    //==============================================
-
     w[n-1] = solution(b)[n-1]; // zadanie sekcji (po wyliczeniu po czasie)
     ChebyshevOperatorFinite<double> op(N, n, u0, g, v, w, multiIndices);
     int max_iterations = 100;
     auto solution_approx = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
 
-//    cout << "Found approximate finite solution (omega, a) =" << endl;
-//    cout << "omega = " << solution_approx.first << endl;
     cout << "a_series_approx = " << solution_approx.second << endl;
     IVectorType check_solution_for_interpolated = checkSolution(capd::vectalg::convertObject<IVectorOfChebyshevsType>(a_series_start), 1.);  // zakłada, że checkSolution sam robi 2*t - 1
-//    LOGGER(check_solution_for_interpolated);
     IVectorType check_solution_for_approx = checkSolution(capd::vectalg::convertObject<IVectorOfChebyshevsType>(solution_approx.second), 1.);  // zakłada, że checkSolution sam robi 2*t - 1
-//    LOGGER(check_solution_for_approx);
     return op;
 }
 
@@ -250,7 +229,7 @@ int main() {
 
     int N = 48;
     double nu = 1.1;
-    double rt = 2.0;
+    double rt = 4.0;
 
     IVectorType u0{5., 5., 23.};
 
@@ -261,7 +240,7 @@ int main() {
     std::vector<double> list_of_used_dts(1000);
 
     double base_time_step = 0.4;
-    std::vector<double> fallback_steps{0.2, 0.15, 0.1, 0.05};
+    std::vector<double> fallback_steps{0.35, 0.3, 0.2, 0.15, 0.1, 0.05};
 
     auto solution = findStartTaylorApproximation(N, rt, u0);
 
@@ -360,7 +339,6 @@ int main() {
         for (int i = 0; i < global_step; ++i) {
             intervalOut << i;
             if (std::isnan(list_of_rs[i])) {
-                // Jeśli promień się nie wyliczył — nie zapisuj przedziałów
                 intervalOut << ",NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN\n";
                 break;
             } else {

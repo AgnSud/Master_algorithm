@@ -67,7 +67,7 @@ void checkRadiiPolynomialsCoeffs(int n, double nu, RadiiPolynomials<Interval> ra
 void testChebyshevSeries() {
     cout << "\n========== TEST: ChebyshevSeries ==========\n";
 
-    DChebyshevsVectorType poly1(2);  // a_0 + a_1 T_1 + a_2 T_2
+    DChebyshevsVectorType poly1(2);
     DChebyshevsVectorType poly2(2);
     DVectorType tmp = {5.481443923147439, 0.2407219615737195};
     poly1.setCoefficients(tmp);
