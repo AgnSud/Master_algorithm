@@ -33,7 +33,7 @@ typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVector
 typedef ChebyshevSeries<Interval, DIMENSION> IChebyshevsVectorType;
 typedef vectalg::SumNorm<IVectorType, IMatrixType> ISumNormType;
 
-int attempt_nr = 14;
+int attempt_nr = 23;
 
 
 ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const IVectorType& u0,
@@ -227,9 +227,9 @@ int main() {
     DVectorType v{0, 0, 1.};
     DVectorType w{0, 0, 0};
 
-    int N = 48;
-    double nu = 1.1;
-    double rt = 4.0;
+    int N = 70;
+    double nu = 1.085;
+    double rt = 5.0;
 
     IVectorType u0{5., 5., 23.};
 
@@ -239,8 +239,8 @@ int main() {
     std::vector<double> list_of_omegas(1000);
     std::vector<double> list_of_used_dts(1000);
 
-    double base_time_step = 0.4;
-    std::vector<double> fallback_steps{0.35, 0.3, 0.2, 0.15, 0.1, 0.05};
+    double base_time_step = 0.5;
+    std::vector<double> fallback_steps{0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05};
 
     auto solution = findStartTaylorApproximation(N, rt, u0);
 

@@ -454,7 +454,7 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
     compute_YBounds(2);
     auto [A_coeff, B_coeff] = compute_Z0_terms();
     auto C_coeff = Y_bounds[0];
-//        zamiana A_coeff, B_coeff, C_coeff na lewe końce przedziałów tych Z_bounds i Y_bounds
+//        zamiana A_coeff, B_coeff, C_coeff na prawe końce przedziałów tych Z_bounds i Y_bounds
     A_coeff = A_coeff.right();
     B_coeff = B_coeff.right();
     C_coeff = C_coeff.right();
@@ -475,7 +475,7 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
     compute_YBounds(2);
     auto [A_coeff, B_coeff] = compute_Z1j_terms(j);
     auto C_coeff = Y_bounds[j + 1];
-    //    zamiana A_coeff, B_coeff, C_coeff na lewe końce przedziałów tych Z_bounds i Y_bounds
+    //    zamiana A_coeff, B_coeff, C_coeff na prawe końce przedziałów tych Z_bounds i Y_bounds
     A_coeff = A_coeff.right();
     B_coeff = B_coeff.right();
     C_coeff = C_coeff.right();

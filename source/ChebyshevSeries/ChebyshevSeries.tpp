@@ -44,15 +44,37 @@ int ChebyshevSeries<T, DIM>::getN() const {
     return this->N;
 }
 
+//template <typename T, int DIM>
+//T ChebyshevSeries<T, DIM>::operator()(T t) const {
+//    T sum = (*this)[0];  // a_0
+//    for (int k = 1; k < this->N; ++k) {
+//        T T_k = evaluateFirstKind(k, t);
+//        auto a_k = (*this)[k];
+//        sum += 2 * a_k * T_k;  // 2 * a_k * T_k(x)
+//    }
+//    return sum;
+//}
+
 template <typename T, int DIM>
-T ChebyshevSeries<T, DIM>::operator()(T t) const {
-    T sum = (*this)[0];  // a_0
-    for (int k = 1; k < this->N; ++k) {
-        T T_k = evaluateFirstKind(k, t);
-        auto a_k = (*this)[k];
-        sum += 2 * a_k * T_k;  // 2 * a_k * T_k(x)
+T ChebyshevSeries<T, DIM>::operator()(T x) const {
+    // Clenshaw dla S_N(x) = sum_{k=0}^{N-1} a_k T_k(x)
+    // Konwencja indeksów w klasie: mamy N współczynników a_0..a_{N-1}
+    // Używamy: b_{N} = b_{N+1} = 0, a potem wstecz:
+    // b_k = a_k + 2*x*b_{k+1} - b_{k+2}  dla k = N-1, ..., 1
+    // S_N(x) = a_0 + x*b_1 - b_2
+    T b_kplus1 = T(0); // b_{k+1}
+    T b_kplus2 = T(0); // b_{k+2}
+
+    // Jeśli mamy tylko a_0, pętla się nie wykona i S = a_0
+    for (int k = this->N - 1; k >= 1; --k) {
+        T b_k = (*this)[k] + T(2) * x * b_kplus1 - b_kplus2;
+        b_kplus2 = b_kplus1;
+        b_kplus1 = b_k;
     }
-    return sum;
+
+    T S = (*this)[0] + x * b_kplus1 - b_kplus2; // S_N(x)
+    // Z Twojej definicji: u_N(x) = a_0 + 2 * sum_{k=1}^{N-1} a_k T_k(x) = 2*S_N(x) - a_0
+    return T(2) * S - (*this)[0];
 }
 
 template <typename T, int DIM>
