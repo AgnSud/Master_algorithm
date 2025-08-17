@@ -93,6 +93,7 @@ Po pomyślnej kompilacji plik wykonywalny `master_algorithm` znajdzie się w kat
 
 ## 6. Struktura katalogów i plików
 
+```bash
 master_algorithm/
 ├─ source/
 │ └─ ChebyshevSeries/
@@ -117,6 +118,7 @@ master_algorithm/
 ├─ CMakeLists.txt # Konfiguracja budowania (C++20, CAPD, filib++)
 ├─ all_plots.ipynb # Plik w którym są wszystkie rysujące wykresy 
 └─ README.md # Dokumentacja projektu
+```
 
 
 ### Pliki wynikowe (artefakty programu)
