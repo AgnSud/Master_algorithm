@@ -99,7 +99,7 @@ master_algorithm/
 │ └─ ChebyshevSeries/
 │ ├─ ChebyshevSeries.hpp # Klasa reprezentujaca rozwiniecie Czebyszewa 
 │ ├─ ChebyshevSeries.tpp 
-│ ├─ Norm.hpp # Normy ważone w $\ella_n^1$ i związane operacje 
+│ ├─ Norm.hpp # Normy ważone w $\ell_n^1$ i związane operacje 
 │ ├─ norm.tpp 
 │ ├─ ChebyshevOperatorFinite.hpp # Operator F_N (skończony wymiar operatora Czebyszewa): f0, f1, DF, A itp.
 │ ├─ ChebyshevOperatorFinite.tpp
@@ -116,12 +116,12 @@ master_algorithm/
 │ # - dalsze kroki iteracyjnie do kolejnych sekcji
 │ # - zapis wyników do CSV
 ├─ CMakeLists.txt # Konfiguracja budowania (C++20, CAPD, filib++)
-├─ all_plots.ipynb # Plik w którym są wszystkie rysujące wykresy 
+├─ all_plots.ipynb # Plik w którym są wszystkie rysujące wykresy w języku python
 └─ README.md # Dokumentacja projektu
 ```
 
 
-### Pliki wynikowe (artefakty programu)
+### Pliki wynikowe
 
 Podczas działania program zapisuje wyniki w plikach `.csv` w katalogu uruchomienia:
 
@@ -133,5 +133,3 @@ Podczas działania program zapisuje wyniki w plikach `.csv` w katalogu uruchomie
 
 - **`radii_polynomial_N<N>_base_time_step<Δt>_global_step_<K>_nu_<ν>_attempt_nr_<id>.csv`**  
   Promienie `r` wyznaczone w kolejnych iteracjach.
-
-> ℹ️ **Uwaga**: katalogi `cmake-build-*` to foldery robocze generowane przez CMake/IDE i zwykle powinny być dodane do `.gitignore`.
