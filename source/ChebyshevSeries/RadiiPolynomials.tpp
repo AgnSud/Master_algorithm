@@ -4,7 +4,7 @@
 #include "RadiiPolynomials.hpp"
 
 template<typename T>
-RadiiPolynomials<T>::RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_)
+RadiiPolynomials<T>::RadiiPolynomials(int N_, int n_, long double nu_, const ChebyshevOperatorFinite<T>& finiteOp_)
         : N(N_), n(n_), nu(nu_), finiteOp(finiteOp_), Y_bounds(n_+1), Z_bounds(n_+1) {}
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -429,14 +429,14 @@ T RadiiPolynomials<T>::compute_GammaPlus_a(const VectorType& a) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-double RadiiPolynomials<T>::findRForRadiiPolynomials(){
+long double RadiiPolynomials<T>::findRForRadiiPolynomials(){
     VectorType intervals(1 + n);
     intervals[0] = findRIntervalForRadiiPolynomials_0();
     for (int j = 0; j < n; j++){
         intervals[1 + j] = findRIntervalForRadiiPolynomials_1j(j);
     }
     LOGGER(intervals);
-    double r = intervals[0].leftBound();
+    long double r = intervals[0].leftBound();
     for (int j = 0; j < n; j++){
         auto left_r = intervals[j + 1].leftBound();
         if (left_r > r)
@@ -458,7 +458,7 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
     A_coeff = A_coeff.right();
     B_coeff = B_coeff.right();
     C_coeff = C_coeff.right();
-    LOGGER(Y_bounds[0]);
+//    LOGGER(Y_bounds[0]);
 
     B_coeff -= 1;
     auto delta = B_coeff * B_coeff - (4 * A_coeff * C_coeff);
@@ -479,7 +479,7 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
     A_coeff = A_coeff.right();
     B_coeff = B_coeff.right();
     C_coeff = C_coeff.right();
-    LOGGER(Y_bounds[j+1]);
+//    LOGGER(Y_bounds[j+1]);
 
     B_coeff -= 1;
     auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;

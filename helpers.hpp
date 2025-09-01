@@ -17,6 +17,11 @@ typedef vectalg::Matrix<double, DIMENSION, DIMENSION> DMatrixType;
 typedef vectalg::Vector<ChebyshevSeries<double, DIMENSION>, DIMENSION> DVectorOfChebyshevsType;
 typedef ChebyshevSeries<double, DIMENSION> DChebyshevsVectorType;
 
+typedef vectalg::Vector<long double, DIMENSION> LDVectorType;
+typedef vectalg::Matrix<long double, DIMENSION, DIMENSION> LDMatrixType;
+typedef vectalg::Vector<ChebyshevSeries<long double, DIMENSION>, DIMENSION> LDVectorOfChebyshevsType;
+typedef ChebyshevSeries<long double, DIMENSION> LDChebyshevsVectorType;
+
 typedef vectalg::Vector<Interval, DIMENSION> IVectorType;
 typedef vectalg::Matrix<Interval, DIMENSION, DIMENSION> IMatrixType;
 typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVectorOfChebyshevsType;
@@ -47,12 +52,12 @@ vector<vector<int>> generateMultiIndices(int order, int maxDegree) {
     return result;
 }
 
-DMatrixType defineFunctionG(vector<vector<int>> multiIndices, int n){
+LDMatrixType defineFunctionG(vector<vector<int>> multiIndices, int n){
     int A = multiIndices.size();
-    double rho = 28;
-    double beta = 8/3.;
-    double sigma = 10;
-    DMatrixType g(A, n);
+    long double rho = 28;
+    long double beta = 8/3.;
+    long double sigma = 10;
+    LDMatrixType g(A, n);
 
     //definiuje poprzez wielowskazniki
     //Lorenz
@@ -92,7 +97,7 @@ DMatrixType defineFunctionG(vector<vector<int>> multiIndices, int n){
 }
 
 IVectorType checkSolution(const IVectorOfChebyshevsType& a_series_approx,
-                          double argument){
+                          long double argument){
     IVectorType value(a_series_approx.dimension());
     for(int i = 0; i < a_series_approx.dimension(); i++){
         value[i] = a_series_approx[i](argument * 2 - 1);
@@ -119,17 +124,17 @@ void printPreparation(int N, int n, int N_g,
     cout << "Liczba wyliczanych współczynników szeregu Czebyszewa ustawiona została na N=" << N << endl << endl;
 }
 
-DChebyshevsVectorType czebyszewCoefficientsFromAbValues(const std::vector<double>& f_vals) {
+DChebyshevsVectorType czebyszewCoefficientsFromAbValues(const std::vector<long double>& f_vals) {
     int N = f_vals.size();
-    DChebyshevsVectorType a_k(N);
+    LDChebyshevsVectorType a_k(N);
 
-    std::vector<double> theta(N);
+    std::vector<long double> theta(N);
     for (int j = 0; j < N; ++j) {
         theta[j] = M_PI * (j + 0.5) / N;
     }
 
     for (int k = 0; k < N; ++k) {
-        double sum = 0.0;
+        long double sum = 0.0;
         for (int j = 0; j < N; ++j) {
             sum += f_vals[j] * std::cos(k * theta[j]);
         }
@@ -139,16 +144,16 @@ DChebyshevsVectorType czebyszewCoefficientsFromAbValues(const std::vector<double
     return a_k;
 }
 
-DTimeMap::SolutionCurve findStartTaylorApproximation(int N, double rt, const IVectorType& _u0){
-    DMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
-    DOdeSolver solver(vectorField, N);
-    DTimeMap tm(solver);
+LDTimeMap::SolutionCurve findStartTaylorApproximation(int N, long double rt, const IVectorType& _u0){
+    LDMap vectorField("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;");
+    LDOdeSolver solver(vectorField, N);
+    LDTimeMap tm(solver);
 
-    auto u0_mid = capd::vectalg::convertObject<DVectorType>(_u0);
+    auto u0_mid = capd::vectalg::convertObject<LDVectorType>(_u0);
     cout << "Starting computing to time " << rt << endl;
     tm.stopAfterStep(true);
     int counter = 0;
-    DTimeMap::SolutionCurve solution(0.);
+    LDTimeMap::SolutionCurve solution(0.);
     do {
         tm(rt, u0_mid, solution);
         counter++;
@@ -156,7 +161,7 @@ DTimeMap::SolutionCurve findStartTaylorApproximation(int N, double rt, const IVe
             cout << "check, counter=" << counter << endl;
     } while (!tm.completed());
     int nr_of_points = 250;
-    double acc_t = 0;
+    long double acc_t = 0;
 
     // === ZAPIS DO PLIKU ===
     std::ofstream outFile("solution_output.csv");

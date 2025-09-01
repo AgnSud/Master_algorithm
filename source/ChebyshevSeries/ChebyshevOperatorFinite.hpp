@@ -69,7 +69,7 @@ public:
             T omega_start,
             const VectorOfChebyshevsType& a_series_start,
             int max_iterations = 100,
-            T tolerance = 1e-13);
+            T tolerance = 1e-16);
 
     VectorType NewtonLikeOperatorTx_x(const VectorType& x);
     VectorType applyDT(const VectorType& x, const VectorType& direction);

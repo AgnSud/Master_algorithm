@@ -15,6 +15,12 @@ using namespace std;
 typedef vectalg::Vector<double, DIMENSION> DVectorType;
 typedef vectalg::Vector<Interval, DIMENSION> IVectorType;
 typedef vectalg::Vector<ChebyshevSeries<double, DIMENSION>, DIMENSION> DVectorOfChebyshevsType;
+
+typedef vectalg::Vector<long double, DIMENSION> LDVectorType;
+typedef vectalg::Matrix<long double, DIMENSION, DIMENSION> LDMatrixType;
+typedef vectalg::Vector<ChebyshevSeries<long double, DIMENSION>, DIMENSION> LDVectorOfChebyshevsType;
+typedef ChebyshevSeries<long double, DIMENSION> LDChebyshevsVectorType;
+
 typedef ChebyshevSeries<double, DIMENSION> DChebyshevsVectorType;
 typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVectorOfChebyshevsType;
 typedef vectalg::Matrix<Interval, DIMENSION, DIMENSION> IMatrixType;
@@ -26,13 +32,13 @@ IVectorType randomVectorInBallWeightedNorm(int dim, Interval r, const Norm<Inter
     std::normal_distribution<> dist(0.0, 1.0);
     std::uniform_real_distribution<> u_dist(0.0, 1.0);  // dla losowego skalowania <1
 
-    DVectorType vec(dim);
+    LDVectorType vec(dim);
     for (int i = 0; i < dim; ++i)
         vec[i] = dist(gen);
 
-    IVectorType ivec = capd::vectalg::convertObject<IVectorType, DVectorType>(vec);
+    auto ivec = capd::vectalg::convertObject<IVectorType>(vec);
     Interval norm_val = weighted_norm.computeNorm(ivec);
-    double u = std::pow(u_dist(gen), 1.0 / dim);
+    long double u = std::pow(u_dist(gen), 1.0 / dim);
     Interval scale = Interval(r * u) / norm_val;
 
     for (int i = 0; i < dim; ++i)
@@ -40,7 +46,7 @@ IVectorType randomVectorInBallWeightedNorm(int dim, Interval r, const Norm<Inter
 
     return ivec;
 }
-void checkRadiiPolynomialsCoeffs(int n, double nu, RadiiPolynomials<Interval> radii_pol){
+void checkRadiiPolynomialsCoeffs(int n, long double nu, RadiiPolynomials<Interval> radii_pol){
     string name = "radii_polynomials_coeffs_nu_" + std::to_string(nu) + ".csv";
     std::ofstream coeff_out(name);
     coeff_out << std::setprecision(17) << std::scientific;

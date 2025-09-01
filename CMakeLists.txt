@@ -5,14 +5,24 @@ set(CMAKE_CXX_STANDARD 20)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/capdMake/cmake/")
 
-include_directories("/home/agnieszka/CAPD/capdDynSys/include")
-include_directories("/home/agnieszka/CAPD/capdAlg/include")
-include_directories("/home/agnieszka/CAPD/capdAux/include")
-include_directories("/home/agnieszka/CAPD/capdExt/include")
-include_directories("/home/agnieszka/CAPD/capdDynSys/lib")
-include_directories("/home/agnieszka/CAPD/capdAlg/lib")
-include_directories("/home/agnieszka/CAPD/capdAux/lib")
-include_directories("/home/agnieszka/CAPD/capdExt/lib")
+include_directories(
+        "/home/agnieszka/CAPD/capdDynSys/include"
+        "/home/agnieszka/CAPD/capdAlg/include"
+        "/home/agnieszka/CAPD/capdAux/include"
+        "/home/agnieszka/CAPD/capdExt/include"
+        "/home/agnieszka/CAPD/capdMake/libcapd/include"
+        "/home/agnieszka/CAPD/capdMake/bin/include"
+)
+
+link_directories(
+        "/home/agnieszka/CAPD/capdDynSys/lib"
+        "/home/agnieszka/CAPD/capdAlg/lib"
+        "/home/agnieszka/CAPD/capdAux/lib"
+        "/home/agnieszka/CAPD/capdExt/lib"
+        "/home/agnieszka/CAPD/capdMake/libcapd/lib"
+        "/home/agnieszka/CAPD/capdMake/bin/lib"
+)
+
 
 find_package(CAPD REQUIRED PATHS /home/agnieszka/CAPD/build)
 

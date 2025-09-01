@@ -44,17 +44,6 @@ int ChebyshevSeries<T, DIM>::getN() const {
     return this->N;
 }
 
-//template <typename T, int DIM>
-//T ChebyshevSeries<T, DIM>::operator()(T t) const {
-//    T sum = (*this)[0];  // a_0
-//    for (int k = 1; k < this->N; ++k) {
-//        T T_k = evaluateFirstKind(k, t);
-//        auto a_k = (*this)[k];
-//        sum += 2 * a_k * T_k;  // 2 * a_k * T_k(x)
-//    }
-//    return sum;
-//}
-
 template <typename T, int DIM>
 T ChebyshevSeries<T, DIM>::operator()(T x) const {
     // Clenshaw dla S_N(x) = sum_{k=0}^{N-1} a_k T_k(x)
@@ -73,7 +62,6 @@ T ChebyshevSeries<T, DIM>::operator()(T x) const {
     }
 
     T S = (*this)[0] + x * b_kplus1 - b_kplus2; // S_N(x)
-    // Z Twojej definicji: u_N(x) = a_0 + 2 * sum_{k=1}^{N-1} a_k T_k(x) = 2*S_N(x) - a_0
     return T(2) * S - (*this)[0];
 }
 

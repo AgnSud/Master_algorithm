@@ -12,11 +12,16 @@ public:
     typedef  ChebyshevOperatorFinite<T>::VectorType VectorType;
     typedef  ChebyshevOperatorFinite<T>::MatrixType MatrixType;
     typedef  vectalg::SumNorm<VectorType, MatrixType> NormType;
+
     typedef  ChebyshevOperatorFinite<double>::VectorType DVectorType;
     typedef  ChebyshevOperatorFinite<double>::MatrixType DMatrixType;
     typedef  vectalg::SumNorm<DVectorType, DMatrixType> DNormType;
 
-    RadiiPolynomials(int N_, int n_, double nu_, const ChebyshevOperatorFinite<T>& finiteOp_);
+    typedef  ChebyshevOperatorFinite<long double>::VectorType LDVectorType;
+    typedef  ChebyshevOperatorFinite<long double>::MatrixType LDMatrixType;
+    typedef  vectalg::SumNorm<LDVectorType, LDMatrixType> LDNormType;
+
+    RadiiPolynomials(int N_, int n_, long double nu_, const ChebyshevOperatorFinite<T>& finiteOp_);
 
     VectorType getYBounds();
     VectorType getZBounds();
@@ -54,7 +59,7 @@ public:
     T compute_GammaPlus_a(const VectorType& a);
 
 
-    double findRForRadiiPolynomials();
+    long double findRForRadiiPolynomials();
     T findRIntervalForRadiiPolynomials_0();
     T findRIntervalForRadiiPolynomials_1j(int j);
     VectorType operator()(T r); // [p_0, p_{1,1}, ..., p_{1,n}]
@@ -62,7 +67,6 @@ public:
     void testOperatorNorm();
 
 private:
-    // TODO: waga nie będzie przedziałem dla interval, prawda?
     int N;
     int n;
     double nu;
