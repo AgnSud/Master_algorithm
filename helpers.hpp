@@ -150,15 +150,13 @@ LDTimeMap::SolutionCurve findStartTaylorApproximation(int N, long double rt, con
     LDTimeMap tm(solver);
 
     auto u0_mid = capd::vectalg::convertObject<LDVectorType>(_u0);
-    cout << "Starting computing to time " << rt << endl;
+    cout << "Starting computing Taylor to time " << rt << endl;
     tm.stopAfterStep(true);
     int counter = 0;
     LDTimeMap::SolutionCurve solution(0.);
     do {
         tm(rt, u0_mid, solution);
         counter++;
-        if (counter % 50 == 0)
-            cout << "check, counter=" << counter << endl;
     } while (!tm.completed());
     int nr_of_points = 250;
     long double acc_t = 0;

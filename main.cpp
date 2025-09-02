@@ -43,7 +43,7 @@ typedef vectalg::Vector<ChebyshevSeries<Interval, DIMENSION>, DIMENSION> IVector
 typedef ChebyshevSeries<Interval, DIMENSION> IChebyshevsVectorType;
 typedef vectalg::SumNorm<IVectorType, IMatrixType> ISumNormType;
 
-int attempt_nr = 61;
+int attempt_nr = 62;
 
 
 ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const IVectorType& u0,
@@ -90,10 +90,10 @@ ChebyshevOperatorFinite<Interval> convertToInterval(int N, int n, const IVectorT
     try{
         auto I_inverse_of_derivative_test = capd::vectalg::convertObject<IMatrixType>(finiteOp.getInverseDerivativeFinite());
         IMatrixType interval_inverse_of_inverse_of_derivative_test = matrixAlgorithms::gaussInverseMatrix(I_inverse_of_derivative_test);
-        cout << "Test na odwrócenie macierzy odwrotnej... - ZDANY" << endl;
+        cout << "\tTest na odwrócenie macierzy odwrotnej... - ZDANY" << endl;
     }catch(const std::runtime_error& e){
-        std::cerr << "Błąd: " << e.what() << "\n";
-        cout << "Test na odwrócenie macierzy odwrotnej... - NIEZDANY" << endl;
+        std::cerr << "\tBłąd: " << e.what() << "\n";
+        cout << "\tTest na odwrócenie macierzy odwrotnej... - NIEZDANY" << endl;
     }
     IVectorOfChebyshevsType IC_series = IFiniteOp.convertToSeriesFromXForm(IFiniteOp.compute_c(IFiniteOp.getX_approx()), 2*N-1);
     IFiniteOp.setCSeries(IC_series);
@@ -169,69 +169,6 @@ void compareWithTaylorAndSaveResults(int N, long double z, long double nu, int s
     std::cout << "Zapisano plik z porównaniem Czebyszewa i Taylora dla kroku " << step << ": "  << name << std::endl;
 }
 
-void compareWithIntervalTaylorAndSaveResults(int N, double nu, int step, double base_time_step, double a, double b,
-                                             const IVectorType& cheb_solution, //cheb_solution
-                                             const IVectorOfChebyshevsType& a_series_interval,
-                                             Interval& omega_interval){
-    // Plik wyjściowy
-    std::string name = "trajectory_intervalN_" + std::to_string(N)
-                       + "_step_" + std::to_string(step)
-                       + "_base_time_step_" + std::to_string(base_time_step)
-                       + "_nu_" + std::to_string(nu)
-                       + "_attempt_nr_" + std::to_string(attempt_nr) + ".csv";
-    int n = 3;
-    double t_chebyshev = 0;
-    double t_taylor = a;
-    double omega_mid = mid(omega_interval).leftBound();
-    int number_of_points = 1;
-    double del_tay = 1.0 / (omega_mid * number_of_points);
-    double del_cheb = 1.0 / number_of_points;
-
-    ISumNormType sumNormI;
-
-    IMap vf("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;", 4);
-    IOdeSolver solver(vf,N);
-//    ICoordinateSection section(3,2,27.);
-//    IPoincareMap pm(solver,section,capd::poincare::PlusMinus);
-    ITimeMap tm(solver);
-    IVectorType u0{5., 5., 23.};
-    IMatrix M(3,3);
-    C0HORect2Set set1(u0);
-//    C0Rect2Set set2(u);
-//    C0TripletonSet set3(u);
-
-    ITimeMap::SolutionCurve solution(0.);
-    IVector v = tm(b, set1, solution);
-    cout << v << endl;
-//    tm.stopAfterStep(true);
-//    int counter = 0;
-//    do {
-//        tm(b, set1, solution);
-//        counter++;
-//        if (counter % 50 == 0)
-//            cout << "check, counter=" << counter << endl;
-//    } while (!tm.completed());
-//    cout << solution(b) << endl;
-//    cout << vectalg::maxDiam(solution(b)) << endl;
-
-    auto tay_sol = solution(b);
-    auto tay_diam = maxDiam(solution(b));
-    auto cheb_diam = maxDiam(cheb_solution);
-
-    std::ofstream fout(name);
-    fout << std::setprecision(17) << std::scientific;
-    fout << "t_chebyshev,t_taylor,chebyshev_solution,taylor_solution,cheb_max_diam,taylor_max_diam\n";
-    fout << 1.0 << "," << b << "," << cheb_solution << "," << tay_sol << ","
-         << cheb_diam << "," << tay_diam << "\n";
-    fout.close();
-
-    std::cout << "TAY maxDiam(b)=" << tay_diam
-              << " | CHEB maxDiam(b)=" << cheb_diam
-              << " | " << tay_sol << " | " << cheb_solution
-              << " -> zapisano: " << name << std::endl;
-}
-
-
 
 ChebyshevOperatorFinite<long double> findStartApproximation_PrepareChebyshevOperator_FindFiniteSolution(int N, int n, long double rt,
                                                 long double a, long double b,
@@ -260,7 +197,6 @@ ChebyshevOperatorFinite<long double> findStartApproximation_PrepareChebyshevOper
     LDChebyshevsVectorType coeffs_y = czebyszewCoefficientsFromAbValues(f_vals_y);
     LDChebyshevsVectorType coeffs_z = czebyszewCoefficientsFromAbValues(f_vals_z);
     long double x = a;
-    cout << "===== Interpolacja dla przedziału [" << a << "," << b << "] =======" << endl;
     for (int i = 0; i < N; i++) {
         long double t = (2 * x - (a + b)) / (b - a);
         long double approx_x = coeffs_x(t);
@@ -283,7 +219,6 @@ ChebyshevOperatorFinite<long double> findStartApproximation_PrepareChebyshevOper
     int max_iterations = 100;
     auto solution_approx = op.findFiniteSolution(omega_start, a_series_start, max_iterations);
 
-//    cout << "a_series_approx = " << solution_approx.second << endl;
     IVectorType check_solution_for_interpolated = checkSolution(capd::vectalg::convertObject<IVectorOfChebyshevsType>(a_series_start), 1.0L);  // zakłada, że checkSolution sam robi 2*t - 1
     IVectorType check_solution_for_approx = checkSolution(capd::vectalg::convertObject<IVectorOfChebyshevsType>(solution_approx.second), 1.0L);  // zakłada, że checkSolution sam robi 2*t - 1
     return op;
@@ -295,13 +230,12 @@ int main() {
     constexpr int N_g = 2;
     auto multiIndices = generateMultiIndices(n, N_g);
     LDMatrixType g = defineFunctionG(multiIndices, n);
-    LOGGER(g);
     LDVectorType v{0, 0, 1.};
     LDVectorType w{0, 0, 0};
 
-    int N = 45;
+    int N = 50;
     long double nu = 1.1;
-    long double rt = 5.0;
+    long double rt = 3.0;
 
     IVectorType u0{5., 5., 23.};
 
@@ -314,12 +248,10 @@ int main() {
     std::vector<long double> list_of_omegas(1000);
     std::vector<long double> list_of_used_dts(1000);
 
-    long double base_time_step = 0.45;
-    std::vector<long double> fallback_steps{0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05};
+    long double base_time_step = 0.5;
+    std::vector<long double> fallback_steps{0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05};
 
     auto solution = findStartTaylorApproximation(N, rt, u0);
-//    cout << "u_t = " << solution(rt) << endl;
-
 
     IMap vf("par:q;var:x,y,z;fun:10*(y-x),x*(28-z)-y,x*y-8*z/3;", 4);
     IOdeSolver solver(vf,N);
@@ -328,7 +260,6 @@ int main() {
     C0Rect2Set set1(u0);
     ITimeMap::SolutionCurve Isolution(0.);
     auto tay_sol = tm(rt, set1, Isolution);
-    cout << tay_sol << endl;
 
     long double current_time = 0.0;
     int global_step = 0;
@@ -379,7 +310,6 @@ int main() {
                 omega_interval.split(omega_interval_mid, r_omega);
 
                 u0 = checkSolution(a_series_interval, 1.0L);
-                LOGGER(u0);
                 for (int j = 0; j < n - 1; j++) {
                     u0[j] = Interval(u0[j].leftBound() - r, u0[j].rightBound() + r);
                 }
@@ -391,7 +321,6 @@ int main() {
                 cout << "\tCzas przejścia: " << 1./omega_interval << endl;
 
                 compareWithTaylorAndSaveResults(N, w[n - 1], nu, global_step, base_time_step, dt, a, b, u0, a_series_interval, omega_interval_mid, solution);
-//                compareWithIntervalTaylorAndSaveResults(N, nu, global_step, base_time_step, a, b, u0, a_series_interval, omega_interval);
                 list_of_rs[global_step] = r;
                 list_of_u0[global_step] = u0;
                 list_of_interval_tay_sol[global_step] = Isolution(b);
@@ -405,7 +334,7 @@ int main() {
                 success = true;
                 break;
             } catch (const std::exception& e) {
-                std::cerr << "Błąd przy próbie z krokiem dt = " << dt << ": " << e.what() << std::endl;
+                std::cerr << "\tBłąd przy próbie z krokiem dt = " << dt << ": " << e.what() << std::endl;
             }
         }
 

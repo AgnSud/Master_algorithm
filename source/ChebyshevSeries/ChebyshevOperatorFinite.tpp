@@ -223,8 +223,6 @@ std::pair<T, typename ChebyshevOperatorFinite<T>::VectorOfChebyshevsType> Chebys
     this->setOmega(omega_final);
     this->setF_x_approx((*this)(x));
     this->setX_approx(x);
-    cout << "Liczba iteracji Newtona dla Czebyszewa: " << iteration << endl;
-    cout << "Czas przejścia: " << 1./omega_final << endl;
     computeDerivativeInverse(x);
 
     return std::make_pair(omega_final, a_series_final);

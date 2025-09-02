@@ -226,7 +226,6 @@ typename RadiiPolynomials<T>::VectorType RadiiPolynomials<T>::compute_h() {
 
     MatrixType DF_N = finiteOp.getDerivativeFinite();
     MatrixType A_N = finiteOp.getInverseDerivativeFinite();
-//    DMatrixType identity_matrix = capd::vectalg::Matrix<T, 1+n*N, 1+n*N>::Identity(1+n*N);
     MatrixType diff = identity_matrix - A_N * DF_N;
     Norm<T> weighted_norm(nu, N, n);
 
@@ -435,7 +434,6 @@ long double RadiiPolynomials<T>::findRForRadiiPolynomials(){
     for (int j = 0; j < n; j++){
         intervals[1 + j] = findRIntervalForRadiiPolynomials_1j(j);
     }
-    LOGGER(intervals);
     long double r = intervals[0].leftBound();
     for (int j = 0; j < n; j++){
         auto left_r = intervals[j + 1].leftBound();
@@ -458,12 +456,11 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_0(){
     A_coeff = A_coeff.right();
     B_coeff = B_coeff.right();
     C_coeff = C_coeff.right();
-//    LOGGER(Y_bounds[0]);
 
     B_coeff -= 1;
     auto delta = B_coeff * B_coeff - (4 * A_coeff * C_coeff);
     if (delta < 0)
-        throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
+        throw std::logic_error("Delta < 0 -> wielomian radii nie ma pierwiastkow");
 
     auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
     auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
@@ -479,12 +476,11 @@ T RadiiPolynomials<T>::findRIntervalForRadiiPolynomials_1j(int j){
     A_coeff = A_coeff.right();
     B_coeff = B_coeff.right();
     C_coeff = C_coeff.right();
-//    LOGGER(Y_bounds[j+1]);
 
     B_coeff -= 1;
     auto delta = B_coeff * B_coeff - 4 * A_coeff * C_coeff;
     if (delta < 0)
-        throw std::logic_error("Delta < 0 -> radii polynomial has no roots -> needed to mitigate nu");
+        throw std::logic_error("Delta < 0 -> wielomian radii nie ma pierwiastkow");
 
     auto x1 = (-B_coeff - sqrt(delta)) / (2 * A_coeff);
     auto x2 = (-B_coeff + sqrt(delta)) / (2 * A_coeff);
